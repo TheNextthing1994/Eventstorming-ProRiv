@@ -972,7 +972,7 @@ export const INITIAL_OPEN_POINTS: OpenPoint[] = [
     clarifyWith: 'senior',
     priority: 'high',
     isResolved: false,
-    origin: 'norwegian_compliance_review',
+    origin: 'project_context',
     status: 'open_decision',
     createdAt: '2026-10-09T00:00:00Z',
     updatedAt: '2026-10-09T00:00:00Z'

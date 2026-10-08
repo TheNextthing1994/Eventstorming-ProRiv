@@ -61,7 +61,15 @@ export const SeniorWorkshop: React.FC<SeniorWorkshopProps> = ({
   const ru = language === 'ru';
   const dual = language === 'bilingual';
   const t = (de: string, russian: string) => ru ? russian : de;
-  const [selectedId, setSelectedId] = useState('arrival');
+  const [selectedId, setSelectedId] = useState(() => {
+    try {
+      const stored = sessionStorage.getItem('isa_workshop_last_step');
+      return WORKSHOP_STEPS.some(step => step.id === stored) ? stored! : 'arrival';
+    } catch { return 'arrival'; }
+  });
+  useEffect(() => {
+    try { sessionStorage.setItem('isa_workshop_last_step', selectedId); } catch { /* in-memory view still works */ }
+  }, [selectedId]);
   const [deepOpen, setDeepOpen] = useState(false);
   const [notes, setNotes] = useState<WorkshopNotes>({});
   const [loaded, setLoaded] = useState(false);

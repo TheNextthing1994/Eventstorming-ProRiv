@@ -371,7 +371,8 @@ export async function loadEntireDatabase(): Promise<DatabaseState> {
     decisions,
     attachments,
     hotspotSettings: hotspots,
-    customImage: customImgSetting?.value
+    customImage: customImgSetting?.value,
+    workshopNotes: settingsList.find(item => item.key === 'senior_workshop_notes_v1')?.value || {}
   };
 }
 
@@ -741,6 +742,9 @@ export async function importFromJson(jsonString: string): Promise<boolean> {
     }
     if (data.customImage) {
       await putToStore('settings', { key: 'custom_image', value: data.customImage });
+    }
+    if (data.workshopNotes && typeof data.workshopNotes === 'object') {
+      await putToStore('settings', { key: 'senior_workshop_notes_v1', value: data.workshopNotes });
     }
 
     return true;

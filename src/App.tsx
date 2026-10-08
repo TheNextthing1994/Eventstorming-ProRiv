@@ -17,7 +17,7 @@ import { GlobalOverview } from './components/GlobalOverview';
 import { CompetitorHub } from './components/CompetitorHub';
 import { EventStormingHub } from './components/EventStormingHub';
 import { SeniorDecisionsHub } from './components/SeniorDecisionsHub';
-import { PresentationMode } from './components/PresentationMode';
+import { GuidedPresentation } from './components/GuidedPresentation';
 import { CalibrationModal } from './components/CalibrationModal';
 import { GlobalSearchModal } from './components/GlobalSearchModal';
 import { ImportExportModal } from './components/ImportExportModal';
@@ -182,13 +182,11 @@ export default function App() {
   // Presentation mode view
   if (currentView === 'presentation') {
     return (
-      <PresentationMode
-        initialTopicId={currentTopicId}
+      <GuidedPresentation
         databaseState={databaseState}
         language={language}
         onLanguageChange={handleLanguageChange}
-        onExit={() => navigateTo('topic', currentTopicId)}
-        onNavigateHome={() => navigateTo('home')}
+        onExit={() => navigateTo('workshop')}
       />
     );
   }

@@ -18,7 +18,7 @@ import {
   DomainEventItem
 } from '../types';
 
-export const SEED_VERSION = 4;
+export const SEED_VERSION = 5;
 
 export const MVP_STRATEGIC_STATEMENT = {
   quote: "Wir bauen kein zweites Dalux und kein neues Tripletex. Wir entwickeln eine schlanke Baustellen-Ausführungsschicht für ProRiv und integrieren bestehende Systeme.",
@@ -194,9 +194,22 @@ export const SENIOR_DECISION_QUESTIONS: SeniorDecisionItem[] = [
     date: '2026-10-08',
     connectedTopics: ['raport', 'api', 'vremya']
   }
-];
-
-export const DOMAIN_EVENTS_LIST: DomainEventItem[] = [
+  ,{
+    id: 'sd-11-hms-role',
+    number: 11,
+    question: 'In welcher Rolle arbeitet ProRiv auf Baustellen (Subunternehmer / Hauptunternehmer / Bauherr)? Wer führt die elektronische HMS-Übersichtsliste, und braucht ISA dafür überhaupt eine eigene Funktion?',
+    questionRu: 'В какой роли ProRiv работает на стройках (субподрядчик / генподрядчик / заказчик строительства)? Кто ведёт обязательный электронный список HMS и нужна ли вообще такая функция в ISA?',
+    responsiblePerson: 'Senior Software Engineer + Isa / ProRiv Geschäftsleitung',
+    priority: 'high',
+    status: 'offen',
+    currentProposal: 'MVP: Keine eigene gesetzliche Anwesenheitsliste entwickeln, solange Baustellenverantwortung und bestehende Systeme ungeklärt sind. ISA erfasst zunächst interne Projektzeiten (Beginn, Ende, Pausen); HMS-Kartennummer nur bei nachgewiesenem Zweck/datenschutzkonform speichern. Wenn ProRiv die Listenführung übernimmt oder Baustellen einen Export verlangen, Schnittstelle bzw. passende Listenfunktion getrennt bewerten. Interne Zeitbuchungen ersetzen die gesetzliche Liste nicht.',
+    currentProposalRu: 'MVP: Не строить отдельный обязательный реестр, пока неизвестны ответственность и существующие системы на стройках. В ISA сначала учитывать часы по проектам (начало, конец, перерывы); номер HMS-карты хранить только при обоснованной цели и соблюдении защиты данных. При поручении вести список или требовании передачи данных отдельно оценить интеграцию либо функцию реестра. Учёт часов не заменяет обязательный список.',
+    rationale: 'Nach Byggherreforskriften § 15 liegt die Verantwortung grundsätzlich beim Bauherrn; Listenführung kann schriftlich delegiert werden (oft an den Hauptunternehmer). Daher genügt die Unterscheidung Haupt-/Subunternehmer allein nicht. Bedarf mit Isa bestätigen; nicht voreilig ein separates HMS-Modul bauen. Quelle: https://www.arbeidstilsynet.no/hms/hms-i-bygg-og-anlegg/byggherreforskriften/elektroniske-oversiktslister/',
+    rationaleRu: 'По § 15 Byggherreforskriften ответственность обычно у заказчика строительства (byggherre); ведение списка можно письменно передать другой фирме, часто генподрядчику. Статус субподрядчика или генподрядчика сам по себе недостаточен; уточнить у Исы.',
+    date: '2026-10-09',
+    connectedTopics: ['vremya', 'users', 'clients', 'api']
+  }
+];\n\nexport const DOMAIN_EVENTS_LIST: DomainEventItem[] = [
   {
     id: 'de-1',
     name: 'WorkSessionStarted',
@@ -948,6 +961,20 @@ export const INITIAL_PRODUCT_RECOMMENDATIONS: ProductRecommendation[] = [
 ];
 
 export const INITIAL_OPEN_POINTS: OpenPoint[] = [
+  {
+    id: 'op-vremya-hms-subcontractor',
+    topicId: 'vremya',
+    additionalTopicIds: ['clients', 'users', 'api'],
+    question: 'Senior / Isa: Ist ProRiv hauptsächlich Subunternehmer, Hauptunternehmer oder selbst Bauherr? Wer ist für die elektronische Übersichtsliste zuständig, wer führt sie (ggf. schriftlich delegiert), welches System wird heute genutzt und welche Daten/Schnittstellen werden von ProRiv verlangt?',
+    questionRu: 'Сеньор / Иса: ProRiv в основном субподрядчик, генподрядчик или заказчик строительства? Кто отвечает за обязательный электронный список, кто его ведёт (возможна письменная передача), какая система сейчас используется и какие данные/интеграции нужны от ProRiv?',
+    clarifyWith: 'senior',
+    priority: 'high',
+    isResolved: false,
+    origin: 'norwegian_compliance_review',
+    status: 'open_decision',
+    createdAt: '2026-10-09T00:00:00Z',
+    updatedAt: '2026-10-09T00:00:00Z'
+  },
   {
     id: 'op-users-1',
     topicId: 'users',

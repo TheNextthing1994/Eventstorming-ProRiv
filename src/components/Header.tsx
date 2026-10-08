@@ -96,7 +96,7 @@ export const Header: React.FC<HeaderProps> = ({
   }
 
   return (
-    <header className="h-14 bg-white border-b border-slate-200/80 flex items-center justify-between px-3 sm:px-6 shrink-0 z-30 select-none">
+    <header className="min-h-14 bg-white border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-2 px-3 sm:px-6 py-2 shrink-0 z-30 select-none">
       {/* Zone 1: Single text wordmark */}
       <div className="flex items-center gap-2.5">
         <button
@@ -110,87 +110,40 @@ export const Header: React.FC<HeaderProps> = ({
         </span>
       </div>
 
-      {/* Zone 2: Navigation Links */}
-      <nav className="flex items-center gap-1">
+      {/* Meeting-first navigation. Research remains accessible, but doesn't compete for attention. */}
+      <nav className="flex items-center gap-1.5">
         <button
           onClick={() => onNavigate('home')}
-          className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors ${
-            currentView === 'home'
-              ? 'text-emerald-900 bg-emerald-50/80 font-semibold'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-          }`}
-        >
-          {getTranslation('home', language)}
+          className={`px-3 py-2 text-xs font-semibold rounded-lg ${currentView === 'home' ? 'bg-emerald-50 text-emerald-900' : 'text-slate-600 hover:bg-slate-100'}`}>
+          {language === 'ru' ? 'Эскиз' : 'Skizze'}
         </button>
-
         <button
-          onClick={() => onNavigate('overview')}
-          className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1 ${
-            currentView === 'overview'
-              ? 'text-emerald-900 bg-emerald-50/80 font-semibold'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-          }`}
-        >
-          <BarChart3 className="w-3.5 h-3.5 text-slate-500" />
-          <span>{getTranslation('status', language)}</span>
+          onClick={() => onNavigate('workshop')}
+          className={`px-3.5 py-2 text-xs font-bold rounded-lg ${currentView === 'workshop' ? 'bg-emerald-700 text-white' : 'bg-slate-900 text-white hover:bg-slate-800'}`}>
+          {language === 'ru' ? 'Встреча с сеньором' : 'Senior-Workshop'}
         </button>
-
-        <button
-          onClick={() => onNavigate('competitors')}
-          className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1 ${
-            currentView === 'competitors'
-              ? 'text-emerald-900 bg-emerald-50/80 font-semibold'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-          }`}
-          title="SmartDok, QuickBooks Time, Dalux..."
-        >
-          <Building2 className="w-3.5 h-3.5 text-slate-500" />
-          <span>{getTranslation('competitors', language)}</span>
-        </button>
-
-        <button
-          onClick={() => onNavigate('event-storming')}
-          className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1 ${
-            currentView === 'event-storming'
-              ? 'text-indigo-950 bg-indigo-50/80 font-semibold'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-          }`}
-          title="Event Storming & 10 Regeln"
-        >
-          <Zap className="w-3.5 h-3.5 text-indigo-500" />
-          <span>{getTranslation('events', language)}</span>
-        </button>
-
-        <button
-          onClick={() => onNavigate('senior-decisions')}
-          className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1 ${
-            currentView === 'senior-decisions'
-              ? 'text-rose-900 bg-rose-50/80 font-semibold'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-          }`}
-          title="10 Fragen mit dem Senior klären"
-        >
-          <HelpCircle className="w-3.5 h-3.5 text-rose-500" />
-          <span>{getTranslation('seniorDecisions', language)}</span>
-        </button>
-
-        <button
-          onClick={onOpenSearch}
-          className="px-2 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors flex items-center gap-1"
-          title="Cmd+K"
-        >
-          <Search className="w-3.5 h-3.5 text-slate-400" />
-          <span className="hidden lg:inline">{getTranslation('search', language)}</span>
-          <kbd className="hidden lg:inline text-[10px] text-slate-400 bg-slate-100 px-1 py-0.5 rounded font-mono">⌘K</kbd>
-        </button>
-
-        <button
-          onClick={onOpenImportExport}
-          className="px-2 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors flex items-center gap-1"
-        >
-          <ArrowDownToLine className="w-3.5 h-3.5 text-slate-400" />
-          <span className="hidden md:inline">{getTranslation('importExport', language)}</span>
-        </button>
+        <details className="relative group">
+          <summary className="px-3 py-2 cursor-pointer rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 list-none select-none">
+            {language === 'ru' ? 'Исследование ▾' : 'Recherche ▾'}
+          </summary>
+          <div className="absolute top-full right-0 mt-2 w-56 p-2 bg-white border border-slate-200 rounded-xl shadow-xl z-40 space-y-1">
+            {[
+              ['overview', language === 'ru' ? 'Статус' : 'Status & Übersicht'],
+              ['competitors', language === 'ru' ? 'Конкуренты' : 'Wettbewerber'],
+              ['event-storming', 'Event Storming'],
+              ['senior-decisions', language === 'ru' ? 'Открытые решения' : 'Offene Entscheidungen']
+            ].map(([view,label])=>(
+              <button key={view} onClick={() => onNavigate(view)} className="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-slate-100 text-slate-700">{label}</button>
+            ))}
+            <div className="h-px bg-slate-100 my-1"/>
+            <button onClick={onOpenSearch} className="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-slate-100 text-slate-700">
+              {language === 'ru' ? 'Поиск' : 'Suche'} (Ctrl+K)
+            </button>
+            <button onClick={onOpenImportExport} className="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-slate-100 text-slate-700">
+              {language === 'ru' ? 'Импорт / экспорт' : 'Import / Export'}
+            </button>
+          </div>
+        </details>
       </nav>
 
       {/* Zone 3: Language Switcher & Presentation Button */}

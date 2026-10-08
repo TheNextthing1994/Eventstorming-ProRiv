@@ -10,6 +10,7 @@ import {
   loadEntireDatabase
 } from './db/indexedDb';
 import { Header } from './components/Header';
+import { SeniorWorkshop } from './components/SeniorWorkshop';
 import { OriginalSketchCanvas } from './components/OriginalSketchCanvas';
 import { TopicDetailView } from './components/TopicDetailView';
 import { GlobalOverview } from './components/GlobalOverview';
@@ -42,7 +43,7 @@ export default function App() {
 
   // Navigation states synced with URL Hash
   const [currentView, setCurrentView] = useState<
-    'home' | 'topic' | 'overview' | 'competitors' | 'event-storming' | 'senior-decisions' | 'presentation'
+    'home' | 'workshop' | 'topic' | 'overview' | 'competitors' | 'event-storming' | 'senior-decisions' | 'presentation'
   >('home');
   const [currentTopicId, setCurrentTopicId] = useState<TopicId>('mobile-app');
 
@@ -90,6 +91,8 @@ export default function App() {
       } else {
         setCurrentView('home');
       }
+    } else if (hash === 'workshop') {
+      setCurrentView('workshop');
     } else if (hash === 'overview') {
       setCurrentView('overview');
     } else if (hash === 'competitors') {
@@ -123,6 +126,9 @@ export default function App() {
       window.location.hash = `#/topic/${targetTopic}`;
       setCurrentTopicId(targetTopic);
       setCurrentView('topic');
+    } else if (view === 'workshop') {
+      window.location.hash = '#/workshop';
+      setCurrentView('workshop');
     } else if (view === 'overview') {
       window.location.hash = '#/overview';
       setCurrentView('overview');
@@ -209,10 +215,21 @@ export default function App() {
             databaseState={databaseState}
             language={language}
             onSelectTopic={(topicId) => navigateTo('topic', topicId)}
+            onStartWorkshop={() => navigateTo('workshop')}
             onOpenCalibration={() => setIsCalibrationOpen(true)}
             onImageChanged={(dataUrl) => {
               setDatabaseState(prev => prev ? { ...prev, customImage: dataUrl } : null);
             }}
+          />
+        )}
+
+        {currentView === 'workshop' && (
+          <SeniorWorkshop
+            databaseState={databaseState}
+            language={language}
+            onNavigateHome={() => navigateTo('home')}
+            onSelectTopic={(topicId) => navigateTo('topic', topicId)}
+            onNavigateSection={(section) => navigateTo(section)}
           />
         )}
 

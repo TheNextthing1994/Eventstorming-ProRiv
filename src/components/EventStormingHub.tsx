@@ -211,6 +211,11 @@ export const EventStormingHub: React.FC<EventStormingHubProps> = ({
         </button>
       </div>
 
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-950 leading-relaxed">
+        {language === 'ru'
+          ? 'Внимание: здесь сохранён исторический проект Event Storming. Старые обязательные согласования рапорта прорабом или офисом НЕ подтверждены заказчиком. Согласно разговору, рабочий отправляет рапорт клиенту сам; прораб проверяет часы в Tripletex. Обновлённую версию процесса смотрите в Senior-Workshop.'
+          : 'Hinweis: Hier bleibt der historische Event-Storming-Entwurf erhalten. Frühere Pflichtfreigaben des Rapports durch Vorarbeiter oder Büro sind NICHT kundenseitig bestätigt. Laut Gespräch sendet der Arbeiter den Rapport selbst; der Vorarbeiter prüft die Stunden in Tripletex. Der aktuelle kundenbezogene Ablauf steht im Senior-Workshop.'}
+      </div>
       {/* Tabs */}
       <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2">
         <button

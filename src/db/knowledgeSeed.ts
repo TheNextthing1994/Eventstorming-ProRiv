@@ -193,8 +193,8 @@ export const SENIOR_DECISION_QUESTIONS: SeniorDecisionItem[] = [
     rationaleRu: 'Обеспечивает полный аудит и исключает случайные дублированные проводки в Tripletex.',
     date: '2026-10-08',
     connectedTopics: ['raport', 'api', 'vremya']
-  }
-  ,{
+  },
+  {
     id: 'sd-11-hms-role',
     number: 11,
     question: 'In welcher Rolle arbeitet ProRiv auf Baustellen (Subunternehmer / Hauptunternehmer / Bauherr)? Wer führt die elektronische HMS-Übersichtsliste, und braucht ISA dafür überhaupt eine eigene Funktion?',

@@ -266,52 +266,7 @@ export const OriginalSketchCanvas: React.FC<OriginalSketchCanvasProps> = ({
         )}
       </div>
 
-      {/* Quick Access Badges below the sketch */}
-      <div className="w-full max-w-5xl mt-6">
-        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2.5">
-          {getTranslation('directAccess', language)}:
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-          {(Object.keys(TOPIC_DEFINITIONS) as TopicId[]).map((topicId, idx) => {
-            const meta = TOPIC_DEFINITIONS[topicId];
-            const isGreen = meta.colorType === 'green';
-            const questionsCount = databaseState.questions.filter(q => q.topicId === topicId).length;
-            const resolvedCount = databaseState.questions.filter(q => q.topicId === topicId && q.isResolved).length;
 
-            return (
-              <button
-                key={topicId}
-                onClick={() => onSelectTopic(topicId)}
-                onMouseEnter={() => setHoveredTopic(topicId)}
-                onMouseLeave={() => setHoveredTopic(null)}
-                className={`p-3 rounded-lg border text-left transition-all bg-white hover:shadow-xs group ${
-                  isGreen
-                    ? 'border-emerald-200/80 hover:border-emerald-400 hover:bg-emerald-50/30'
-                    : 'border-slate-200/90 hover:border-rose-300 hover:bg-rose-50/20'
-                }`}
-              >
-                <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono mb-1">
-                  <span>0{idx + 1}</span>
-                  <span className={`w-2 h-2 rounded-full ${isGreen ? 'bg-emerald-500' : 'bg-rose-400'}`} />
-                </div>
-                <div className="text-xs font-bold text-slate-800 group-hover:text-slate-900 tracking-tight truncate">
-                  {meta.sketchTitle}
-                </div>
-                <div className="text-[11px] text-slate-600 truncate mt-0.5 font-medium">
-                  {language === 'ru'
-                    ? meta.russianTitle
-                    : language === 'bilingual'
-                      ? meta.russianTitle
-                      : meta.germanTitle}
-                </div>
-                <div className="text-[10px] text-slate-400 mt-2 font-mono">
-                  {resolvedCount}/{questionsCount} {getTranslation('solvedQuestions', language)}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
     </div>
   );
 };

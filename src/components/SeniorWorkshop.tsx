@@ -189,7 +189,11 @@ export const SeniorWorkshop: React.FC<SeniorWorkshopProps> = ({
                     );
                   })}
                 </div>
-                {pi < 3 && <div className="flex justify-center mt-2 text-slate-300"><ArrowRight className="w-4 h-4 rotate-90" /></div>}
+                {pi < 2 && <div className="flex justify-center mt-2 text-slate-300"><ArrowRight className="w-4 h-4 rotate-90" /></div>}
+                {pi === 1 && <div className="my-3 px-3 py-2 bg-sky-50 border border-sky-100 text-[11px] text-sky-950 rounded-lg text-center">
+                  {t('Ab hier zwei getrennte Stränge: Kundenantwort und Stundenverarbeitung in Tripletex. Keine zwingende Reihenfolge bestätigt.',
+                     'Далее два отдельных пути: ответ клиента и обработка часов в Tripletex. Обязательный порядок не подтверждён.')}
+                </div>}
               </div>
             ))}
             <div className="flex items-start gap-2 p-3 bg-sky-50 rounded-lg text-xs text-sky-900">
@@ -303,6 +307,7 @@ export const SeniorWorkshop: React.FC<SeniorWorkshopProps> = ({
                 <button onClick={()=>onSelectTopic(selected.topicId)} className="rounded-lg px-3 py-2 border border-slate-200 text-xs font-semibold hover:bg-slate-50">{t('Alle Datensätze öffnen','Открыть все записи')} ↗</button>
                 <button onClick={()=>onNavigateSection('event-storming')} className="rounded-lg px-3 py-2 border border-slate-200 text-xs font-semibold hover:bg-slate-50">Event Storming ↗</button>
                 <button onClick={()=>onNavigateSection('competitors')} className="rounded-lg px-3 py-2 border border-slate-200 text-xs font-semibold hover:bg-slate-50">{t('Wettbewerber','Конкуренты')} ↗</button>
+                <a href="https://github.com/TheNextthing1994/Eventstorming-ProRiv/blob/main/docs/DEEP_RESEARCH_2026-10-08_RAW.md" target="_blank" rel="noopener noreferrer" className="rounded-lg px-3 py-2 border border-slate-200 text-xs font-semibold hover:bg-slate-50">{t('Deep Research (Original, ungeprüft)', 'Deep Research (оригинал, не проверен)')} ↗</a>
               </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-6 gap-2">

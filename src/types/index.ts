@@ -241,6 +241,8 @@ export interface DatabaseState {
   attachments: AttachmentItem[];
   hotspotSettings: Record<TopicId, HotspotCoordinates>;
   customImage?: string;
+  /** Optional so older JSON backups remain compatible. */
+  workshopNotes?: Record<string, { status: 'open' | 'test' | 'decided'; answer: string; owner: string; nextStep: string; updatedAt: string }>;
 }
 
 export interface GlobalStats {

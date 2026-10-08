@@ -198,7 +198,7 @@ export const SeniorDecisionsHub: React.FC<SeniorDecisionsHubProps> = ({
         >
           <HelpCircle className="w-4 h-4" />
           <span>
-            {language === 'ru' ? '10 Ключевых решений архитектуры' : '10 Offene Kernentscheidungen'}
+            {language === 'ru' ? `${questionsList.length} ключевых архитектурных вопросов` : `${questionsList.length} offene Kernentscheidungen`}
           </span>
         </button>
       </div>

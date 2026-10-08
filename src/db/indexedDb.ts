@@ -749,3 +749,27 @@ export async function importFromJson(jsonString: string): Promise<boolean> {
     return false;
   }
 }
+
+
+/**
+ * Workshop notes belong to the current browser (IndexedDB settings store).
+ * They are deliberately separate from the seed, so future content upgrades
+ * never overwrite what was agreed during the senior meeting.
+ */
+export interface WorkshopNote {
+  status: 'open' | 'test' | 'decided';
+  answer: string;
+  owner: string;
+  nextStep: string;
+  updatedAt: string;
+}
+export type WorkshopNotes = Record<string, WorkshopNote>;
+
+export async function loadWorkshopNotes(): Promise<WorkshopNotes> {
+  const items = await getAllFromStore<{ key: string; value: WorkshopNotes }>('settings');
+  return items.find(item => item.key === 'senior_workshop_notes_v1')?.value || {};
+}
+
+export async function saveWorkshopNotes(notes: WorkshopNotes): Promise<void> {
+  await putToStore('settings', { key: 'senior_workshop_notes_v1', value: notes });
+}

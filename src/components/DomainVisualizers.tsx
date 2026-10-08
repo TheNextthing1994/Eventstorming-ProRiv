@@ -29,10 +29,10 @@ export const RoleMatrixVisualizer: React.FC<VisualizerProps> = ({ language = 'ru
     { action: 'Выбор стройплощадки и проекта', worker: true, foreman: true, office: true, customer: false, note: 'Рабочий выбирает свой объект' },
     { action: 'Старт / стоп рабочего времени (WorkSession)', worker: true, foreman: true, office: false, customer: false, note: 'Валидация GPS при отметке' },
     { action: 'Замеры бурения и резки, загрузка фото', worker: true, foreman: true, office: true, customer: false, note: 'Диаметры, глубина, погонные метры' },
-    { action: 'Подача рапорта на согласование (WorkReportSubmitted)', worker: true, foreman: true, office: false, customer: false, note: 'Передача на проверку бригадиру' },
+    { action: 'Отправка рапорта клиенту', worker: true, foreman: false, office: false, customer: false, note: 'Рабочий отправляет сам по SMS/почте' },
     { action: 'Проверка и подтверждение GPS-отклонений', worker: false, foreman: true, office: true, customer: false, note: 'Бригадир оценивает расхождение' },
-    { action: 'Утверждение часов для Tripletex (TimesheetApproved)', worker: false, foreman: true, office: true, customer: false, note: 'Согласование табеля зарплаты' },
-    { action: 'Техническое утверждение рапорта (WorkReportApproved)', worker: false, foreman: true, office: true, customer: false, note: 'Проверка объемов для счета клиенту' },
+    { action: 'Проверка и утверждение часов в Tripletex', worker: false, foreman: true, office: false, customer: false, note: 'Прораб работает в Tripletex, а не в ISA' },
+
     { action: 'Изменение коммерческих тарифов и оверрайдов', worker: false, foreman: false, office: true, customer: false, note: 'Только офис управляет ценами' },
     { action: 'Открытие утвержденного рапорта на правку (ревизия)', worker: false, foreman: false, office: true, customer: false, note: 'Требует указания причины аудита' },
     { action: 'Просмотр и подтверждение рапорта по временной ссылке', worker: false, foreman: false, office: false, customer: true, note: 'Ссылка по SMS/Mail без пароля' },
@@ -41,10 +41,10 @@ export const RoleMatrixVisualizer: React.FC<VisualizerProps> = ({ language = 'ru
     { action: 'Baustelle & Projekt auswählen', worker: true, foreman: true, office: true, customer: false, note: 'Arbeiter wählt eigenen Einsatzort' },
     { action: 'Arbeitszeit starten / stoppen (WorkSession)', worker: true, foreman: true, office: false, customer: false, note: 'GPS-Plausibilisierung beim Stempeln' },
     { action: 'Kernbohr- & Säge-Aufmaß erfassen', worker: true, foreman: true, office: true, customer: false, note: 'Mengen, Maße (mm, cm, m), Fotos' },
-    { action: 'Rapport einreichen (WorkReportSubmitted)', worker: true, foreman: true, office: false, customer: false, note: 'Übergabe an Vorarbeiter-Prüfung' },
+    { action: 'Rapport an Kunden senden', worker: true, foreman: false, office: false, customer: false, note: 'Arbeiter versendet selbst per SMS / E-Mail' },
     { action: 'GPS-Ausnahmen prüfen & freigeben', worker: false, foreman: true, office: true, customer: false, note: 'Vorarbeiter beurteilt Standortabweichung' },
-    { action: 'Arbeitsstunden freigeben (TimesheetApproved)', worker: false, foreman: true, office: true, customer: false, note: 'Stundenfreigabe für Tripletex' },
-    { action: 'Rapport fachlich freigeben (WorkReportApproved)', worker: false, foreman: true, office: true, customer: false, note: 'Aufmaßprüfung für Kundenabrechnung' },
+    { action: 'Arbeitsstunden in Tripletex prüfen', worker: false, foreman: true, office: false, customer: false, note: 'Vorarbeiter genehmigt in Tripletex, nicht in ISA' },
+
     { action: 'Kaufmännische Preise & Overrides bearbeiten', worker: false, foreman: false, office: true, customer: false, note: 'Nur Büro steuert Konditionen (Vorschlag)' },
     { action: 'Freigegebenen Rapport wieder öffnen (Revision)', worker: false, foreman: false, office: true, customer: false, note: 'Erfordert dokumentierten Audit-Grund' },
     { action: 'Rapport per Magic-Link einsehen & signieren', worker: false, foreman: false, office: false, customer: true, note: 'Zeitlich begrenzter SMS/Mail-Link' },
@@ -438,7 +438,7 @@ export const TimeTripleDivisionVisualizer: React.FC<VisualizerProps> = ({ langua
             <div>• status (Submitted, Approved, Exported)</div>
           </div>
           <span className="text-[10px] text-slate-400 block italic">
-            {language === 'ru' ? 'Экспортируется в Tripletex для зарплаты' : 'Fließt nach Vorarbeiterfreigabe zu Tripletex'}
+            {language === 'ru' ? 'Экспортируется в Tripletex для зарплаты' : 'Wird an Tripletex übertragen; Vorarbeiter prüft dort'}
           </span>
         </div>
 

@@ -10,13 +10,16 @@ import {
   FileCheck2,
   ExternalLink
 } from 'lucide-react';
-import { TopicId, DatabaseState } from '../types';
+import { TopicId, DatabaseState, Language } from '../types';
 import { TOPIC_DEFINITIONS, TOPIC_ORDER } from '../db/defaultData';
 import { StatusBadge } from './StatusBadge';
+import { getTranslation, getDualText } from '../i18n/translations';
 
 interface PresentationModeProps {
   initialTopicId?: TopicId;
   databaseState: DatabaseState;
+  language: Language;
+  onLanguageChange: (lang: Language) => void;
   onExit: () => void;
   onNavigateHome: () => void;
 }
@@ -24,6 +27,8 @@ interface PresentationModeProps {
 export const PresentationMode: React.FC<PresentationModeProps> = ({
   initialTopicId,
   databaseState,
+  language,
+  onLanguageChange,
   onExit,
   onNavigateHome
 }) => {
@@ -78,20 +83,24 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
   const prevTopic = TOPIC_ORDER[(currentIndex - 1 + TOPIC_ORDER.length) % TOPIC_ORDER.length];
   const nextTopic = TOPIC_ORDER[(currentIndex + 1) % TOPIC_ORDER.length];
 
+  const currentBriefing = (language === 'ru' || language === 'bilingual') && meta.briefingRu
+    ? meta.briefingRu
+    : meta.briefing;
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans select-none antialiased">
       {/* Top Presentation Bar */}
-      <div className="h-16 px-6 bg-slate-900 border-b border-slate-800 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-4">
+      <div className="h-16 px-4 sm:px-6 bg-slate-900 border-b border-slate-800 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-3">
           <button
             onClick={onNavigateHome}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors shadow-sm"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors shadow-xs"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Zurück zur Originalskizze</span>
+            <span className="hidden sm:inline">{getTranslation('backToSketch', language)}</span>
           </button>
 
-          <div className="h-5 w-px bg-slate-800" />
+          <div className="h-5 w-px bg-slate-800 hidden sm:block" />
 
           <div className="flex items-center gap-2">
             <span
@@ -102,11 +111,13 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
             <span className="text-sm font-bold tracking-tight text-white uppercase font-mono">
               {meta.sketchTitle}
             </span>
-            <span className="text-xs text-slate-400 font-normal">· {meta.germanTitle}</span>
+            <span className="text-xs text-slate-400 font-normal hidden md:inline">
+              · {language === 'ru' ? meta.russianTitle : meta.germanTitle}
+            </span>
           </div>
         </div>
 
-        {/* Quick topic pills for direct clicking in presentation */}
+        {/* Quick topic pills */}
         <div className="hidden lg:flex items-center gap-1.5">
           {TOPIC_ORDER.map((tId, idx) => {
             const isSelected = tId === currentTopicId;
@@ -115,7 +126,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
               <button
                 key={tId}
                 onClick={() => setCurrentTopicId(tId)}
-                className={`px-3 py-1 text-xs rounded font-medium transition-colors ${
+                className={`px-2.5 py-1 text-xs rounded font-medium transition-colors ${
                   isSelected
                     ? 'bg-white text-slate-950 font-bold'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800'
@@ -127,11 +138,36 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
           })}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          {/* Language Switcher in Presentation Mode */}
+          <div className="flex items-center bg-slate-800 rounded-lg p-0.5 border border-slate-700 text-[11px] font-mono">
+            <button
+              onClick={() => onLanguageChange('de')}
+              className={`px-2 py-0.5 rounded transition-colors ${language === 'de' ? 'bg-slate-700 text-white font-bold' : 'text-slate-400 hover:text-white'}`}
+              title="Deutsch"
+            >
+              DE
+            </button>
+            <button
+              onClick={() => onLanguageChange('ru')}
+              className={`px-2 py-0.5 rounded transition-colors ${language === 'ru' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-400 hover:text-white'}`}
+              title="Русский для сеньора"
+            >
+              RU
+            </button>
+            <button
+              onClick={() => onLanguageChange('bilingual')}
+              className={`px-2 py-0.5 rounded transition-colors ${language === 'bilingual' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-white'}`}
+              title="Двуязычный режим (DE + RU)"
+            >
+              DE+RU
+            </button>
+          </div>
+
           <button
             onClick={toggleFullscreen}
-            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
-            title="Vollbild umschalten"
+            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            title={language === 'ru' ? 'Полноэкранный режим' : 'Vollbild'}
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
@@ -139,7 +175,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
             onClick={onExit}
             className="px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-md transition-colors"
           >
-            Präsentation beenden
+            {getTranslation('exitPresentation', language)}
           </button>
         </div>
       </div>
@@ -149,78 +185,104 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         {/* Title Card */}
         <div className="border-b border-slate-800 pb-6">
           <div className="flex items-center gap-2 text-emerald-400 text-xs font-mono mb-2 uppercase tracking-widest">
-            <span>Themenbereich 0{currentIndex + 1} von 06</span>
+            <span>
+              {language === 'ru' ? `Тематическая область 0${currentIndex + 1} из 06` : `Themenbereich 0${currentIndex + 1} von 06`}
+            </span>
             <span>·</span>
-            <span>{meta.colorType === 'green' ? 'Architekturkern' : 'Fachmodul'}</span>
+            <span>{meta.colorType === 'green' ? (language === 'ru' ? 'Архитектурное ядро' : 'Architekturkern') : (language === 'ru' ? 'Бизнес-модуль' : 'Fachmodul')}</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
             {meta.sketchTitle}
           </h1>
           <h2 className="text-lg text-slate-300 font-medium mt-1">
-            {meta.germanTitle}
+            {language === 'ru'
+              ? meta.russianTitle
+              : language === 'bilingual'
+                ? `${meta.russianTitle} · ${meta.germanTitle}`
+                : meta.germanTitle}
           </h2>
-          {summary && (
-            <p className="mt-4 text-base text-slate-300 leading-relaxed max-w-4xl bg-slate-900/60 p-4 rounded-xl border border-slate-800">
-              {summary}
-            </p>
-          )}
 
-          {/* 5-Punkte Senior Briefing */}
-          {meta.briefing && (
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
-              <div className="p-3.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
-                <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block font-semibold">
-                  1. Senior-Frage
-                </span>
-                <p className="text-slate-100 font-medium leading-relaxed">
-                  {meta.briefing.seniorAsked}
+          {/* 5-Point Senior Briefing */}
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
+            <div className="p-3.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
+              <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block font-semibold">
+                {getTranslation('briefing1', language)}
+              </span>
+              <p className="text-slate-100 font-medium leading-relaxed">
+                {currentBriefing.seniorAsked}
+              </p>
+              {language === 'bilingual' && meta.briefing && meta.briefing.seniorAsked !== currentBriefing.seniorAsked && (
+                <p className="text-[11px] text-slate-400 italic pt-1 border-t border-slate-800">
+                  DE: {meta.briefing.seniorAsked}
                 </p>
-              </div>
-
-              <div className="p-3.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
-                <span className="text-[10px] font-mono text-sky-400 uppercase tracking-wider block font-semibold">
-                  2. Bisher herausgefunden
-                </span>
-                <p className="text-slate-200 leading-relaxed">
-                  {meta.briefing.findingsSummary}
-                </p>
-              </div>
-
-              <div className="p-3.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
-                <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider block font-semibold">
-                  3. Andere Programme
-                </span>
-                <p className="text-slate-200 leading-relaxed">
-                  {meta.briefing.competitorSummary}
-                </p>
-              </div>
-
-              <div className="p-3.5 bg-emerald-950/40 rounded-xl border border-emerald-800/60 space-y-1">
-                <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider block font-semibold">
-                  4. Empfehlung für ISA
-                </span>
-                <p className="text-emerald-100 font-medium leading-relaxed">
-                  {meta.briefing.recommendationSummary}
-                </p>
-              </div>
-
-              <div className="p-3.5 bg-rose-950/30 rounded-xl border border-rose-900/50 space-y-1">
-                <span className="text-[10px] font-mono text-rose-400 uppercase tracking-wider block font-semibold">
-                  5. Noch zu klären
-                </span>
-                <p className="text-rose-200 leading-relaxed">
-                  {meta.briefing.openSummary}
-                </p>
-              </div>
+              )}
             </div>
-          )}
+
+            <div className="p-3.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
+              <span className="text-[10px] font-mono text-sky-400 uppercase tracking-wider block font-semibold">
+                {getTranslation('briefing2', language)}
+              </span>
+              <p className="text-slate-200 leading-relaxed">
+                {currentBriefing.findingsSummary}
+              </p>
+              {language === 'bilingual' && meta.briefing && meta.briefing.findingsSummary !== currentBriefing.findingsSummary && (
+                <p className="text-[11px] text-slate-400 italic pt-1 border-t border-slate-800">
+                  DE: {meta.briefing.findingsSummary}
+                </p>
+              )}
+            </div>
+
+            <div className="p-3.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
+              <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider block font-semibold">
+                {getTranslation('briefing3', language)}
+              </span>
+              <p className="text-slate-200 leading-relaxed">
+                {currentBriefing.competitorSummary}
+              </p>
+              {language === 'bilingual' && meta.briefing && meta.briefing.competitorSummary !== currentBriefing.competitorSummary && (
+                <p className="text-[11px] text-slate-400 italic pt-1 border-t border-slate-800">
+                  DE: {meta.briefing.competitorSummary}
+                </p>
+              )}
+            </div>
+
+            <div className="p-3.5 bg-emerald-950/40 rounded-xl border border-emerald-800/60 space-y-1">
+              <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider block font-semibold">
+                {getTranslation('briefing4', language)}
+              </span>
+              <p className="text-emerald-100 font-medium leading-relaxed">
+                {currentBriefing.recommendationSummary}
+              </p>
+              {language === 'bilingual' && meta.briefing && meta.briefing.recommendationSummary !== currentBriefing.recommendationSummary && (
+                <p className="text-[11px] text-emerald-300/70 italic pt-1 border-t border-emerald-900">
+                  DE: {meta.briefing.recommendationSummary}
+                </p>
+              )}
+            </div>
+
+            <div className="p-3.5 bg-rose-950/30 rounded-xl border border-rose-900/50 space-y-1">
+              <span className="text-[10px] font-mono text-rose-400 uppercase tracking-wider block font-semibold">
+                {getTranslation('briefing5', language)}
+              </span>
+              <p className="text-rose-200 leading-relaxed">
+                {currentBriefing.openSummary}
+              </p>
+              {language === 'bilingual' && meta.briefing && meta.briefing.openSummary !== currentBriefing.openSummary && (
+                <p className="text-[11px] text-rose-300/70 italic pt-1 border-t border-rose-900">
+                  DE: {meta.briefing.openSummary}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Section 1: Senior Questions & Answers */}
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b border-slate-800 pb-2">
             <h3 className="text-sm font-mono uppercase tracking-wider text-slate-400">
-              Fragen des Seniors ({topicQuestions.filter(q => q.isResolved).length}/{topicQuestions.length} beantwortet)
+              {language === 'ru'
+                ? `Вопросы сеньора (${topicQuestions.filter(q => q.isResolved).length}/${topicQuestions.length} решено)`
+                : `Fragen des Seniors (${topicQuestions.filter(q => q.isResolved).length}/${topicQuestions.length} beantwortet)`}
             </h3>
           </div>
 
@@ -241,24 +303,27 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                     }`}
                   />
                   <div>
+                    <div className="text-[10px] text-slate-400 font-mono mb-1">
+                      {language === 'ru' ? 'Оригинал из эскиза:' : 'Original:'} {q.question}
+                    </div>
                     <h4 className="text-sm font-bold text-white leading-snug">
-                      {q.question}
+                      {language === 'ru'
+                        ? (q.russianTranslation || q.question)
+                        : language === 'bilingual'
+                          ? (q.russianTranslation ? `${q.russianTranslation} / ${q.germanTranslation || q.question}` : (q.germanTranslation || q.question))
+                          : (q.germanTranslation || q.question)}
                     </h4>
-                    {q.germanTranslation && q.germanTranslation !== q.question && (
-                      <div className="text-xs text-slate-400 mt-1">
-                        Bedeutung: {q.germanTranslation}
-                      </div>
-                    )}
+
                     {q.answer ? (
                       <div className="mt-3 p-3 bg-slate-950/70 rounded-lg border border-slate-800/80 text-xs text-slate-200 leading-relaxed">
                         <span className="font-semibold text-emerald-400 block mb-1">
-                          Ergebnis / Antwort:
+                          {language === 'ru' ? 'Результат / Ответ:' : 'Ergebnis / Antwort:'}
                         </span>
-                        {q.answer}
+                        {language === 'ru' ? (q.answerRu || q.answer) : q.answer}
                       </div>
                     ) : (
                       <div className="text-xs text-amber-400/80 mt-2 italic font-mono">
-                        ⏳ Noch offen für Klärung
+                        {language === 'ru' ? '⏳ Открыто для согласования' : '⏳ Noch offen für Klärung'}
                       </div>
                     )}
                   </div>
@@ -268,12 +333,14 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
           </div>
         </div>
 
-        {/* Section 2: Core Decisions (if any) */}
+        {/* Section 2: Core Decisions */}
         {topicDecisions.length > 0 && (
           <div className="space-y-4">
             <div className="border-b border-slate-800 pb-2">
               <h3 className="text-sm font-mono uppercase tracking-wider text-emerald-400">
-                Beschlossene Architekturentscheidungen ({topicDecisions.length})
+                {language === 'ru'
+                  ? `Зафиксированные архитектурные решения (${topicDecisions.length})`
+                  : `Beschlossene Architekturentscheidungen (${topicDecisions.length})`}
               </h3>
             </div>
 
@@ -287,13 +354,19 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                     <span className="text-emerald-400 font-bold uppercase">{d.status}</span>
                     <span>{d.date}</span>
                   </div>
-                  <h4 className="text-sm font-bold text-white">{d.title}</h4>
+                  <h4 className="text-sm font-bold text-white">
+                    {language === 'ru'
+                      ? (d.titleRu || d.title)
+                      : language === 'bilingual'
+                        ? (d.titleRu ? `${d.titleRu} / ${d.title}` : d.title)
+                        : d.title}
+                  </h4>
                   <p className="text-xs text-slate-300 leading-relaxed bg-slate-950 p-2.5 rounded border border-slate-800">
-                    {d.rationale}
+                    {language === 'ru' ? (d.rationaleRu || d.rationale) : d.rationale}
                   </p>
                   {d.responsiblePerson && (
                     <div className="text-[11px] text-slate-400">
-                      Verantwortlich: {d.responsiblePerson}
+                      {language === 'ru' ? 'Ответственный:' : 'Verantwortlich:'} {d.responsiblePerson}
                     </div>
                   )}
                 </div>
@@ -302,12 +375,14 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
           </div>
         )}
 
-        {/* Section 3: Competitor Research (if any) */}
+        {/* Section 3: Competitor Research */}
         {topicCompetitors.length > 0 && (
           <div className="space-y-4">
             <div className="border-b border-slate-800 pb-2">
               <h3 className="text-sm font-mono uppercase tracking-wider text-slate-400">
-                Wettbewerbsanalyse ({topicCompetitors.length})
+                {language === 'ru'
+                  ? `Анализ программ-аналогов (${topicCompetitors.length})`
+                  : `Wettbewerbsanalyse (${topicCompetitors.length})`}
               </h3>
             </div>
 
@@ -321,16 +396,26 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                     <div className="text-xs font-mono text-emerald-400 uppercase">
                       {c.productName}
                     </div>
-                    <h4 className="text-sm font-bold text-white">{c.analyzedFeature}</h4>
+                    <h4 className="text-sm font-bold text-white">
+                      {language === 'ru'
+                        ? (c.analyzedFeatureRu || c.analyzedFeature)
+                        : language === 'bilingual'
+                          ? (c.analyzedFeatureRu ? `${c.analyzedFeatureRu} / ${c.analyzedFeature}` : c.analyzedFeature)
+                          : c.analyzedFeature}
+                    </h4>
                   </div>
                   <div className="text-xs space-y-2 text-slate-300">
                     <div>
-                      <span className="text-slate-400 font-medium block">Beobachteter Ablauf:</span>
-                      <p>{c.observedWorkflow}</p>
+                      <span className="text-slate-400 font-medium block">
+                        {language === 'ru' ? 'Наблюдаемый процесс:' : 'Beobachteter Ablauf:'}
+                      </span>
+                      <p>{language === 'ru' ? (c.observedWorkflowRu || c.observedWorkflow) : c.observedWorkflow}</p>
                     </div>
                     <div className="p-2.5 bg-emerald-950/30 rounded border border-emerald-900/50">
-                      <span className="text-emerald-400 font-semibold block mb-0.5">Key Takeaway:</span>
-                      <p className="text-slate-200">{c.keyTakeaway}</p>
+                      <span className="text-emerald-400 font-semibold block mb-0.5">
+                        {language === 'ru' ? 'Что берем для ISA:' : 'Key Takeaway:'}
+                      </span>
+                      <p className="text-slate-200">{language === 'ru' ? (c.keyTakeawayRu || c.keyTakeaway) : c.keyTakeaway}</p>
                     </div>
                   </div>
                 </div>
@@ -344,7 +429,9 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
           <div className="space-y-4">
             <div className="border-b border-slate-800 pb-2">
               <h3 className="text-sm font-mono uppercase tracking-wider text-slate-400">
-                Empfehlungen für unser Produkt ({topicRecs.length})
+                {language === 'ru'
+                  ? `Архитектурные рекомендации (${topicRecs.length})`
+                  : `Empfehlungen für unser Produkt (${topicRecs.length})`}
               </h3>
             </div>
 
@@ -357,13 +444,21 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xs font-mono font-bold text-amber-400 uppercase">
-                        PRIO: {r.priority}
+                        {language === 'ru' ? 'Приоритет:' : 'PRIO:'} {r.priority}
                       </span>
                       <span className="text-slate-500">·</span>
-                      <StatusBadge status={r.status} />
+                      <StatusBadge status={r.status} language={language} />
                     </div>
-                    <h4 className="text-sm font-bold text-white">{r.title}</h4>
-                    <p className="text-xs text-slate-300 mt-1 leading-relaxed">{r.description}</p>
+                    <h4 className="text-sm font-bold text-white">
+                      {language === 'ru'
+                        ? (r.titleRu || r.title)
+                        : language === 'bilingual'
+                          ? (r.titleRu ? `${r.titleRu} / ${r.title}` : r.title)
+                          : r.title}
+                    </h4>
+                    <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                      {language === 'ru' ? (r.descriptionRu || r.description) : r.description}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -372,25 +467,35 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         )}
       </main>
 
-      {/* Bottom Sticky Footer for Slide Flip */}
+      {/* Bottom Sticky Footer */}
       <div className="h-14 bg-slate-900/90 border-t border-slate-800 px-6 flex items-center justify-between shrink-0">
         <button
           onClick={() => setCurrentTopicId(prevTopic)}
           className="flex items-center gap-2 text-xs font-medium text-slate-300 hover:text-white px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
-          <span>Vorheriges Thema: {TOPIC_DEFINITIONS[prevTopic].sketchTitle}</span>
+          <span>
+            {language === 'ru'
+              ? `Предыдущая тема: ${TOPIC_DEFINITIONS[prevTopic].sketchTitle}`
+              : `Vorheriges Thema: ${TOPIC_DEFINITIONS[prevTopic].sketchTitle}`}
+          </span>
         </button>
 
         <div className="text-xs text-slate-400 font-mono hidden sm:inline">
-          Verwende Pfeiltasten (← / →) oder Tasten 1–6
+          {language === 'ru'
+            ? 'Используйте стрелки (← / →) или клавиши 1–6'
+            : 'Verwende Pfeiltasten (← / →) oder Tasten 1–6'}
         </div>
 
         <button
           onClick={() => setCurrentTopicId(nextTopic)}
           className="flex items-center gap-2 text-xs font-medium text-slate-300 hover:text-white px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 transition-colors"
         >
-          <span>Nächstes Thema: {TOPIC_DEFINITIONS[nextTopic].sketchTitle}</span>
+          <span>
+            {language === 'ru'
+              ? `Следующая тема: ${TOPIC_DEFINITIONS[nextTopic].sketchTitle}`
+              : `Nächstes Thema: ${TOPIC_DEFINITIONS[nextTopic].sketchTitle}`}
+          </span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>

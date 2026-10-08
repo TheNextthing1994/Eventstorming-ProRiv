@@ -194,38 +194,97 @@ export async function initializeDatabase(): Promise<DatabaseState> {
       getAllFromStore<TopicContent>('topics')
     ]);
 
-    const findingIds = new Set(currentFindings.map(f => f.id));
+    const findingMap = new Map(currentFindings.map(f => [f.id, f]));
     for (const item of INITIAL_RESEARCH_FINDINGS) {
-      if (!findingIds.has(item.id)) {
+      const existing = findingMap.get(item.id);
+      if (!existing) {
         await putToStore('findings', item);
+      } else {
+        await putToStore('findings', {
+          ...existing,
+          titleRu: item.titleRu || existing.titleRu,
+          contentRu: item.contentRu || existing.contentRu
+        });
       }
     }
 
-    const compIds = new Set(currentCompetitors.map(c => c.id));
+    const compMap = new Map(currentCompetitors.map(c => [c.id, c]));
     for (const item of INITIAL_COMPETITORS) {
-      if (!compIds.has(item.id)) {
+      const existing = compMap.get(item.id);
+      if (!existing) {
         await putToStore('competitors', item);
+      } else {
+        await putToStore('competitors', {
+          ...existing,
+          analyzedFeatureRu: item.analyzedFeatureRu || existing.analyzedFeatureRu,
+          investigationGoalRu: item.investigationGoalRu || existing.investigationGoalRu,
+          observedWorkflowRu: item.observedWorkflowRu || existing.observedWorkflowRu,
+          keyTakeawayRu: item.keyTakeawayRu || existing.keyTakeawayRu,
+          disadvantagesRu: item.disadvantagesRu || existing.disadvantagesRu,
+          transferabilityRu: item.transferabilityRu || existing.transferabilityRu
+        });
       }
     }
 
-    const recIds = new Set(currentRecs.map(r => r.id));
+    const recMap = new Map(currentRecs.map(r => [r.id, r]));
     for (const item of INITIAL_PRODUCT_RECOMMENDATIONS) {
-      if (!recIds.has(item.id)) {
+      const existing = recMap.get(item.id);
+      if (!existing) {
         await putToStore('recommendations', item);
+      } else {
+        await putToStore('recommendations', {
+          ...existing,
+          titleRu: item.titleRu || existing.titleRu,
+          descriptionRu: item.descriptionRu || existing.descriptionRu,
+          rationaleRu: item.rationaleRu || existing.rationaleRu
+        });
       }
     }
 
-    const pointIds = new Set(currentPoints.map(p => p.id));
+    const pointMap = new Map(currentPoints.map(p => [p.id, p]));
     for (const item of INITIAL_OPEN_POINTS) {
-      if (!pointIds.has(item.id)) {
+      const existing = pointMap.get(item.id);
+      if (!existing) {
         await putToStore('openPoints', item);
+      } else {
+        await putToStore('openPoints', {
+          ...existing,
+          questionRu: item.questionRu || existing.questionRu
+        });
       }
     }
 
-    const decIds = new Set(currentDecs.map(d => d.id));
+    const decMap = new Map(currentDecs.map(d => [d.id, d]));
     for (const item of INITIAL_DECISIONS) {
-      if (!decIds.has(item.id)) {
+      const existing = decMap.get(item.id);
+      if (!existing) {
         await putToStore('decisions', item);
+      } else {
+        await putToStore('decisions', {
+          ...existing,
+          titleRu: item.titleRu || existing.titleRu,
+          rationaleRu: item.rationaleRu || existing.rationaleRu
+        });
+      }
+    }
+
+    // Upgrade existing questions so that Feld 1 (answer) and Feld 2 (clientQuestion) and needsClientClarification are populated
+    const initialQuestions = generateInitialQuestions();
+    const initQMap = new Map(initialQuestions.map(q => [q.id, q]));
+    for (const q of existingQuestions) {
+      const seedQ = initQMap.get(q.id);
+      if (seedQ) {
+        await putToStore('questions', {
+          ...q,
+          answer: q.answer || seedQ.answer,
+          answerRu: q.answerRu || seedQ.answerRu,
+          clientQuestion: q.clientQuestion || seedQ.clientQuestion,
+          clientQuestionRu: q.clientQuestionRu || seedQ.clientQuestionRu,
+          needsClientClarification: q.needsClientClarification !== undefined ? q.needsClientClarification : seedQ.needsClientClarification,
+          questionRu: q.questionRu || seedQ.questionRu,
+          germanTranslation: q.germanTranslation || seedQ.germanTranslation,
+          russianTranslation: q.russianTranslation || seedQ.russianTranslation
+        });
       }
     }
 
@@ -488,10 +547,15 @@ export function calculateGlobalStats(state: DatabaseState): GlobalStats {
     });
   });
 
+  const clientQuestionsCount = state.questions.filter(q => q.needsClientClarification || !!q.clientQuestion).length;
+  const unresolvedClientQuestionsCount = state.questions.filter(q => (q.needsClientClarification || !!q.clientQuestion) && !q.isResolved).length;
+
   return {
     totalQuestions,
     resolvedQuestions,
     openQuestionsCount,
+    clientQuestionsCount,
+    unresolvedClientQuestionsCount,
     totalOpenPoints,
     unresolvedOpenPoints,
     totalFindings,
@@ -522,6 +586,7 @@ export async function exportStateAsMarkdown(): Promise<string> {
   md += `**Erstellt am:** ${dateStr}\n\n`;
   md += `## 1. Executive Summary & Statusüberblick\n\n`;
   md += `- **Erfasste Fragen:** ${stats.totalQuestions} (davon beantwortet: ${stats.resolvedQuestions}, offen: ${stats.openQuestionsCount})\n`;
+  md += `- **Fragen an Klienten (Isa) für den Senior:** ${stats.clientQuestionsCount} (davon ungelöst: ${stats.unresolvedClientQuestionsCount})\n`;
   md += `- **Offene Klärungspunkte:** ${stats.totalOpenPoints} (davon ungelöst: ${stats.unresolvedOpenPoints})\n`;
   md += `- **Gesammelte Erkenntnisse:** ${stats.totalFindings}\n`;
   md += `- **Wettbewerbsanalysen:** ${stats.totalCompetitors}\n`;
@@ -558,7 +623,10 @@ export async function exportStateAsMarkdown(): Promise<string> {
           md += `  *Bedeutung:* ${q.germanTranslation}\n`;
         }
         if (q.answer) {
-          md += `  *Antwort:* ${q.answer}\n`;
+          md += `  *1. Unser Vorschlag:* ${q.answer}\n`;
+        }
+        if (q.clientQuestion) {
+          md += `  *2. ⚠️ FRAGE AN KLIENTEN (ISA):* ${q.clientQuestion}\n`;
         }
       });
       md += `\n`;

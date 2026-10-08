@@ -27,11 +27,13 @@ import {
   OpenPoint,
   Decision,
   KnowledgeStatus,
-  AttachmentItem
+  AttachmentItem,
+  Language
 } from '../types';
 import { TOPIC_DEFINITIONS, TOPIC_ORDER } from '../db/defaultData';
 import { StatusBadge, STATUS_CONFIG } from './StatusBadge';
 import { AttachmentViewer } from './AttachmentViewer';
+import { getTranslation, getDualText, UI_TEXT } from '../i18n/translations';
 import {
   RoleMatrixVisualizer,
   EntityHierarchyVisualizer,
@@ -61,6 +63,7 @@ import {
 interface TopicDetailViewProps {
   topicId: TopicId;
   databaseState: DatabaseState;
+  language?: Language;
   onNavigateHome: () => void;
   onSelectTopic: (topicId: TopicId) => void;
   onRefreshData: () => Promise<void>;
@@ -71,6 +74,7 @@ type ActiveSection = 'all' | 'summary' | 'questions' | 'findings' | 'competitors
 export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
   topicId,
   databaseState,
+  language = 'ru',
   onNavigateHome,
   onSelectTopic,
   onRefreshData
@@ -106,7 +110,16 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
   const isItemForTopic = (item: { topicId: TopicId; additionalTopicIds?: TopicId[] }) =>
     item.topicId === topicId || item.additionalTopicIds?.includes(topicId);
 
+  const [questionFilter, setQuestionFilter] = useState<'all' | 'client_only' | 'resolved'>('all');
+
   const topicQuestions = databaseState.questions.filter(q => q.topicId === topicId);
+  const clientQuestionsInTopic = topicQuestions.filter(q => q.needsClientClarification || !!q.clientQuestion);
+  const filteredTopicQuestions = questionFilter === 'client_only'
+    ? clientQuestionsInTopic
+    : questionFilter === 'resolved'
+      ? topicQuestions.filter(q => q.isResolved)
+      : topicQuestions;
+
   const topicFindings = databaseState.findings.filter(isItemForTopic);
   const topicCompetitors = databaseState.competitors.filter(isItemForTopic);
   const topicRecs = databaseState.recommendations.filter(isItemForTopic);
@@ -248,12 +261,14 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
               className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-emerald-800 transition-colors bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-md"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Zurück zur Originalskizze</span>
+              <span>{getTranslation('backToSketch', language)}</span>
             </button>
             <span className="text-slate-300">/</span>
             <div className="flex items-center gap-1.5 text-xs">
               <span className="font-bold text-slate-900 tracking-tight">{meta.sketchTitle}</span>
-              <span className="text-slate-500 hidden sm:inline">({meta.germanTitle})</span>
+              <span className="text-slate-500 hidden sm:inline">
+                ({language === 'ru' ? meta.russianTitle : language === 'bilingual' ? `${meta.russianTitle} / ${meta.germanTitle}` : meta.germanTitle})
+              </span>
             </div>
           </div>
 
@@ -277,7 +292,7 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                       ? 'bg-slate-900 text-white font-medium'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                   }`}
-                  title={`${tMeta.sketchTitle} – ${tMeta.germanTitle}`}
+                  title={`${tMeta.sketchTitle} – ${language === 'ru' ? tMeta.russianTitle : tMeta.germanTitle}`}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${isGreen ? 'bg-emerald-400' : 'bg-rose-400'}`} />
                   <span>{tMeta.sketchTitle}</span>
@@ -300,14 +315,20 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                   }`}
                 />
                 <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
-                  {meta.colorType === 'green' ? 'Zentraler Architekturbereich (Grün)' : 'Fachbereich der Skizze (Rot)'}
+                  {meta.colorType === 'green'
+                    ? (language === 'ru' ? 'Центральное архитектурное ядро (Зеленый)' : 'Zentraler Architekturbereich (Grün)')
+                    : (language === 'ru' ? 'Функциональный домен эскиза (Красный)' : 'Fachbereich der Skizze (Rot)')}
                 </span>
               </div>
               <h1 className="text-2xl font-bold tracking-tight text-slate-900">
                 {meta.sketchTitle}
               </h1>
               <h2 className="text-sm font-medium text-slate-600 mt-0.5">
-                {meta.germanTitle}
+                {language === 'ru'
+                  ? meta.russianTitle
+                  : language === 'bilingual'
+                    ? `${meta.russianTitle} (${meta.germanTitle})`
+                    : meta.germanTitle}
               </h2>
               {meta.sketchSubtitle && (
                 <div className="text-xs font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded mt-2 inline-block">
@@ -319,24 +340,32 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
             {/* Quick Metrics */}
             <div className="flex items-center gap-4 text-xs text-slate-500 font-mono bg-slate-50 px-4 py-2.5 rounded-lg border border-slate-200/80">
               <div>
-                <div className="text-slate-400 text-[10px]">FRAGEN</div>
+                <div className="text-slate-400 text-[10px]">
+                  {language === 'ru' ? 'ВОПРОСЫ' : 'FRAGEN'}
+                </div>
                 <div className="font-semibold text-slate-800">
-                  {topicQuestions.filter(q => q.isResolved).length}/{topicQuestions.length} gelöst
+                  {topicQuestions.filter(q => q.isResolved).length}/{topicQuestions.length} {language === 'ru' ? 'решено' : 'gelöst'}
                 </div>
               </div>
               <div className="border-r border-slate-200 h-6" />
               <div>
-                <div className="text-slate-400 text-[10px]">ERKENNTNISSE</div>
+                <div className="text-slate-400 text-[10px]">
+                  {language === 'ru' ? 'ДАННЫЕ' : 'ERKENNTNISSE'}
+                </div>
                 <div className="font-semibold text-slate-800">{topicFindings.length}</div>
               </div>
               <div className="border-r border-slate-200 h-6" />
               <div>
-                <div className="text-slate-400 text-[10px]">WETTBEWERB</div>
+                <div className="text-slate-400 text-[10px]">
+                  {language === 'ru' ? 'КОНКУРЕНТЫ' : 'WETTBEWERB'}
+                </div>
                 <div className="font-semibold text-slate-800">{topicCompetitors.length}</div>
               </div>
               <div className="border-r border-slate-200 h-6" />
               <div>
-                <div className="text-slate-400 text-[10px]">ENTSCHEIDUNGEN</div>
+                <div className="text-slate-400 text-[10px]">
+                  {language === 'ru' ? 'РЕШЕНИЯ' : 'ENTSCHEIDUNGEN'}
+                </div>
                 <div className="font-semibold text-slate-800">{topicDecisions.length}</div>
               </div>
             </div>
@@ -352,7 +381,7 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
-              Alle Bereiche
+              {getTranslation('allSections', language)}
             </button>
             <button
               onClick={() => setActiveSection('summary')}
@@ -362,7 +391,7 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
-              A. Übersicht
+              {getTranslation('secA', language)}
             </button>
             <button
               onClick={() => setActiveSection('questions')}
@@ -372,7 +401,7 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
-              B. Fragen des Seniors ({topicQuestions.length})
+              {getTranslation('secB', language)} ({topicQuestions.length})
             </button>
             <button
               onClick={() => setActiveSection('findings')}
@@ -382,7 +411,7 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
-              C. Erkenntnisse ({topicFindings.length})
+              {getTranslation('secC', language)} ({topicFindings.length})
             </button>
             <button
               onClick={() => setActiveSection('competitors')}
@@ -392,7 +421,7 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
-              D. Wettbewerb ({topicCompetitors.length})
+              {getTranslation('secD', language)} ({topicCompetitors.length})
             </button>
             <button
               onClick={() => setActiveSection('recommendations')}
@@ -402,7 +431,7 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
-              E. Empfehlungen ({topicRecs.length})
+              {getTranslation('secE', language)} ({topicRecs.length})
             </button>
             <button
               onClick={() => setActiveSection('open_points')}
@@ -412,7 +441,7 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
-              F. Offene Punkte ({topicOpenPoints.length})
+              {getTranslation('secF', language)} ({topicOpenPoints.length})
             </button>
             <button
               onClick={() => setActiveSection('decisions')}
@@ -422,7 +451,7 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
-              G. Entscheidungen ({topicDecisions.length})
+              {getTranslation('secG', language)} ({topicDecisions.length})
             </button>
             <button
               onClick={() => setActiveSection('attachments')}
@@ -432,79 +461,18 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
-              H. Quellen & Anhänge
+              {getTranslation('secH', language)}
             </button>
           </div>
         </div>
 
-        {/* COMPACT SENIOR BRIEFING (5-Punkte-Sofortübersicht) */}
-        {meta.briefing && (
-          <div className="bg-slate-900 text-white rounded-xl p-5 shadow-sm border border-slate-800 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-              <span className="text-xs font-mono uppercase tracking-wider text-emerald-400 font-bold">
-                Senior-Briefing: Das Wichtigste auf einen Blick
-              </span>
-              <span className="text-[11px] font-mono text-slate-400">
-                Bereich: {meta.sketchTitle}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
-              <div className="p-3 bg-slate-800/80 rounded-lg border border-slate-700/80 space-y-1">
-                <span className="text-[10px] font-mono text-slate-400 uppercase block font-semibold">
-                  1. Was hat der Senior gefragt?
-                </span>
-                <p className="text-slate-200 leading-snug font-medium">
-                  {meta.briefing.seniorAsked}
-                </p>
-              </div>
-
-              <div className="p-3 bg-slate-800/80 rounded-lg border border-slate-700/80 space-y-1">
-                <span className="text-[10px] font-mono text-sky-400 uppercase block font-semibold">
-                  2. Bisher herausgefunden
-                </span>
-                <p className="text-slate-200 leading-snug">
-                  {meta.briefing.findingsSummary}
-                </p>
-              </div>
-
-              <div className="p-3 bg-slate-800/80 rounded-lg border border-slate-700/80 space-y-1">
-                <span className="text-[10px] font-mono text-amber-400 uppercase block font-semibold">
-                  3. Andere Programme
-                </span>
-                <p className="text-slate-200 leading-snug">
-                  {meta.briefing.competitorSummary}
-                </p>
-              </div>
-
-              <div className="p-3 bg-slate-800/80 rounded-lg border border-slate-700/80 space-y-1">
-                <span className="text-[10px] font-mono text-emerald-400 uppercase block font-semibold">
-                  4. Empfehlung für ISA
-                </span>
-                <p className="text-emerald-100 leading-snug font-medium">
-                  {meta.briefing.recommendationSummary}
-                </p>
-              </div>
-
-              <div className="p-3 bg-slate-800/80 rounded-lg border border-slate-700/80 space-y-1">
-                <span className="text-[10px] font-mono text-rose-400 uppercase block font-semibold">
-                  5. Noch zu klären
-                </span>
-                <p className="text-rose-200 leading-snug">
-                  {meta.briefing.openSummary}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* DOMAIN SPECIFIC VISUALIZER */}
-        {topicId === 'users' && <RoleMatrixVisualizer />}
-        {topicId === 'clients' && <EntityHierarchyVisualizer />}
-        {topicId === 'raport' && <WorkReportPreviewVisualizer />}
-        {topicId === 'vremya' && <TimeTripleDivisionVisualizer />}
-        {topicId === 'api' && <ApiArchitectureVisualizer />}
-        {topicId === 'mobile-app' && <MobileTechStackVisualizer />}
+        {topicId === 'users' && <RoleMatrixVisualizer language={language} />}
+        {topicId === 'clients' && <EntityHierarchyVisualizer language={language} />}
+        {topicId === 'raport' && <WorkReportPreviewVisualizer language={language} />}
+        {topicId === 'vremya' && <TimeTripleDivisionVisualizer language={language} />}
+        {topicId === 'api' && <ApiArchitectureVisualizer language={language} />}
+        {topicId === 'mobile-app' && <MobileTechStackVisualizer language={language} />}
 
         {/* SECTION A: ÜBERSICHT */}
         {(activeSection === 'all' || activeSection === 'summary') && (
@@ -573,107 +541,286 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
         {/* SECTION B: FRAGEN DES SENIORS */}
         {(activeSection === 'all' || activeSection === 'questions') && (
           <section className="bg-white rounded-xl border border-slate-200/90 p-6 shadow-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
               <div>
-                <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                  B. Fragen des Seniors
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Die konkreten Fragestellungen aus der Originalskizze. Jede Frage kann beantwortet und als geklärt markiert werden.
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                    {getTranslation('secB', language)}
+                  </h3>
+                  {clientQuestionsInTopic.length > 0 && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-full">
+                      <AlertCircle className="w-3 h-3 text-amber-700" />
+                      <span>{clientQuestionsInTopic.length} {language === 'ru' ? 'вопросов клиенту (Isa)' : 'Fragen an Klienten (Isa)'}</span>
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {language === 'ru'
+                    ? '2-полевая структура: 1. Наше предложение (техника) и 2. Вопрос клиенту (Иса). Неясные моменты фиксируются для сеньора на завтра.'
+                    : 'Strikte 2-Felder-Struktur: 1. Unser Vorschlag (Technik) & 2. Frage an Klienten (Isa). Unklare Punkte direkt für den Senior morgen fixieren.'}
                 </p>
               </div>
 
-              <button
-                onClick={() => setIsNewQuestionModal(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-white rounded-md transition-colors shadow-xs"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Frage hinzufügen</span>
-              </button>
+              <div className="flex items-center gap-2">
+                {/* Filter Pills */}
+                <div className="flex items-center bg-slate-100 rounded-lg p-0.5 text-xs">
+                  <button
+                    onClick={() => setQuestionFilter('all')}
+                    className={`px-2.5 py-1 rounded font-medium transition-colors ${
+                      questionFilter === 'all'
+                        ? 'bg-white text-slate-900 shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    {language === 'ru' ? `Все (${topicQuestions.length})` : `Alle (${topicQuestions.length})`}
+                  </button>
+                  <button
+                    onClick={() => setQuestionFilter('client_only')}
+                    className={`px-2.5 py-1 rounded font-medium flex items-center gap-1 transition-colors ${
+                      questionFilter === 'client_only'
+                        ? 'bg-amber-500 text-white shadow-xs font-semibold'
+                        : 'text-amber-800 hover:text-amber-950'
+                    }`}
+                  >
+                    <AlertCircle className="w-3 h-3" />
+                    <span>{language === 'ru' ? `Клиенту (${clientQuestionsInTopic.length})` : `Klientenfragen (${clientQuestionsInTopic.length})`}</span>
+                  </button>
+                  <button
+                    onClick={() => setQuestionFilter('resolved')}
+                    className={`px-2.5 py-1 rounded font-medium transition-colors ${
+                      questionFilter === 'resolved'
+                        ? 'bg-white text-emerald-800 shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    {language === 'ru' ? `Решено (${topicQuestions.filter(q => q.isResolved).length})` : `Geklärt (${topicQuestions.filter(q => q.isResolved).length})`}
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setIsNewQuestionModal(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-white rounded-md transition-colors shadow-xs"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{getTranslation('addQuestion', language)}</span>
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-3">
-              {topicQuestions.map((q) => (
-                <div
-                  key={q.id}
-                  className={`p-4 rounded-lg border transition-all ${
-                    q.isResolved
-                      ? 'bg-emerald-50/20 border-emerald-200/70'
-                      : 'bg-white border-slate-200/80 hover:border-slate-300'
-                  }`}
+            {/* Quick banner for client questions if any */}
+            {clientQuestionsInTopic.length > 0 && questionFilter !== 'client_only' && (
+              <div className="bg-amber-50/80 border border-amber-200/90 rounded-lg p-3 text-xs text-amber-950 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
+                  <span>
+                    {language === 'ru'
+                      ? `Внимание: здесь зафиксировано ${clientQuestionsInTopic.length} вопросов, которые Сеньор должен завтра задать клиенту (Исе).`
+                      : `Hinweis: Hier sind ${clientQuestionsInTopic.length} Fragen fixiert, die der Senior morgen unbedingt den Kunden (Isa) fragen muss.`}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setQuestionFilter('client_only')}
+                  className="shrink-0 text-[11px] font-semibold text-amber-900 hover:text-amber-950 underline"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-2.5">
-                      <button
-                        onClick={() => handleToggleQuestionResolved(q)}
-                        className={`mt-0.5 p-1 rounded-md transition-colors ${
-                          q.isResolved
-                            ? 'text-emerald-700 hover:bg-emerald-100'
-                            : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
-                        }`}
-                        title={q.isResolved ? 'Als offen markieren' : 'Als geklärt markieren'}
-                      >
-                        <CheckCircle2 className={`w-4 h-4 ${q.isResolved ? 'fill-emerald-600 text-white' : ''}`} />
-                      </button>
+                  {language === 'ru' ? 'Показать только вопросы клиенту →' : 'Nur Klientenfragen anzeigen →'}
+                </button>
+              </div>
+            )}
 
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className={`text-xs font-bold tracking-tight ${q.isResolved ? 'text-slate-800' : 'text-slate-900'}`}>
-                            {q.question}
+            <div className="space-y-4">
+              {filteredTopicQuestions.length === 0 ? (
+                <div className="p-6 text-center text-xs text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                  {language === 'ru' ? 'Нет вопросов по выбранному фильтру.' : 'Keine Fragen für den ausgewählten Filter vorhanden.'}
+                </div>
+              ) : (
+                filteredTopicQuestions.map((q) => (
+                  <div
+                    key={q.id}
+                    className={`p-4 rounded-xl border transition-all ${
+                      q.isResolved
+                        ? 'bg-emerald-50/15 border-emerald-200/70'
+                        : (q.needsClientClarification || q.clientQuestion)
+                          ? 'bg-amber-50/20 border-amber-200 hover:border-amber-300'
+                          : 'bg-white border-slate-200/80 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-2.5">
+                        <button
+                          onClick={() => handleToggleQuestionResolved(q)}
+                          className={`mt-0.5 p-1 rounded-md transition-colors ${
+                            q.isResolved
+                              ? 'text-emerald-700 hover:bg-emerald-100'
+                              : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+                          }`}
+                          title={q.isResolved
+                            ? (language === 'ru' ? 'Отметить как открытый' : 'Als offen markieren')
+                            : (language === 'ru' ? 'Отметить как решенный' : 'Als geklärt markieren')}
+                        >
+                          <CheckCircle2 className={`w-4 h-4 ${q.isResolved ? 'fill-emerald-600 text-white' : ''}`} />
+                        </button>
+
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className={`text-xs font-bold tracking-tight ${q.isResolved ? 'text-slate-800' : 'text-slate-900'}`}>
+                              {language === 'ru'
+                                ? (q.questionRu || q.question)
+                                : language === 'bilingual'
+                                  ? (q.questionRu ? `${q.questionRu}` : q.question)
+                                  : q.question}
+                            </span>
+                            {q.originalFromSketch && (
+                              <span className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded font-mono">
+                                {language === 'ru' ? 'Из эскиза' : 'Original aus Skizze'}
+                              </span>
+                            )}
+                            {(q.needsClientClarification || q.clientQuestion) && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.2 rounded">
+                                <AlertCircle className="w-2.5 h-2.5 text-amber-700" />
+                                {language === 'ru' ? 'Вопрос клиенту (Isa)' : 'Frage an Klienten (Isa)'}
+                              </span>
+                            )}
+                          </div>
+
+                          {language === 'bilingual' && q.questionRu && q.question !== q.questionRu && (
+                            <div className="text-[11px] text-slate-400 mt-0.5 italic">
+                              DE: {q.question}
+                            </div>
+                          )}
+
+                          {q.germanTranslation && q.germanTranslation !== q.question && language === 'de' && (
+                            <div className="text-[11px] text-slate-500 mt-0.5">
+                              Bedeutung: {q.germanTranslation}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => setEditingQuestion(q)}
+                          className="p-1 text-slate-400 hover:text-slate-700 rounded transition-colors"
+                          title={language === 'ru' ? 'Редактировать предложение и вопрос клиенту' : 'Vorschlag & Frage an Klienten bearbeiten'}
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteQuestion(q.id)}
+                          className="p-1 text-slate-400 hover:text-rose-600 rounded transition-colors"
+                          title={language === 'ru' ? 'Удалить вопрос' : 'Frage löschen'}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* TWO DEDICATED FIELDS: FELD 1 (UNSER VORSCHLAG) & FELD 2 (FRAGE AN KLIENTEN ISA) */}
+                    <div className="mt-3 ml-7 space-y-2.5">
+                      {/* FELD 1: UNSER VORSCHLAG */}
+                      <div className="p-3 bg-emerald-50/40 rounded-lg border border-emerald-200/70 text-xs text-slate-800 leading-relaxed">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-semibold text-emerald-950 text-[11px] flex items-center gap-1.5">
+                            <Lightbulb className="w-3.5 h-3.5 text-emerald-700" />
+                            {language === 'ru' ? '1. Наше предложение (Техника / Процесс):' : '1. Unser Vorschlag (Technik & Empfehlung):'}
                           </span>
-                          {q.originalFromSketch && (
-                            <span className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded font-mono">
-                              Original aus Skizze
+                          {(!q.answer && !q.answerRu) && (
+                            <span className="text-[10px] text-slate-400 italic">
+                              {language === 'ru' ? 'пока не сформулировано' : 'noch nicht festgelegt'}
                             </span>
                           )}
                         </div>
-
-                        {q.germanTranslation && q.germanTranslation !== q.question && (
-                          <div className="text-[11px] text-slate-500 mt-0.5">
-                            Bedeutung: {q.germanTranslation}
+                        {(q.answer || q.answerRu) ? (
+                          <>
+                            <p className="whitespace-pre-wrap text-emerald-950 font-normal">
+                              {language === 'ru' ? (q.answerRu || q.answer) : q.answer}
+                            </p>
+                            {language === 'bilingual' && q.answerRu && q.answer && q.answer !== q.answerRu && (
+                              <div className="text-[11px] text-emerald-800/80 mt-1.5 pt-1 border-t border-emerald-200/50 italic">
+                                DE: {q.answer}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="flex items-center justify-between text-slate-500 pt-0.5">
+                            <span className="text-[11px] italic">
+                              {language === 'ru'
+                                ? 'Мы не знаем что предложить — требуется запросить информацию у клиента (Исы).'
+                                : 'Wir können hier noch keinen Vorschlag machen – zwingende Info vom Kunden (Isa) nötig.'}
+                            </span>
+                            <button
+                              onClick={() => setEditingQuestion(q)}
+                              className="text-[11px] text-emerald-800 hover:text-emerald-950 font-medium underline"
+                            >
+                              + {language === 'ru' ? 'Записать предложение' : 'Vorschlag erfassen'}
+                            </button>
                           </div>
                         )}
                       </div>
-                    </div>
 
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        onClick={() => setEditingQuestion(q)}
-                        className="p-1 text-slate-400 hover:text-slate-700 rounded transition-colors"
-                        title="Antwort erfassen / bearbeiten"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteQuestion(q.id)}
-                        className="p-1 text-slate-400 hover:text-rose-600 rounded transition-colors"
-                        title="Frage löschen"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      {/* FELD 2: FRAGE AN KLIENTEN (ISA) */}
+                      {(q.clientQuestion || q.clientQuestionRu) ? (
+                        <div className="p-3 bg-amber-50/80 rounded-lg border border-amber-300 text-xs text-amber-950 leading-relaxed shadow-xs">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-bold text-amber-950 text-[11px] flex items-center gap-1.5">
+                              <AlertCircle className="w-3.5 h-3.5 text-amber-700" />
+                              {language === 'ru'
+                                ? '2. Вопрос клиенту (Isa) — передать сеньору на завтра:'
+                                : '2. Frage an Klienten (Isa) – Morgen an den Senior übergeben:'}
+                            </span>
+                            <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-amber-200 text-amber-900 font-bold">
+                              {language === 'ru' ? 'Запрос клиенту' : 'Klienten-Frage'}
+                            </span>
+                          </div>
+                          <p className="whitespace-pre-wrap font-medium text-amber-950">
+                            {language === 'ru' ? (q.clientQuestionRu || q.clientQuestion) : q.clientQuestion}
+                          </p>
+                          {language === 'bilingual' && q.clientQuestionRu && q.clientQuestion && q.clientQuestion !== q.clientQuestionRu && (
+                            <div className="text-[11px] text-amber-800/80 mt-1.5 pt-1 border-t border-amber-200 italic">
+                              DE: {q.clientQuestion}
+                            </div>
+                          )}
+                        </div>
+                      ) : q.needsClientClarification ? (
+                        <div className="p-3 bg-amber-50/60 rounded-lg border border-dashed border-amber-300 text-xs text-amber-900 flex items-center justify-between">
+                          <div className="flex items-center gap-1.5 text-[11px]">
+                            <AlertCircle className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                            <span className="font-semibold">
+                              {language === 'ru'
+                                ? '2. Зафиксировано: требуется запрос клиенту (Исе)! Пожалуйста, сформулируйте точный вопрос для сеньора.'
+                                : '2. Fixiert: Klärung mit Klient (Isa) zwingend nötig! Bitte konkrete Frage für den Senior erfassen.'}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => setEditingQuestion(q)}
+                            className="text-[11px] bg-amber-700 hover:bg-amber-800 text-white px-2.5 py-1 rounded font-medium shadow-xs shrink-0"
+                          >
+                            {language === 'ru' ? '+ Сформулировать вопрос' : '+ Frage an Isa formulieren'}
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="pt-0.5">
+                          <button
+                            onClick={() => {
+                              setEditingQuestion({
+                                ...q,
+                                needsClientClarification: true
+                              });
+                            }}
+                            className="text-[11px] text-slate-500 hover:text-amber-800 inline-flex items-center gap-1 font-medium hover:underline transition-colors"
+                          >
+                            <HelpCircle className="w-3 h-3 text-slate-400" />
+                            <span>
+                              {language === 'ru'
+                                ? '+ Зафиксировать вопрос клиенту (Isa), если нужно спросить заказчика'
+                                : '+ Frage an Klienten (Isa) fixieren (falls Klärungsbedarf für den Senior)'}
+                            </span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
-
-                  {/* Answer display */}
-                  {q.answer ? (
-                    <div className="mt-3 ml-7 p-3 bg-slate-50 rounded-lg border border-slate-100 text-xs text-slate-800 leading-relaxed whitespace-pre-wrap">
-                      <div className="font-semibold text-slate-700 text-[11px] mb-1">
-                        Antwort / Recherche-Ergebnis:
-                      </div>
-                      {q.answer}
-                    </div>
-                  ) : (
-                    <div className="mt-2 ml-7">
-                      <button
-                        onClick={() => setEditingQuestion(q)}
-                        className="text-[11px] text-emerald-800 hover:text-emerald-950 font-medium inline-flex items-center gap-1"
-                      >
-                        <span>+ Antwort jetzt erfassen</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </section>
         )}
@@ -684,10 +831,12 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                  C. Gesammelte Erkenntnisse
+                  {getTranslation('secC', language)}
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Rechercheergebnisse, technische Beobachtungen und verifizierte Fakten.
+                  {language === 'ru'
+                    ? 'Результаты исследований, технические наблюдения и проверенные факты.'
+                    : 'Rechercheergebnisse, technische Beobachtungen und verifizierte Fakten.'}
                 </p>
               </div>
 
@@ -696,16 +845,20 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-white rounded-md transition-colors shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Erkenntnis hinzufügen</span>
+                <span>{getTranslation('addFinding', language)}</span>
               </button>
             </div>
 
             {topicFindings.length === 0 ? (
               <div className="p-8 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
                 <Lightbulb className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                <h4 className="text-xs font-semibold text-slate-700">Noch keine Erkenntnisse hinterlegt</h4>
+                <h4 className="text-xs font-semibold text-slate-700">
+                  {language === 'ru' ? 'Данные еще не внесены' : 'Noch keine Erkenntnisse hinterlegt'}
+                </h4>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-                  Hier trägst du technische Fakten, Best-Practices und Ergebnisse aus Artikeln, Dokumentationen oder Tests ein.
+                  {language === 'ru'
+                    ? 'Здесь фиксируются технические факты, лучшие практики и результаты тестов.'
+                    : 'Hier trägst du technische Fakten, Best-Practices und Ergebnisse aus Artikeln, Dokumentationen oder Tests ein.'}
                 </p>
               </div>
             ) : (
@@ -718,14 +871,20 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <StatusBadge status={f.status} origin={f.origin} showOrigin />
+                          <StatusBadge status={f.status} origin={f.origin} showOrigin language={language} />
                           {f.additionalTopicIds && f.additionalTopicIds.length > 0 && (
                             <span className="text-[10px] text-slate-400 font-mono">
-                              · Verknüpft mit {f.additionalTopicIds.map(t => TOPIC_DEFINITIONS[t]?.sketchTitle).join(', ')}
+                              · {language === 'ru' ? 'Связано с' : 'Verknüpft mit'} {f.additionalTopicIds.map(t => TOPIC_DEFINITIONS[t]?.sketchTitle).join(', ')}
                             </span>
                           )}
                         </div>
-                        <h4 className="text-xs font-bold text-slate-900">{f.title}</h4>
+                        <h4 className="text-xs font-bold text-slate-900">
+                          {language === 'ru'
+                            ? (f.titleRu || f.title)
+                            : language === 'bilingual'
+                              ? (f.titleRu ? `${f.titleRu}` : f.title)
+                              : f.title}
+                        </h4>
                       </div>
 
                       <div className="flex items-center gap-1">
@@ -745,12 +904,12 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                     </div>
 
                     <p className="text-xs text-slate-700 leading-relaxed mt-2 whitespace-pre-wrap">
-                      {f.content}
+                      {language === 'ru' ? (f.contentRu || f.content) : f.content}
                     </p>
 
                     {(f.sourceName || f.sourceUrl) && (
                       <div className="mt-3 pt-2 border-t border-slate-100 flex items-center gap-2 text-[11px] text-slate-500">
-                        <span className="font-medium">Quelle:</span>
+                        <span className="font-medium">{getTranslation('source', language)}:</span>
                         <span>{f.sourceName || 'Referenz'}</span>
                         {f.sourceUrl && (
                           <a
@@ -778,10 +937,12 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                  D. Wettbewerbsrecherche (Competitor Benchmarking)
+                  {getTranslation('secD', language)}
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Dokumentation anderer Softwareprodukte, Abläufe, Learnings und Übertragbarkeit.
+                  {language === 'ru'
+                    ? 'Анализ программных продуктов, процессов, выводов и применимости для нашего продукта.'
+                    : 'Dokumentation anderer Softwareprodukte, Abläufe, Learnings und Übertragbarkeit.'}
                 </p>
               </div>
 
@@ -790,16 +951,20 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-white rounded-md transition-colors shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Wettbewerber analysieren</span>
+                <span>{getTranslation('addCompetitor', language)}</span>
               </button>
             </div>
 
             {topicCompetitors.length === 0 ? (
               <div className="p-8 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
                 <Building2 className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                <h4 className="text-xs font-semibold text-slate-700">Noch keine Wettbewerbsprodukte erfasst</h4>
+                <h4 className="text-xs font-semibold text-slate-700">
+                  {language === 'ru' ? 'Конкуренты еще не добавлены' : 'Noch keine Wettbewerbsprodukte erfasst'}
+                </h4>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-                  Trage z. B. Produkte wie 123erfasst, BauMaster, Craftnote, PlanRadar oder SAP ein und dokumentiere deren Workflow.
+                  {language === 'ru'
+                    ? 'Добавьте SmartDok, Dalux, QuickBooks Time или Tripletex и опишите их функционал.'
+                    : 'Trage z. B. Produkte wie SmartDok, Dalux, QuickBooks Time oder Tripletex ein und dokumentiere deren Workflow.'}
                 </p>
               </div>
             ) : (
@@ -813,13 +978,13 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <div>
                           <div className="text-[11px] font-mono text-emerald-800 uppercase tracking-wider">
-                            Produkt
+                            {language === 'ru' ? 'ПРОДУКТ' : 'Produkt'}
                           </div>
                           <h4 className="text-sm font-bold text-slate-900">
                             {c.productName}
                           </h4>
                           <div className="text-xs font-medium text-slate-600 mt-0.5">
-                            Funktion: {c.analyzedFeature}
+                            {language === 'ru' ? 'Функция:' : 'Funktion:'} {language === 'ru' ? (c.analyzedFeatureRu || c.analyzedFeature) : c.analyzedFeature}
                           </div>
                         </div>
 
@@ -841,27 +1006,37 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
 
                       <div className="space-y-2 text-xs text-slate-700 pt-2 border-t border-slate-100">
                         <div>
-                          <span className="font-semibold text-slate-800 block">Beobachteter Ablauf:</span>
-                          <p className="leading-relaxed text-slate-600 mt-0.5">{c.observedWorkflow}</p>
-                        </div>
-
-                        <div>
-                          <span className="font-semibold text-slate-800 block">Was wir davon lernen können:</span>
-                          <p className="leading-relaxed text-emerald-900 bg-emerald-50/50 p-2 rounded mt-0.5 border border-emerald-100">
-                            {c.keyTakeaway}
+                          <span className="font-semibold text-slate-800 block">
+                            {language === 'ru' ? 'Изученный процесс:' : 'Beobachteter Ablauf:'}
+                          </span>
+                          <p className="leading-relaxed text-slate-600 mt-0.5">
+                            {language === 'ru' ? (c.observedWorkflowRu || c.observedWorkflow) : c.observedWorkflow}
                           </p>
                         </div>
 
                         <div>
-                          <span className="font-semibold text-slate-800 block">Übertragbarkeit auf unser Produkt:</span>
-                          <p className="leading-relaxed text-slate-600 mt-0.5">{c.transferability}</p>
+                          <span className="font-semibold text-slate-800 block">
+                            {language === 'ru' ? 'Чему мы можем научиться:' : 'Was wir davon lernen können:'}
+                          </span>
+                          <p className="leading-relaxed text-emerald-900 bg-emerald-50/50 p-2 rounded mt-0.5 border border-emerald-100">
+                            {language === 'ru' ? (c.keyTakeawayRu || c.keyTakeaway) : c.keyTakeaway}
+                          </p>
+                        </div>
+
+                        <div>
+                          <span className="font-semibold text-slate-800 block">
+                            {language === 'ru' ? 'Применимость для нашего продукта:' : 'Übertragbarkeit auf unser Produkt:'}
+                          </span>
+                          <p className="leading-relaxed text-slate-600 mt-0.5">
+                            {language === 'ru' ? (c.transferabilityRu || c.transferability) : c.transferability}
+                          </p>
                         </div>
                       </div>
                     </div>
 
                     {c.sourceOrLink && (
                       <div className="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500">
-                        <span className="font-medium">Quelle / Demo: </span>
+                        <span className="font-medium">{getTranslation('source', language)}: </span>
                         {c.sourceOrLink.startsWith('http') ? (
                           <a
                             href={c.sourceOrLink}
@@ -869,7 +1044,7 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                             rel="noopener noreferrer"
                             className="text-emerald-700 hover:underline inline-flex items-center gap-0.5"
                           >
-                            <span>Link öffnen</span>
+                            <span>Link</span>
                             <ExternalLink className="w-2.5 h-2.5" />
                           </a>
                         ) : (
@@ -890,10 +1065,12 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                  E. Empfehlungen für unser Produkt
+                  {getTranslation('secE', language)}
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Konkrete Architektur- und Lösungsvorschläge für das Projektteam.
+                  {language === 'ru'
+                    ? 'Конкретные архитектурные и технические предложения для команды проекта.'
+                    : 'Konkrete Architektur- und Lösungsvorschläge für das Projektteam.'}
                 </p>
               </div>
 
@@ -902,16 +1079,20 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-white rounded-md transition-colors shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Empfehlung hinzufügen</span>
+                <span>{getTranslation('addRec', language)}</span>
               </button>
             </div>
 
             {topicRecs.length === 0 ? (
               <div className="p-8 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
                 <Lightbulb className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                <h4 className="text-xs font-semibold text-slate-700">Noch keine Empfehlungen formuliert</h4>
+                <h4 className="text-xs font-semibold text-slate-700">
+                  {language === 'ru' ? 'Рекомендации еще не добавлены' : 'Noch keine Empfehlungen formuliert'}
+                </h4>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-                  Hier dokumentierst du eigene Lösungsvorschläge für den Senior Software Engineer zur Diskussion.
+                  {language === 'ru'
+                    ? 'Здесь фиксируются архитектурные решения и предложения для согласования с Сеньором.'
+                    : 'Hier dokumentierst du eigene Lösungsvorschläge für den Senior Software Engineer zur Diskussion.'}
                 </p>
               </div>
             ) : (
@@ -924,13 +1105,15 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-2 mb-1 text-xs">
-                          <StatusBadge status={r.status} origin={r.origin} showOrigin />
+                          <StatusBadge status={r.status} origin={r.origin} showOrigin language={language} />
                           <span className="text-slate-300">·</span>
                           <span className="font-mono text-[11px] text-slate-500">
-                            Priorität: {r.priority.toUpperCase()}
+                            {language === 'ru' ? 'Приоритет:' : 'Priorität:'} {r.priority.toUpperCase()}
                           </span>
                         </div>
-                        <h4 className="text-xs font-bold text-slate-900">{r.title}</h4>
+                        <h4 className="text-xs font-bold text-slate-900">
+                          {language === 'ru' ? (r.titleRu || r.title) : r.title}
+                        </h4>
                       </div>
 
                       <div className="flex items-center gap-1">
@@ -950,13 +1133,15 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                     </div>
 
                     <p className="text-xs text-slate-700 leading-relaxed mt-2 whitespace-pre-wrap">
-                      {r.description}
+                      {language === 'ru' ? (r.descriptionRu || r.description) : r.description}
                     </p>
 
-                    {r.rationale && (
+                    {(r.rationale || r.rationaleRu) && (
                       <div className="mt-2 text-xs text-slate-600 bg-slate-50 p-2.5 rounded border border-slate-100">
-                        <span className="font-semibold text-slate-700">Begründung: </span>
-                        {r.rationale}
+                        <span className="font-semibold text-slate-700">
+                          {language === 'ru' ? 'Обоснование: ' : 'Begründung: '}
+                        </span>
+                        {language === 'ru' ? (r.rationaleRu || r.rationale) : r.rationale}
                       </div>
                     )}
                   </div>
@@ -972,10 +1157,12 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                  F. Offene Punkte (Klärungsbedarf)
+                  {getTranslation('secF', language)}
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Fragen, die noch mit dem Senior, dem Kunden oder dem Team geklärt werden müssen.
+                  {language === 'ru'
+                    ? 'Вопросы, требующие обсуждения с Сеньором, клиентом или командой.'
+                    : 'Fragen, die noch mit dem Senior, dem Kunden oder dem Team geklärt werden müssen.'}
                 </p>
               </div>
 
@@ -984,16 +1171,20 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-white rounded-md transition-colors shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Punkt hinzufügen</span>
+                <span>{getTranslation('addOpenPoint', language)}</span>
               </button>
             </div>
 
             {topicOpenPoints.length === 0 ? (
               <div className="p-8 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
                 <AlertCircle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                <h4 className="text-xs font-semibold text-slate-700">Keine offenen Klärungspunkte</h4>
+                <h4 className="text-xs font-semibold text-slate-700">
+                  {language === 'ru' ? 'Нет открытых вопросов' : 'Keine offenen Klärungspunkte'}
+                </h4>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-                  Alle Aspekte dieses Themas sind entweder vorläufig geklärt oder warten auf Recherche.
+                  {language === 'ru'
+                    ? 'Все аспекты данной темы предварительно согласованы.'
+                    : 'Alle Aspekte dieses Themas sind entweder vorläufig geklärt oder warten auf Recherche.'}
                 </p>
               </div>
             ) : (
@@ -1027,16 +1218,20 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
 
                         <div>
                           <div className="flex items-center gap-2 text-xs">
-                            <span className="font-bold text-slate-900">{p.question}</span>
+                            <span className="font-bold text-slate-900">
+                              {language === 'ru' ? (p.questionRu || p.question) : p.question}
+                            </span>
                             <span className="text-[10px] px-1.5 py-0.5 rounded font-mono bg-slate-100 text-slate-600">
-                              Klärung mit: {p.clarifyWith.toUpperCase()}
+                              {language === 'ru' ? 'К согласованию:' : 'Klärung mit:'} {p.clarifyWith.toUpperCase()}
                             </span>
                           </div>
 
-                          {p.resolutionNote && (
+                          {(p.resolutionNote || p.resolutionNoteRu) && (
                             <div className="text-xs text-slate-600 mt-2 bg-slate-100/70 p-2 rounded">
-                              <span className="font-semibold text-slate-700">Ergebnis: </span>
-                              {p.resolutionNote}
+                              <span className="font-semibold text-slate-700">
+                                {language === 'ru' ? 'Результат: ' : 'Ergebnis: '}
+                              </span>
+                              {language === 'ru' ? (p.resolutionNoteRu || p.resolutionNote) : p.resolutionNote}
                             </div>
                           )}
                         </div>
@@ -1070,10 +1265,12 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                  G. Getroffene Architekturentscheidungen
+                  {getTranslation('secG', language)}
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Verbindliche Beschlüsse mit Datum, Begründung und Verantwortlichem.
+                  {language === 'ru'
+                    ? 'Обязательные архитектурные решения с датой, обоснованием и ответственным.'
+                    : 'Verbindliche Beschlüsse mit Datum, Begründung und Verantwortlichem.'}
                 </p>
               </div>
 
@@ -1082,16 +1279,20 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-white rounded-md transition-colors shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Entscheidung dokumentieren</span>
+                <span>{getTranslation('addDecision', language)}</span>
               </button>
             </div>
 
             {topicDecisions.length === 0 ? (
               <div className="p-8 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
                 <FileCheck2 className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                <h4 className="text-xs font-semibold text-slate-700">Noch keine Entscheidungen festgehalten</h4>
+                <h4 className="text-xs font-semibold text-slate-700">
+                  {language === 'ru' ? 'Решения еще не зафиксированы' : 'Noch keine Entscheidungen festgehalten'}
+                </h4>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-                  Sobald im Meeting mit dem Senior eine Entscheidung getroffen wird, trage sie hier verbindlich ein.
+                  {language === 'ru'
+                    ? 'Как только на встрече с Сеньором принято решение, зафиксируйте его здесь.'
+                    : 'Sobald im Meeting mit dem Senior eine Entscheidung getroffen wird, trage sie hier verbindlich ein.'}
                 </p>
               </div>
             ) : (
@@ -1105,18 +1306,24 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                       <div>
                         <div className="flex items-center gap-2 mb-1 text-xs">
                           <span className="font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded text-[11px]">
-                            {d.status === 'decided' ? 'Beschlossen' : d.status === 'draft' ? 'Entwurf' : 'Abgelöst'}
+                            {d.status === 'decided'
+                              ? (language === 'ru' ? 'Принято' : 'Beschlossen')
+                              : d.status === 'draft'
+                                ? (language === 'ru' ? 'Проект' : 'Entwurf')
+                                : (language === 'ru' ? 'Заменено' : 'Abgelöst')}
                           </span>
                           <span className="font-mono text-slate-400 text-[11px]">
-                            Datum: {d.date}
+                            {language === 'ru' ? 'Дата:' : 'Datum:'} {d.date}
                           </span>
                           {d.responsiblePerson && (
                             <span className="text-slate-500 text-[11px]">
-                              · Verantwortlich: {d.responsiblePerson}
+                              · {getTranslation('responsible', language)}: {d.responsiblePerson}
                             </span>
                           )}
                         </div>
-                        <h4 className="text-xs font-bold text-slate-900">{d.title}</h4>
+                        <h4 className="text-xs font-bold text-slate-900">
+                          {language === 'ru' ? (d.titleRu || d.title) : d.title}
+                        </h4>
                       </div>
 
                       <div className="flex items-center gap-1">
@@ -1136,8 +1343,10 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                     </div>
 
                     <div className="mt-2 text-xs text-slate-700 leading-relaxed bg-slate-50/60 p-3 rounded border border-slate-100 whitespace-pre-wrap">
-                      <span className="font-semibold text-slate-800 block mb-1">Begründung & Tragweite:</span>
-                      {d.rationale}
+                      <span className="font-semibold text-slate-800 block mb-1">
+                        {language === 'ru' ? 'Обоснование и последствия:' : 'Begründung & Tragweite:'}
+                      </span>
+                      {language === 'ru' ? (d.rationaleRu || d.rationale) : d.rationale}
                     </div>
                   </div>
                 ))}
@@ -1151,10 +1360,12 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
           <section className="bg-white rounded-xl border border-slate-200/90 p-6 shadow-xs space-y-4">
             <div className="border-b border-slate-100 pb-3">
               <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                H. Quellen, Notizen & Dateianhänge
+                {getTranslation('secH', language)}
               </h3>
               <p className="text-xs text-slate-500">
-                Screenshots, Architektur-Diagramme, PDF-Dateien und Weblinks – persistent im Browser gespeichert.
+                {language === 'ru'
+                  ? 'Скриншоты, архитектурные диаграммы, PDF-файлы и веб-ссылки — сохраненные в браузере.'
+                  : 'Screenshots, Architektur-Diagramme, PDF-Dateien und Weblinks – persistent im Browser gespeichert.'}
               </p>
             </div>
 
@@ -1173,6 +1384,7 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
         <QuestionModal
           initialQuestion={editingQuestion}
           topicId={topicId}
+          language={language}
           onClose={() => {
             setEditingQuestion(null);
             setIsNewQuestionModal(false);
@@ -1254,14 +1466,29 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
 interface QuestionModalProps {
   initialQuestion: SeniorQuestion | null;
   topicId: TopicId;
+  language?: Language;
   onClose: () => void;
   onSave: (q: SeniorQuestion) => void;
 }
 
-const QuestionModal: React.FC<QuestionModalProps> = ({ initialQuestion, topicId, onClose, onSave }) => {
+const QuestionModal: React.FC<QuestionModalProps> = ({ initialQuestion, topicId, language = 'ru', onClose, onSave }) => {
   const [question, setQuestion] = useState(initialQuestion?.question || '');
+  const [questionRu, setQuestionRu] = useState(initialQuestion?.questionRu || '');
   const [germanTranslation, setGermanTranslation] = useState(initialQuestion?.germanTranslation || '');
+  
+  // Feld 1: Unser Vorschlag
   const [answer, setAnswer] = useState(initialQuestion?.answer || '');
+  const [answerRu, setAnswerRu] = useState(initialQuestion?.answerRu || '');
+  
+  // Feld 2: Frage an Klienten (Isa)
+  const [clientQuestion, setClientQuestion] = useState(initialQuestion?.clientQuestion || '');
+  const [clientQuestionRu, setClientQuestionRu] = useState(initialQuestion?.clientQuestionRu || '');
+  const [needsClientClarification, setNeedsClientClarification] = useState(
+    initialQuestion?.needsClientClarification !== undefined
+      ? initialQuestion.needsClientClarification
+      : (initialQuestion?.clientQuestion ? true : false)
+  );
+
   const [isResolved, setIsResolved] = useState(initialQuestion?.isResolved || false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -1272,64 +1499,246 @@ const QuestionModal: React.FC<QuestionModalProps> = ({ initialQuestion, topicId,
       id: initialQuestion?.id || `q-${Date.now()}`,
       topicId,
       question: question.trim(),
+      questionRu: questionRu.trim() || undefined,
       germanTranslation: germanTranslation.trim() || undefined,
+      russianTranslation: questionRu.trim() || undefined,
       answer: answer.trim() || undefined,
+      answerRu: answerRu.trim() || undefined,
+      clientQuestion: clientQuestion.trim() || undefined,
+      clientQuestionRu: clientQuestionRu.trim() || undefined,
+      needsClientClarification: needsClientClarification || Boolean(clientQuestion.trim() || clientQuestionRu.trim()),
       isResolved,
       originalFromSketch: initialQuestion?.originalFromSketch || false,
+      origin: initialQuestion?.origin || 'sketch',
+      status: initialQuestion?.status || 'open_decision',
       createdAt: initialQuestion?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-      <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-lg p-6">
-        <h3 className="text-sm font-bold text-slate-900 mb-4">
-          {initialQuestion ? 'Frage des Seniors bearbeiten' : 'Neue Frage erfassen'}
-        </h3>
-        <form onSubmit={handleSubmit} className="space-y-3">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+      <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-2xl p-6 my-8 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-start justify-between border-b border-slate-100 pb-3">
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">Frage</label>
-            <input
-              type="text"
-              required
-              value={question}
-              onChange={e => setQuestion(e.target.value)}
-              className="w-full text-xs px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-600"
-            />
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
+                {language === 'ru' ? '2-полевая модель' : '2-Felder-Modell'}
+              </span>
+              <span className="text-slate-300">/</span>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-200">
+                {language === 'ru' ? 'Сеньор ↔ Клиент (Isa)' : 'Senior ↔ Klient (Isa)'}
+              </span>
+            </div>
+            <h3 className="text-base font-bold text-slate-900 mt-1">
+              {initialQuestion
+                ? (language === 'ru' ? 'Редактирование вопроса сеньора' : 'Frage des Seniors bearbeiten')
+                : (language === 'ru' ? 'Новая формулировка вопроса' : 'Neue Frage erfassen')}
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {language === 'ru'
+                ? 'Поле 1: Наше предложение. Поле 2: Вопрос клиенту (Иса). Если мы не знаем что предложить — обязательно фиксируем вопрос клиенту для сеньора на завтра!'
+                : 'Feld 1: Unser Vorschlag. Feld 2: Frage an Klienten (Isa). Wenn wir noch keinen Vorschlag machen können: Frage an Isa fixieren, damit der Senior morgen direkt weiß, was er fragen muss!'}
+            </p>
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">Deutsche Übersetzung / Kontext</label>
-            <input
-              type="text"
-              value={germanTranslation}
-              onChange={e => setGermanTranslation(e.target.value)}
-              className="w-full text-xs px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-600"
-            />
+          <button
+            onClick={onClose}
+            className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Question / Title */}
+          <div className="space-y-2 bg-slate-50/70 p-3.5 rounded-lg border border-slate-200/80">
+            <div>
+              <label className="block text-xs font-bold text-slate-800 mb-1">
+                {language === 'ru' ? 'Вопрос из эскиза / Оригинальный текст' : 'Frage / Text aus Originalskizze'}
+              </label>
+              <input
+                type="text"
+                required
+                value={question}
+                onChange={e => setQuestion(e.target.value)}
+                placeholder={language === 'ru' ? 'Например: Kakie info ?' : 'z. B. Kakie info ?'}
+                className="w-full text-xs px-3 py-2 bg-white border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-600 font-medium"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+              <div>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                  {language === 'ru' ? 'Русский перевод / Формулировка' : 'Russische Übersetzung / Kontext'}
+                </label>
+                <input
+                  type="text"
+                  value={questionRu}
+                  onChange={e => setQuestionRu(e.target.value)}
+                  placeholder="Вопрос на русском..."
+                  className="w-full text-xs px-2.5 py-1.5 bg-white border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-600"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                  {language === 'ru' ? 'Немецкий контекст / Значение' : 'Deutsche Bedeutung / Klartext'}
+                </label>
+                <input
+                  type="text"
+                  value={germanTranslation}
+                  onChange={e => setGermanTranslation(e.target.value)}
+                  placeholder="Klartext auf Deutsch..."
+                  className="w-full text-xs px-2.5 py-1.5 bg-white border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-600"
+                />
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">Antwort / Klärung</label>
-            <textarea
-              rows={4}
-              value={answer}
-              onChange={e => setAnswer(e.target.value)}
-              placeholder="Antwort oder Ergebnis der Recherche..."
-              className="w-full text-xs px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-600"
-            />
+          {/* FELD 1: UNSER VORSCHLAG */}
+          <div className="p-4 bg-emerald-50/40 rounded-xl border border-emerald-200/80 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+                <Lightbulb className="w-4 h-4 text-emerald-700" />
+                <span>{language === 'ru' ? 'ПОЛЕ 1: Наше предложение (Техника / Процесс)' : 'FELD 1: Unser Vorschlag (Technik & Empfehlung)'}</span>
+              </label>
+              <span className="text-[10px] text-emerald-800/80 bg-emerald-100/70 px-2 py-0.5 rounded font-mono">
+                {language === 'ru' ? 'Необязательно, если неизвестно' : 'Optional wenn unklar'}
+              </span>
+            </div>
+            <p className="text-[11px] text-emerald-900/80 leading-snug">
+              {language === 'ru'
+                ? 'Что мы предлагаем для ISA? (Если мы пока не знаем, что предложить — оставьте пустым и заполните Поле 2 ниже).'
+                : 'Was schlagen wir technisch oder prozessual vor? (Kann leer bleiben, falls wir es noch nicht wissen und zwingend Info von Isa brauchen).'}
+            </p>
+
+            <div className="space-y-2 pt-1">
+              <div>
+                <span className="text-[10px] font-semibold text-emerald-900 block mb-0.5">
+                  {language === 'ru' ? 'Предложение на русском:' : 'Vorschlag auf Deutsch:'}
+                </span>
+                <textarea
+                  rows={2}
+                  value={language === 'ru' ? (answerRu || answer) : answer}
+                  onChange={e => {
+                    if (language === 'ru') {
+                      setAnswerRu(e.target.value);
+                      if (!answer) setAnswer(e.target.value);
+                    } else {
+                      setAnswer(e.target.value);
+                    }
+                  }}
+                  placeholder={language === 'ru' ? 'Наше техническое предложение для ISA...' : 'Unser technischer Lösungsvorschlag für ISA...'}
+                  className="w-full text-xs px-3 py-2 bg-white border border-emerald-200 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-600"
+                />
+              </div>
+
+              {(language === 'bilingual' || (language === 'ru' && answer !== answerRu)) && (
+                <div>
+                  <span className="text-[10px] font-semibold text-emerald-900 block mb-0.5">
+                    {language === 'ru' ? 'Немецкий вариант предложения (DE):' : 'Russischer Vorschlag (RU):'}
+                  </span>
+                  <textarea
+                    rows={2}
+                    value={language === 'ru' ? answer : answerRu}
+                    onChange={e => {
+                      if (language === 'ru') {
+                        setAnswer(e.target.value);
+                      } else {
+                        setAnswerRu(e.target.value);
+                      }
+                    }}
+                    placeholder={language === 'ru' ? 'Vorschlag auf Deutsch...' : 'Vorschlag auf Russisch...'}
+                    className="w-full text-xs px-3 py-2 bg-white border border-emerald-200 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-600"
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 pt-1">
+          {/* FELD 2: FRAGE AN KLIENTEN (ISA) */}
+          <div className="p-4 bg-amber-50/70 rounded-xl border-2 border-amber-300 space-y-2.5 shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <label className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 text-amber-700" />
+                <span>{language === 'ru' ? 'ПОЛЕ 2: Вопрос клиенту (Isa) — для Сеньора на завтра' : 'FELD 2: Frage an Klienten (Isa) – Morgen an Senior übergeben!'}</span>
+              </label>
+
+              <label className="inline-flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 text-amber-950 px-2.5 py-1 rounded-md cursor-pointer border border-amber-300 text-xs font-semibold transition-colors">
+                <input
+                  type="checkbox"
+                  checked={needsClientClarification}
+                  onChange={e => setNeedsClientClarification(e.target.checked)}
+                  className="accent-amber-700 rounded"
+                />
+                <span>{language === 'ru' ? '⚠️ Запрос клиенту обязателен' : '⚠️ Klienten-Rückfrage erforderlich'}</span>
+              </label>
+            </div>
+
+            <p className="text-[11px] text-amber-900 leading-snug">
+              {language === 'ru'
+                ? 'Если мы не знаем, что предложить — здесь мы фиксируем точный вопрос, который Сеньор завтра должен задать клиенту (Исе), чтобы получить необходимые данные.'
+                : 'Hier exakt fixieren, was der Senior morgen den Klienten Isa fragen muss, falls wir es noch nicht wissen und die Info vom Kunden zwingend brauchen.'}
+            </p>
+
+            <div className="space-y-2 pt-1">
+              <div>
+                <span className="text-[10px] font-semibold text-amber-950 block mb-0.5">
+                  {language === 'ru' ? 'Вопрос клиенту (Исе):' : 'Frage an den Kunden (Isa):'}
+                </span>
+                <textarea
+                  rows={2}
+                  value={language === 'ru' ? (clientQuestionRu || clientQuestion) : clientQuestion}
+                  onChange={e => {
+                    if (language === 'ru') {
+                      setClientQuestionRu(e.target.value);
+                      if (!clientQuestion) setClientQuestion(e.target.value);
+                    } else {
+                      setClientQuestion(e.target.value);
+                    }
+                    if (!needsClientClarification) setNeedsClientClarification(true);
+                  }}
+                  placeholder={language === 'ru' ? 'Что сеньор должен спросить у Исы? Например: Используется ли номер клиента из Tripletex как главный ключ...' : 'Was muss der Senior den Kunden Isa fragen? z. B. Gibt es bei ProRiv Pauschalverträge...'}
+                  className="w-full text-xs px-3 py-2 bg-white border border-amber-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
+                />
+              </div>
+
+              {(language === 'bilingual' || (language === 'ru' && clientQuestion !== clientQuestionRu)) && (
+                <div>
+                  <span className="text-[10px] font-semibold text-amber-950 block mb-0.5">
+                    {language === 'ru' ? 'Немецкий вариант вопроса клиенту (DE):' : 'Russische Version der Frage (RU):'}
+                  </span>
+                  <textarea
+                    rows={2}
+                    value={language === 'ru' ? clientQuestion : clientQuestionRu}
+                    onChange={e => {
+                      if (language === 'ru') {
+                        setClientQuestion(e.target.value);
+                      } else {
+                        setClientQuestionRu(e.target.value);
+                      }
+                      if (!needsClientClarification) setNeedsClientClarification(true);
+                    }}
+                    placeholder={language === 'ru' ? 'Frage an Klienten auf Deutsch...' : 'Вопрос клиенту на русском...'}
+                    className="w-full text-xs px-3 py-2 bg-white border border-amber-300 rounded-md focus:outline-none focus:ring-1 focus:ring-amber-600"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* STATUS: GEKLÄRT */}
+          <div className="flex items-center gap-2 pt-2 px-1">
             <input
               type="checkbox"
               id="isResolved"
               checked={isResolved}
               onChange={e => setIsResolved(e.target.checked)}
-              className="accent-emerald-600 rounded"
+              className="accent-emerald-600 rounded w-4 h-4"
             />
-            <label htmlFor="isResolved" className="text-xs text-slate-700">
-              Frage als geklärt markieren
+            <label htmlFor="isResolved" className="text-xs font-semibold text-slate-800 cursor-pointer">
+              {language === 'ru' ? 'Вопрос полностью закрыт / согласован' : 'Frage als vollständig geklärt markieren'}
             </label>
           </div>
 
@@ -1337,15 +1746,15 @@ const QuestionModal: React.FC<QuestionModalProps> = ({ initialQuestion, topicId,
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-md"
+              className="px-3.5 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-md transition-colors"
             >
-              Abbrechen
+              {getTranslation('cancel', language)}
             </button>
             <button
               type="submit"
-              className="px-4 py-1.5 text-xs font-medium bg-slate-900 text-white rounded-md hover:bg-slate-800"
+              className="px-4 py-1.5 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-md transition-colors shadow-xs"
             >
-              Speichern
+              {getTranslation('save', language)}
             </button>
           </div>
         </form>

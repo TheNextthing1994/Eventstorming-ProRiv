@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Search, X, ArrowRight, HelpCircle, Lightbulb, Building2, FileCheck2, AlertCircle, Paperclip } from 'lucide-react';
-import { DatabaseState, TopicId } from '../types';
+import { DatabaseState, TopicId, Language } from '../types';
 import { TOPIC_DEFINITIONS } from '../db/defaultData';
 import { StatusBadge } from './StatusBadge';
+import { getTranslation } from '../i18n/translations';
 
 interface GlobalSearchModalProps {
   isOpen: boolean;
   onClose: () => void;
   databaseState: DatabaseState;
+  language?: Language;
   onSelectResult: (topicId: TopicId) => void;
 }
 
@@ -25,6 +27,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   isOpen,
   onClose,
   databaseState,
+  language = 'ru',
   onSelectResult
 }) => {
   const [query, setQuery] = useState('');
@@ -50,16 +53,25 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     databaseState.questions.forEach(item => {
       const match =
         item.question.toLowerCase().includes(q) ||
+        (item.questionRu && item.questionRu.toLowerCase().includes(q)) ||
         (item.germanTranslation && item.germanTranslation.toLowerCase().includes(q)) ||
-        (item.answer && item.answer.toLowerCase().includes(q));
+        (item.answer && item.answer.toLowerCase().includes(q)) ||
+        (item.answerRu && item.answerRu.toLowerCase().includes(q)) ||
+        (item.clientQuestion && item.clientQuestion.toLowerCase().includes(q)) ||
+        (item.clientQuestionRu && item.clientQuestionRu.toLowerCase().includes(q));
 
       if (match) {
+        const isClientQ = item.needsClientClarification || Boolean(item.clientQuestion || item.clientQuestionRu);
         list.push({
           id: item.id,
           type: 'question',
-          typeLabel: 'Frage des Seniors',
-          title: item.question,
-          snippet: item.answer || item.germanTranslation || 'Noch keine Antwort hinterlegt',
+          typeLabel: isClientQ
+            ? (language === 'ru' ? '⚡ Вопрос клиенту (Isa)' : '⚡ Frage an Klienten (Isa)')
+            : (language === 'ru' ? 'Вопрос сеньора' : language === 'bilingual' ? 'Frage / Вопрос' : 'Frage des Seniors'),
+          title: language === 'ru' ? (item.questionRu || item.question) : item.question,
+          snippet: (isClientQ && (item.clientQuestionRu || item.clientQuestion))
+            ? `Klientenfrage: ${language === 'ru' ? (item.clientQuestionRu || item.clientQuestion) : item.clientQuestion}`
+            : ((language === 'ru' ? item.answerRu : item.answer) || item.answer || item.answerRu || item.germanTranslation || ''),
           topicId: item.topicId
         });
       }
@@ -69,16 +81,18 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     databaseState.findings.forEach(item => {
       const match =
         item.title.toLowerCase().includes(q) ||
+        (item.titleRu && item.titleRu.toLowerCase().includes(q)) ||
         item.content.toLowerCase().includes(q) ||
+        (item.contentRu && item.contentRu.toLowerCase().includes(q)) ||
         (item.sourceName && item.sourceName.toLowerCase().includes(q));
 
       if (match) {
         list.push({
           id: item.id,
           type: 'finding',
-          typeLabel: 'Erkenntnis',
-          title: item.title,
-          snippet: item.content,
+          typeLabel: language === 'ru' ? 'Данные исследования' : language === 'bilingual' ? 'Erkenntnis / Данные' : 'Erkenntnis',
+          title: language === 'ru' ? (item.titleRu || item.title) : item.title,
+          snippet: language === 'ru' ? (item.contentRu || item.content) : item.content,
           topicId: item.topicId,
           status: item.status
         });
@@ -90,17 +104,21 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       const match =
         item.productName.toLowerCase().includes(q) ||
         item.analyzedFeature.toLowerCase().includes(q) ||
+        (item.analyzedFeatureRu && item.analyzedFeatureRu.toLowerCase().includes(q)) ||
         item.observedWorkflow.toLowerCase().includes(q) ||
+        (item.observedWorkflowRu && item.observedWorkflowRu.toLowerCase().includes(q)) ||
         item.keyTakeaway.toLowerCase().includes(q) ||
-        item.transferability.toLowerCase().includes(q);
+        (item.keyTakeawayRu && item.keyTakeawayRu.toLowerCase().includes(q)) ||
+        item.transferability.toLowerCase().includes(q) ||
+        (item.transferabilityRu && item.transferabilityRu.toLowerCase().includes(q));
 
       if (match) {
         list.push({
           id: item.id,
           type: 'competitor',
-          typeLabel: 'Wettbewerbsanalyse',
-          title: `${item.productName} – ${item.analyzedFeature}`,
-          snippet: item.keyTakeaway || item.observedWorkflow,
+          typeLabel: language === 'ru' ? 'Анализ конкурента' : language === 'bilingual' ? 'Wettbewerb / Конкурент' : 'Wettbewerbsanalyse',
+          title: `${item.productName} – ${language === 'ru' ? (item.analyzedFeatureRu || item.analyzedFeature) : item.analyzedFeature}`,
+          snippet: (language === 'ru' ? item.keyTakeawayRu : item.keyTakeaway) || item.keyTakeaway || item.observedWorkflow,
           topicId: item.topicId
         });
       }
@@ -110,16 +128,19 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     databaseState.recommendations.forEach(item => {
       const match =
         item.title.toLowerCase().includes(q) ||
+        (item.titleRu && item.titleRu.toLowerCase().includes(q)) ||
         item.description.toLowerCase().includes(q) ||
-        item.rationale.toLowerCase().includes(q);
+        (item.descriptionRu && item.descriptionRu.toLowerCase().includes(q)) ||
+        item.rationale.toLowerCase().includes(q) ||
+        (item.rationaleRu && item.rationaleRu.toLowerCase().includes(q));
 
       if (match) {
         list.push({
           id: item.id,
           type: 'recommendation',
-          typeLabel: 'Empfehlung',
-          title: item.title,
-          snippet: item.description,
+          typeLabel: language === 'ru' ? 'Рекомендация' : language === 'bilingual' ? 'Empfehlung / Рекомендация' : 'Empfehlung',
+          title: language === 'ru' ? (item.titleRu || item.title) : item.title,
+          snippet: language === 'ru' ? (item.descriptionRu || item.description) : item.description,
           topicId: item.topicId,
           status: item.status
         });
@@ -130,15 +151,17 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     databaseState.openPoints.forEach(item => {
       const match =
         item.question.toLowerCase().includes(q) ||
-        (item.resolutionNote && item.resolutionNote.toLowerCase().includes(q));
+        (item.questionRu && item.questionRu.toLowerCase().includes(q)) ||
+        (item.resolutionNote && item.resolutionNote.toLowerCase().includes(q)) ||
+        (item.resolutionNoteRu && item.resolutionNoteRu.toLowerCase().includes(q));
 
       if (match) {
         list.push({
           id: item.id,
           type: 'open_point',
-          typeLabel: 'Offener Punkt',
-          title: item.question,
-          snippet: item.resolutionNote || `Zu klären mit: ${item.clarifyWith}`,
+          typeLabel: language === 'ru' ? 'Открытый вопрос' : language === 'bilingual' ? 'Offen / Открыто' : 'Offener Punkt',
+          title: language === 'ru' ? (item.questionRu || item.question) : item.question,
+          snippet: (language === 'ru' ? item.resolutionNoteRu : item.resolutionNote) || (language === 'ru' ? `К согласованию: ${item.clarifyWith}` : `Zu klären mit: ${item.clarifyWith}`),
           topicId: item.topicId
         });
       }
@@ -148,16 +171,18 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     databaseState.decisions.forEach(item => {
       const match =
         item.title.toLowerCase().includes(q) ||
+        (item.titleRu && item.titleRu.toLowerCase().includes(q)) ||
         item.rationale.toLowerCase().includes(q) ||
+        (item.rationaleRu && item.rationaleRu.toLowerCase().includes(q)) ||
         (item.responsiblePerson && item.responsiblePerson.toLowerCase().includes(q));
 
       if (match) {
         list.push({
           id: item.id,
           type: 'decision',
-          typeLabel: 'Entscheidung',
-          title: item.title,
-          snippet: item.rationale,
+          typeLabel: language === 'ru' ? 'Решение' : language === 'bilingual' ? 'Entscheidung / Решение' : 'Entscheidung',
+          title: language === 'ru' ? (item.titleRu || item.title) : item.title,
+          snippet: language === 'ru' ? (item.rationaleRu || item.rationale) : item.rationale,
           topicId: item.topicId
         });
       }
@@ -174,7 +199,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         list.push({
           id: item.id,
           type: 'attachment',
-          typeLabel: 'Quelle / Anhang',
+          typeLabel: language === 'ru' ? 'Источник / Вложение' : 'Quelle / Anhang',
           title: item.title,
           snippet: item.notes || item.fileName || item.url || '',
           topicId: item.topicId
@@ -187,7 +212,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     }
 
     return list;
-  }, [query, databaseState, filterTopic]);
+  }, [query, databaseState, filterTopic, language]);
 
   if (!isOpen) return null;
 
@@ -208,7 +233,11 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Globale Suche nach Fragen, Wettbewerbern (123erfasst...), Erkenntnissen, Quellen..."
+            placeholder={
+              language === 'ru'
+                ? 'Глобальный поиск по вопросам, конкурентам (SmartDok, Dalux...), фактам, источникам...'
+                : 'Globale Suche nach Fragen, Wettbewerbern (SmartDok, Dalux...), Erkenntnissen, Quellen...'
+            }
             className="w-full text-sm bg-transparent focus:outline-none placeholder:text-slate-400 text-slate-900"
           />
           {query && (
@@ -226,14 +255,16 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
         {/* Filter Pills */}
         <div className="flex items-center gap-1.5 px-4 py-2 border-b border-slate-100 bg-white overflow-x-auto text-[11px]">
-          <span className="text-slate-400 font-medium mr-1">Bereich:</span>
+          <span className="text-slate-400 font-medium mr-1">
+            {language === 'ru' ? 'Тема:' : 'Bereich:'}
+          </span>
           <button
             onClick={() => setFilterTopic('all')}
             className={`px-2 py-0.5 rounded transition-colors ${
               filterTopic === 'all' ? 'bg-slate-900 text-white font-medium' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            Alle Bereiche
+            {language === 'ru' ? 'Все темы' : 'Alle Bereiche'}
           </button>
           {(Object.keys(TOPIC_DEFINITIONS) as TopicId[]).map(tId => (
             <button
@@ -252,11 +283,15 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         <div className="max-h-[60vh] overflow-y-auto p-2 divide-y divide-slate-100">
           {!query ? (
             <div className="p-8 text-center text-xs text-slate-400">
-              Tippe einen Suchbegriff ein, um alle Themen, Fragen, Wettbewerber und Beschlüsse zu durchsuchen.
+              {language === 'ru'
+                ? 'Введите поисковый запрос для поиска по всем темам, вопросам, конкурентам и решениям.'
+                : 'Tippe einen Suchbegriff ein, um alle Themen, Fragen, Wettbewerber und Beschlüsse zu durchsuchen.'}
             </div>
           ) : results.length === 0 ? (
             <div className="p-8 text-center text-xs text-slate-500">
-              Keine Treffer für &ldquo;{query}&rdquo; gefunden.
+              {language === 'ru'
+                ? `По запросу «${query}» ничего не найдено.`
+                : `Keine Treffer für „${query}“ gefunden.`}
             </div>
           ) : (
             results.map(r => {
@@ -277,7 +312,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                       </span>
                       <span className="text-slate-400">·</span>
                       <span className="text-slate-500 font-medium">{r.typeLabel}</span>
-                      {r.status && <StatusBadge status={r.status} />}
+                      {r.status && <StatusBadge status={r.status} language={language} />}
                     </div>
 
                     <h4 className="text-xs font-bold text-slate-900 group-hover:text-emerald-900 transition-colors">

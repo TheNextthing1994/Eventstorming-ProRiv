@@ -12,13 +12,15 @@ import {
   Zap,
   Target
 } from 'lucide-react';
-import { DatabaseState, TopicId } from '../types';
+import { DatabaseState, TopicId, Language } from '../types';
 import { TOPIC_DEFINITIONS, TOPIC_ORDER } from '../db/defaultData';
 import { calculateGlobalStats } from '../db/indexedDb';
 import { MVP_STRATEGIC_STATEMENT } from '../db/knowledgeSeed';
+import { getTranslation, PILOT_SCOPE_ITEMS } from '../i18n/translations';
 
 interface GlobalOverviewProps {
   databaseState: DatabaseState;
+  language: Language;
   onSelectTopic: (topicId: TopicId) => void;
   onNavigateHome: () => void;
   onNavigateSection?: (section: string) => void;
@@ -26,6 +28,7 @@ interface GlobalOverviewProps {
 
 export const GlobalOverview: React.FC<GlobalOverviewProps> = ({
   databaseState,
+  language,
   onSelectTopic,
   onNavigateHome,
   onNavigateSection
@@ -36,6 +39,14 @@ export const GlobalOverview: React.FC<GlobalOverviewProps> = ({
     ? Math.round((stats.resolvedQuestions / stats.totalQuestions) * 100)
     : 0;
 
+  const quoteText = language === 'ru'
+    ? MVP_STRATEGIC_STATEMENT.quoteRu
+    : language === 'bilingual'
+      ? `${MVP_STRATEGIC_STATEMENT.quoteRu} (${MVP_STRATEGIC_STATEMENT.quote})`
+      : MVP_STRATEGIC_STATEMENT.quote;
+
+  const pilotScopeList = PILOT_SCOPE_ITEMS[language] || PILOT_SCOPE_ITEMS.ru;
+
   return (
     <div className="w-full min-h-[calc(100vh-3.5rem)] bg-slate-50/70 p-4 sm:p-6 lg:p-8 space-y-6 max-w-6xl mx-auto">
       {/* Header */}
@@ -43,14 +54,14 @@ export const GlobalOverview: React.FC<GlobalOverviewProps> = ({
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
-              Projekt ISA · ProRiv AS
+              {language === 'ru' ? 'Проект ISA · ProRiv AS' : 'Projekt ISA · ProRiv AS'}
             </span>
           </div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900">
-            Recherche- und Statusübersicht
+            {getTranslation('overviewTitle', language)}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Echtzeit-Kennzahlen, MVP-Strategie und Fortschritt über alle 6 Bereiche der Originalskizze.
+            {getTranslation('overviewSubtitle', language)}
           </p>
         </div>
 
@@ -58,27 +69,27 @@ export const GlobalOverview: React.FC<GlobalOverviewProps> = ({
           onClick={onNavigateHome}
           className="px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:text-emerald-800 bg-white border border-slate-200 rounded-md hover:bg-slate-50 transition-colors shadow-xs"
         >
-          ← Zurück zur Originalskizze
+          {getTranslation('backToSketch', language)}
         </button>
       </div>
 
-      {/* STRATEGIC MVP BANNER (Verpflichtend aus Auftrag 2) */}
-      <div className="bg-slate-900 text-white rounded-xl p-6 shadow-sm border border-slate-800 space-y-4">
+      {/* STRATEGIC MVP BANNER */}
+      <div className="bg-slate-900 text-white rounded-xl p-6 shadow-xs border border-slate-800 space-y-4">
         <div className="flex items-center gap-2 text-emerald-400 font-mono text-xs uppercase tracking-wider">
           <Target className="w-4 h-4 text-emerald-400" />
-          <span>Strategischer Grundsatz für das MVP</span>
+          <span>{getTranslation('mvpStrategyTitle', language)}</span>
         </div>
 
         <blockquote className="text-lg sm:text-xl font-bold text-slate-100 tracking-tight leading-snug">
-          &bdquo;{MVP_STRATEGIC_STATEMENT.quote}&ldquo;
+          &bdquo;{quoteText}&ldquo;
         </blockquote>
 
         <div className="pt-2 border-t border-slate-800/80">
           <span className="text-xs font-semibold text-emerald-300 block mb-2">
-            Empfohlener erster Pilot für ProRiv AS:
+            {getTranslation('pilotScopeTitle', language)}
           </span>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs text-slate-300">
-            {MVP_STRATEGIC_STATEMENT.pilotScope.map((item, idx) => (
+            {pilotScopeList.map((item, idx) => (
               <div key={idx} className="flex items-start gap-2 bg-slate-800/60 p-2.5 rounded-lg border border-slate-700/60">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
                 <span className="leading-tight">{item}</span>
@@ -88,127 +99,167 @@ export const GlobalOverview: React.FC<GlobalOverviewProps> = ({
         </div>
       </div>
 
-      {/* KPI Cards (Zero-slop, clean numbers with tabular-nums) */}
+      {/* SENIOR CLIENT QUESTIONS BANNER */}
+      {(stats.clientQuestionsCount || 0) > 0 && (
+        <div
+          onClick={() => onNavigateSection?.('senior-decisions')}
+          className="bg-amber-500/10 border-2 border-amber-300 rounded-xl p-4 cursor-pointer hover:bg-amber-500/15 transition-all flex flex-wrap items-center justify-between gap-3 shadow-xs"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <AlertCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-amber-950 uppercase tracking-wide">
+                  {language === 'ru' ? 'Подготовка к встрече с Сеньором' : 'Vorbereitung Senior-Meeting'}
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-200 text-amber-900 font-mono">
+                  {stats.clientQuestionsCount} {language === 'ru' ? 'вопросов клиенту (Isa)' : 'Fragen an Klienten (Isa)'}
+                </span>
+              </div>
+              <p className="text-xs text-amber-900 mt-0.5 font-medium">
+                {language === 'ru'
+                  ? `Зафиксировано ${stats.clientQuestionsCount} вопросов (из них ${stats.unresolvedClientQuestionsCount} открыто), где мы ждем информации от клиента Isa.`
+                  : `${stats.clientQuestionsCount} Fragen fixiert (davon ${stats.unresolvedClientQuestionsCount} offen), die der Senior morgen dem Kunden Isa stellen muss.`}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 bg-amber-200/80 px-3 py-1.5 rounded-lg">
+            <span>{language === 'ru' ? 'Открыть повестку для Сеньора' : 'Agenda für Senior öffnen'}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </div>
+        </div>
+      )}
+
+      {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
         <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs">
           <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-1">
-            Senior Fragen
+            {getTranslation('seniorQuestionsKpi', language)}
           </div>
           <div className="text-2xl font-bold text-slate-900 tabular-nums">
             {stats.totalQuestions}
           </div>
           <div className="text-xs text-slate-500 mt-1">
-            Originalfragen aus Skizze
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-emerald-200/70 bg-emerald-50/20 shadow-xs">
-          <div className="text-[11px] font-mono text-emerald-800 uppercase tracking-wider mb-1">
-            Beantwortet
-          </div>
-          <div className="text-2xl font-bold text-emerald-900 tabular-nums">
-            {stats.resolvedQuestions}
-          </div>
-          <div className="text-xs text-emerald-700 mt-1 tabular-nums">
-            {completionRate}% Klärungsquote
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs">
-          <div className="text-[11px] font-mono text-rose-700 uppercase tracking-wider mb-1">
-            Offene Punkte
-          </div>
-          <div className="text-2xl font-bold text-rose-900 tabular-nums">
-            {stats.unresolvedOpenPoints}
-          </div>
-          <div className="text-xs text-slate-500 mt-1">
-            von {stats.totalOpenPoints} Klärungsbedarfen
+            {getTranslation('seniorQuestionsSub', language)}
           </div>
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs">
           <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-1">
-            Empfehlungen
+            {getTranslation('answeredKpi', language)}
+          </div>
+          <div className="text-2xl font-bold text-emerald-800 tabular-nums">
+            {stats.resolvedQuestions}
+          </div>
+          <div className="text-xs text-slate-500 mt-1">
+            {completionRate}% {getTranslation('clarificationRate', language)}
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs">
+          <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-1">
+            {getTranslation('openPointsKpi', language)}
+          </div>
+          <div className="text-2xl font-bold text-rose-700 tabular-nums">
+            {stats.unresolvedOpenPoints}
+          </div>
+          <div className="text-xs text-slate-500 mt-1">
+            {stats.totalOpenPoints} {getTranslation('ofPoints', language)}
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs">
+          <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-1">
+            {getTranslation('recommendationsKpi', language)}
           </div>
           <div className="text-2xl font-bold text-slate-900 tabular-nums">
             {stats.totalRecommendations}
           </div>
           <div className="text-xs text-slate-500 mt-1">
-            Architekturvorschläge
+            {getTranslation('recommendationsSub', language)}
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs">
+        <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs col-span-2 sm:col-span-1">
           <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-1">
-            Entscheidungen
+            {getTranslation('decisionsKpi', language)}
           </div>
           <div className="text-2xl font-bold text-slate-900 tabular-nums">
             {stats.totalDecisions}
           </div>
           <div className="text-xs text-slate-500 mt-1">
-            Dokumentierte Beschlüsse
+            {getTranslation('decisionsSub', language)}
           </div>
         </div>
       </div>
 
-      {/* Quick Access to Cross-Domain Hubs */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      {/* Navigation Quick Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
         <div
           onClick={() => onNavigateSection?.('competitors')}
-          className="bg-white p-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-xs cursor-pointer transition-all space-y-1.5"
+          className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all cursor-pointer space-y-1.5"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-              <Building2 className="w-4 h-4 text-sky-600" />
-              <span>Wettbewerbsrecherche</span>
+              <Building2 className="w-4 h-4 text-emerald-800" />
+              <span>{getTranslation('competitors', language)}</span>
             </span>
-            <span className="text-[11px] text-slate-400 font-mono">7 Produkte</span>
+            <span className="text-[11px] text-slate-400 font-mono">7 Softwareprodukte</span>
           </div>
           <p className="text-xs text-slate-600 leading-relaxed">
-            SmartDok, Dalux, QuickBooks Time, PlanRadar, Fieldwire & Tripletex im Detail analysiert.
+            {language === 'ru'
+              ? 'Исследование SmartDok, QuickBooks Time, Dalux, PlanRadar и Tripletex.'
+              : 'Benchmarking von SmartDok, QuickBooks Time, Dalux, PlanRadar und Tripletex.'}
           </p>
           <span className="text-[11px] font-medium text-emerald-800 inline-flex items-center gap-1 pt-1">
-            <span>Zur Wettbewerbsübersicht</span>
+            <span>{getTranslation('detailsBtn', language)}</span>
             <ArrowRight className="w-3 h-3" />
           </span>
         </div>
 
         <div
           onClick={() => onNavigateSection?.('event-storming')}
-          className="bg-white p-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-xs cursor-pointer transition-all space-y-1.5"
+          className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all cursor-pointer space-y-1.5"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-              <Zap className="w-4 h-4 text-indigo-600" />
-              <span>Event Storming Hub</span>
+              <Zap className="w-4 h-4 text-indigo-700" />
+              <span>{getTranslation('events', language)}</span>
             </span>
-            <span className="text-[11px] text-slate-400 font-mono">18 Events</span>
+            <span className="text-[11px] text-indigo-700 font-mono font-semibold">18 Events</span>
           </div>
           <p className="text-xs text-slate-600 leading-relaxed">
-            Lebenszyklus, 10 Fachregeln und dokumentierte Ausnahmepfade von Baustelle bis ERP.
+            {language === 'ru'
+              ? '18 доменных событий, 10 бизнес-правил и матрица обработки сбоев.'
+              : '18 Domain Events, 10 Kernregeln und Fehlerpfade vom Baustelleneinsatz bis ERP.'}
           </p>
-          <span className="text-[11px] font-medium text-emerald-800 inline-flex items-center gap-1 pt-1">
-            <span>Zu den Domain Events</span>
+          <span className="text-[11px] font-medium text-indigo-800 inline-flex items-center gap-1 pt-1">
+            <span>{getTranslation('detailsBtn', language)}</span>
             <ArrowRight className="w-3 h-3" />
           </span>
         </div>
 
         <div
           onClick={() => onNavigateSection?.('senior-decisions')}
-          className="bg-white p-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-xs cursor-pointer transition-all space-y-1.5"
+          className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all cursor-pointer space-y-1.5"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
               <HelpCircle className="w-4 h-4 text-rose-600" />
-              <span>Mit dem Senior klären</span>
+              <span>{getTranslation('seniorDecisions', language)}</span>
             </span>
             <span className="text-[11px] text-rose-700 font-mono font-semibold">10 Fragen</span>
           </div>
           <p className="text-xs text-slate-600 leading-relaxed">
-            Die 10 zentralen Weichenstellungen mit aktuellem Vorschlag und Begründung.
+            {language === 'ru'
+              ? '10 ключевых развилок для сеньора с предложениями и аргументацией.'
+              : 'Die 10 zentralen Weichenstellungen mit aktuellem Vorschlag und Begründung.'}
           </p>
           <span className="text-[11px] font-medium text-rose-800 inline-flex items-center gap-1 pt-1">
-            <span>Zur Entscheidungsliste</span>
+            <span>{getTranslation('detailsBtn', language)}</span>
             <ArrowRight className="w-3 h-3" />
           </span>
         </div>
@@ -218,10 +269,10 @@ export const GlobalOverview: React.FC<GlobalOverviewProps> = ({
       <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
         <div className="p-4 border-b border-slate-100 flex items-center justify-between">
           <h2 className="text-sm font-bold text-slate-900">
-            Übersicht nach Themenbereichen
+            {getTranslation('domainOverviewTitle', language)}
           </h2>
           <span className="text-xs text-slate-400">
-            Klicke auf eine Zeile für die Detailanalyse
+            {getTranslation('clickRowHint', language)}
           </span>
         </div>
 
@@ -229,14 +280,14 @@ export const GlobalOverview: React.FC<GlobalOverviewProps> = ({
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/80 text-slate-500 font-mono text-[11px] uppercase tracking-wider border-b border-slate-200/80">
               <tr>
-                <th className="py-3 px-4">Bereich (Skizze)</th>
-                <th className="py-3 px-4">Thema (Deutsch)</th>
-                <th className="py-3 px-4 text-center">Fragen (Geklärt/Total)</th>
-                <th className="py-3 px-4 text-center">Erkenntnisse</th>
-                <th className="py-3 px-4 text-center">Wettbewerb</th>
-                <th className="py-3 px-4 text-center">Empfehlungen</th>
-                <th className="py-3 px-4 text-center">Entscheidungen</th>
-                <th className="py-3 px-4 text-right">Aktion</th>
+                <th className="py-3 px-4">{getTranslation('colDomain', language)}</th>
+                <th className="py-3 px-4">{getTranslation('colTopic', language)}</th>
+                <th className="py-3 px-4 text-center">{getTranslation('colQuestions', language)}</th>
+                <th className="py-3 px-4 text-center">{getTranslation('colFindings', language)}</th>
+                <th className="py-3 px-4 text-center">{getTranslation('colCompetitors', language)}</th>
+                <th className="py-3 px-4 text-center">{getTranslation('colRecs', language)}</th>
+                <th className="py-3 px-4 text-center">{getTranslation('colDecisions', language)}</th>
+                <th className="py-3 px-4 text-right">{getTranslation('colAction', language)}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -268,7 +319,11 @@ export const GlobalOverview: React.FC<GlobalOverviewProps> = ({
                     </td>
 
                     <td className="py-3.5 px-4 text-slate-600 font-medium">
-                      {meta.germanTitle}
+                      {language === 'ru'
+                        ? meta.russianTitle
+                        : language === 'bilingual'
+                          ? `${meta.russianTitle} / ${meta.germanTitle}`
+                          : meta.germanTitle}
                     </td>
 
                     <td className="py-3.5 px-4 text-center font-mono tabular-nums">
@@ -298,7 +353,7 @@ export const GlobalOverview: React.FC<GlobalOverviewProps> = ({
 
                     <td className="py-3.5 px-4 text-right">
                       <span className="inline-flex items-center gap-1 text-slate-400 group-hover:text-slate-800 font-medium">
-                        <span>Details</span>
+                        <span>{getTranslation('detailsBtn', language)}</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </span>
                     </td>

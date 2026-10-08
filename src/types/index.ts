@@ -5,6 +5,8 @@
 
 export type TopicId = 'users' | 'clients' | 'raport' | 'vremya' | 'api' | 'mobile-app';
 
+export type Language = 'de' | 'ru' | 'bilingual';
+
 /**
  * A. Herkunft (Origin) – Pflichtfeld zur Nachvollziehbarkeit
  */
@@ -50,16 +52,20 @@ export interface TopicMeta {
   sketchTitle: string;
   sketchSubtitle?: string;
   germanTitle: string;
+  russianTitle: string;
   shortDescription: string;
+  russianDescription?: string;
   colorType: 'green' | 'red';
   defaultHotspot: HotspotCoordinates;
   sketchQuestions: string[];
   briefing: SeniorBriefing;
+  briefingRu?: SeniorBriefing;
 }
 
 export interface TopicContent {
   id: TopicId;
   summary: string;
+  summaryRu?: string;
   updatedAt: string;
 }
 
@@ -67,9 +73,17 @@ export interface SeniorQuestion {
   id: string;
   topicId: TopicId;
   question: string;
+  questionRu?: string;
   originalFromSketch?: boolean;
   germanTranslation?: string;
+  russianTranslation?: string;
+  // Feld 1: Unser Vorschlag / Technische Empfehlung
   answer?: string;
+  answerRu?: string;
+  // Feld 2: Frage an den Klienten (Isa) / Rückfragebedarf beim Kunden
+  clientQuestion?: string;
+  clientQuestionRu?: string;
+  needsClientClarification?: boolean;
   isResolved: boolean;
   origin?: KnowledgeOrigin;
   status?: KnowledgeStatus;
@@ -83,7 +97,9 @@ export interface ResearchFinding {
   topicId: TopicId;
   additionalTopicIds?: TopicId[];
   title: string;
+  titleRu?: string;
   content: string;
+  contentRu?: string;
   origin: KnowledgeOrigin;
   status: KnowledgeStatus;
   sourceUrl?: string;
@@ -98,12 +114,18 @@ export interface CompetitorEntry {
   additionalTopicIds?: TopicId[];
   productName: string;
   analyzedFeature: string;
+  analyzedFeatureRu?: string;
   investigationGoal?: string;   // Welche Frage wollten wir beantworten?
+  investigationGoalRu?: string;
   observedWorkflow: string;     // Wie funktioniert der konkrete Benutzerablauf?
+  observedWorkflowRu?: string;
   keyTakeaway: string;          // Was könnten wir übernehmen?
+  keyTakeawayRu?: string;
   disadvantages?: string;       // Welche Nachteile gibt es?
+  disadvantagesRu?: string;
   sourceOrLink?: string;        // Quelle (leer lassen falls unbelegt)
   transferability: string;      // Übertragbarkeit auf ISA
+  transferabilityRu?: string;
   origin: KnowledgeOrigin;
   status: KnowledgeStatus;
   createdAt: string;
@@ -115,8 +137,11 @@ export interface ProductRecommendation {
   topicId: TopicId;
   additionalTopicIds?: TopicId[];
   title: string;
+  titleRu?: string;
   description: string;
+  descriptionRu?: string;
   rationale: string;
+  rationaleRu?: string;
   origin: KnowledgeOrigin;
   status: KnowledgeStatus;
   priority: 'low' | 'medium' | 'high';
@@ -129,10 +154,12 @@ export interface OpenPoint {
   topicId: TopicId;
   additionalTopicIds?: TopicId[];
   question: string;
+  questionRu?: string;
   clarifyWith: 'senior' | 'customer' | 'team';
   priority: 'low' | 'medium' | 'high';
   isResolved: boolean;
   resolutionNote?: string;
+  resolutionNoteRu?: string;
   origin: KnowledgeOrigin;
   status: KnowledgeStatus;
   createdAt: string;
@@ -144,8 +171,10 @@ export interface Decision {
   topicId: TopicId;
   additionalTopicIds?: TopicId[];
   title: string;
+  titleRu?: string;
   date: string;
   rationale: string;
+  rationaleRu?: string;
   responsiblePerson?: string;
   status: 'draft' | 'decided' | 'superseded';
   decisionStatus?: KnowledgeStatus;
@@ -158,11 +187,14 @@ export interface SeniorDecisionItem {
   id: string;
   number: number;
   question: string;
+  questionRu?: string;
   responsiblePerson: string;
   priority: 'high' | 'medium' | 'low';
   status: 'offen' | 'in_diskussion' | 'entschieden';
   currentProposal: string;
+  currentProposalRu?: string;
   rationale: string;
+  rationaleRu?: string;
   date: string;
   connectedTopics: TopicId[];
 }
@@ -171,13 +203,17 @@ export interface DomainEventItem {
   id: string;
   name: string;
   category: 'Session & Zeit' | 'Rapport & Aufmaß' | 'Preis & Kunde' | 'ERP & Tripletex';
+  categoryRu?: string;
   description: string;
+  descriptionRu?: string;
   command: string;
   aggregate: string;
   readModel: string;
   policyOrRule: string;
+  policyOrRuleRu?: string;
   externalSystem?: string;
   openDecision?: string;
+  openDecisionRu?: string;
 }
 
 export interface AttachmentItem {
@@ -211,6 +247,8 @@ export interface GlobalStats {
   totalQuestions: number;
   resolvedQuestions: number;
   openQuestionsCount: number;
+  clientQuestionsCount?: number;
+  unresolvedClientQuestionsCount?: number;
   totalOpenPoints: number;
   unresolvedOpenPoints: number;
   totalFindings: number;

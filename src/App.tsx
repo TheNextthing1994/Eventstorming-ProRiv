@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { DatabaseState, TopicId } from './types';
+import { DatabaseState, TopicId, Language } from './types';
 import {
   initializeDatabase,
   loadEntireDatabase
@@ -25,6 +25,20 @@ import { TOPIC_DEFINITIONS } from './db/defaultData';
 export default function App() {
   const [databaseState, setDatabaseState] = useState<DatabaseState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Language state (Russian / German / Bilingual) - defaults to 'ru' since the Senior speaks Russian
+  const [language, setLanguage] = useState<Language>(() => {
+    const saved = localStorage.getItem('isa_language');
+    if (saved === 'ru' || saved === 'de' || saved === 'bilingual') {
+      return saved as Language;
+    }
+    return 'ru';
+  });
+
+  const handleLanguageChange = (newLang: Language) => {
+    setLanguage(newLang);
+    localStorage.setItem('isa_language', newLang);
+  };
 
   // Navigation states synced with URL Hash
   const [currentView, setCurrentView] = useState<
@@ -150,7 +164,11 @@ export default function App() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 text-slate-600 font-sans">
         <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin mb-3" />
-        <div className="text-xs font-medium tracking-tight">Initialisiere ISA Wissensplattform...</div>
+        <div className="text-xs font-medium tracking-tight">
+          {language === 'ru'
+            ? 'Инициализация платформы знаний ISA...'
+            : 'Initialisiere ISA Wissensplattform...'}
+        </div>
       </div>
     );
   }
@@ -161,6 +179,8 @@ export default function App() {
       <PresentationMode
         initialTopicId={currentTopicId}
         databaseState={databaseState}
+        language={language}
+        onLanguageChange={handleLanguageChange}
         onExit={() => navigateTo('topic', currentTopicId)}
         onNavigateHome={() => navigateTo('home')}
       />
@@ -173,6 +193,8 @@ export default function App() {
       <Header
         currentView={currentView}
         currentTopicId={currentTopicId}
+        language={language}
+        onLanguageChange={handleLanguageChange}
         onNavigate={navigateTo}
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenImportExport={() => setIsImportExportOpen(true)}
@@ -185,6 +207,7 @@ export default function App() {
         {currentView === 'home' && (
           <OriginalSketchCanvas
             databaseState={databaseState}
+            language={language}
             onSelectTopic={(topicId) => navigateTo('topic', topicId)}
             onOpenCalibration={() => setIsCalibrationOpen(true)}
             onImageChanged={(dataUrl) => {
@@ -197,6 +220,7 @@ export default function App() {
           <TopicDetailView
             topicId={currentTopicId}
             databaseState={databaseState}
+            language={language}
             onNavigateHome={() => navigateTo('home')}
             onSelectTopic={(topicId) => navigateTo('topic', topicId)}
             onRefreshData={refreshData}
@@ -206,6 +230,7 @@ export default function App() {
         {currentView === 'overview' && (
           <GlobalOverview
             databaseState={databaseState}
+            language={language}
             onSelectTopic={(topicId) => navigateTo('topic', topicId)}
             onNavigateHome={() => navigateTo('home')}
             onNavigateSection={(section) => navigateTo(section)}
@@ -215,6 +240,7 @@ export default function App() {
         {currentView === 'competitors' && (
           <CompetitorHub
             databaseState={databaseState}
+            language={language}
             onSelectTopic={(topicId) => navigateTo('topic', topicId)}
             onNavigateHome={() => navigateTo('home')}
           />
@@ -222,6 +248,7 @@ export default function App() {
 
         {currentView === 'event-storming' && (
           <EventStormingHub
+            language={language}
             onNavigateHome={() => navigateTo('home')}
             onSelectTopic={(topicId) => navigateTo('topic', topicId)}
           />
@@ -229,8 +256,11 @@ export default function App() {
 
         {currentView === 'senior-decisions' && (
           <SeniorDecisionsHub
+            language={language}
+            databaseState={databaseState}
             onNavigateHome={() => navigateTo('home')}
             onSelectTopic={(topicId) => navigateTo('topic', topicId)}
+            onRefreshData={refreshData}
           />
         )}
       </main>
@@ -240,6 +270,7 @@ export default function App() {
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
         databaseState={databaseState}
+        language={language}
         onSelectResult={(topicId) => navigateTo('topic', topicId)}
       />
 
@@ -248,6 +279,7 @@ export default function App() {
         isOpen={isImportExportOpen}
         onClose={() => setIsImportExportOpen(false)}
         databaseState={databaseState}
+        language={language}
         onDataImported={refreshData}
       />
 

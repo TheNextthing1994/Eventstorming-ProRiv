@@ -9,7 +9,7 @@ import {
   Check,
   AlertCircle
 } from 'lucide-react';
-import { DatabaseState, TopicId, KnowledgeStatus } from '../types';
+import { DatabaseState, TopicId, KnowledgeStatus, Language } from '../types';
 import { TOPIC_DEFINITIONS, TOPIC_ORDER } from '../db/defaultData';
 import {
   exportStateAsJson,
@@ -25,6 +25,7 @@ interface ImportExportModalProps {
   isOpen: boolean;
   onClose: () => void;
   databaseState: DatabaseState;
+  language?: Language;
   onDataImported: () => Promise<void>;
 }
 
@@ -32,6 +33,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
   isOpen,
   onClose,
   databaseState,
+  language = 'ru',
   onDataImported
 }) => {
   const [activeTab, setActiveTab] = useState<'export' | 'import'>('export');
@@ -205,7 +207,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50 shrink-0">
           <div className="flex items-center gap-2">
             <h3 className="text-base font-semibold text-slate-900">
-              Datenimport & Export
+              {language === 'ru' ? 'Импорт и экспорт данных' : 'Datenimport & Export'}
             </h3>
           </div>
           <button
@@ -226,7 +228,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
-            Daten exportieren (JSON & Markdown)
+            {language === 'ru' ? 'Экспорт данных (JSON и Markdown)' : 'Daten exportieren (JSON & Markdown)'}
           </button>
           <button
             onClick={() => setActiveTab('import')}
@@ -236,7 +238,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
-            Recherche importieren (Text, .md, .json)
+            {language === 'ru' ? 'Импорт исследования (Текст, .md, .json)' : 'Recherche importieren (Text, .md, .json)'}
           </button>
         </div>
 

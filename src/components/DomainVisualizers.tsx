@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Users,
   Shield,
@@ -13,16 +13,31 @@ import {
   Cloud,
   Smartphone,
   Server,
-  FileText,
-  CornerDownRight
+  FileText
 } from 'lucide-react';
-import { TopicId } from '../types';
+import { Language } from '../types';
+
+interface VisualizerProps {
+  language?: Language;
+}
 
 /**
  * 1. USERS: Rollen- und Berechtigungsmatrix
  */
-export const RoleMatrixVisualizer: React.FC = () => {
-  const permissions = [
+export const RoleMatrixVisualizer: React.FC<VisualizerProps> = ({ language = 'ru' }) => {
+  const permissions = language === 'ru' ? [
+    { action: 'Выбор стройплощадки и проекта', worker: true, foreman: true, office: true, customer: false, note: 'Рабочий выбирает свой объект' },
+    { action: 'Старт / стоп рабочего времени (WorkSession)', worker: true, foreman: true, office: false, customer: false, note: 'Валидация GPS при отметке' },
+    { action: 'Замеры бурения и резки, загрузка фото', worker: true, foreman: true, office: true, customer: false, note: 'Диаметры, глубина, погонные метры' },
+    { action: 'Подача рапорта на согласование (WorkReportSubmitted)', worker: true, foreman: true, office: false, customer: false, note: 'Передача на проверку бригадиру' },
+    { action: 'Проверка и подтверждение GPS-отклонений', worker: false, foreman: true, office: true, customer: false, note: 'Бригадир оценивает расхождение' },
+    { action: 'Утверждение часов для Tripletex (TimesheetApproved)', worker: false, foreman: true, office: true, customer: false, note: 'Согласование табеля зарплаты' },
+    { action: 'Техническое утверждение рапорта (WorkReportApproved)', worker: false, foreman: true, office: true, customer: false, note: 'Проверка объемов для счета клиенту' },
+    { action: 'Изменение коммерческих тарифов и оверрайдов', worker: false, foreman: false, office: true, customer: false, note: 'Только офис управляет ценами' },
+    { action: 'Открытие утвержденного рапорта на правку (ревизия)', worker: false, foreman: false, office: true, customer: false, note: 'Требует указания причины аудита' },
+    { action: 'Просмотр и подтверждение рапорта по временной ссылке', worker: false, foreman: false, office: false, customer: true, note: 'Ссылка по SMS/Mail без пароля' },
+    { action: 'Выгрузка часов и ссылок в Tripletex ERP', worker: false, foreman: false, office: true, customer: false, note: 'Асинхронная очередь экспорта' }
+  ] : [
     { action: 'Baustelle & Projekt auswählen', worker: true, foreman: true, office: true, customer: false, note: 'Arbeiter wählt eigenen Einsatzort' },
     { action: 'Arbeitszeit starten / stoppen (WorkSession)', worker: true, foreman: true, office: false, customer: false, note: 'GPS-Plausibilisierung beim Stempeln' },
     { action: 'Kernbohr- & Säge-Aufmaß erfassen', worker: true, foreman: true, office: true, customer: false, note: 'Mengen, Maße (mm, cm, m), Fotos' },
@@ -42,14 +57,20 @@ export const RoleMatrixVisualizer: React.FC = () => {
         <div>
           <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
             <Shield className="w-4 h-4 text-emerald-700" />
-            <span>Vorgeschlagene Rollen- & Berechtigungsmatrix (RBAC)</span>
+            <span>
+              {language === 'ru'
+                ? 'Рекомендуемая матрица ролей и прав доступа (RBAC)'
+                : 'Vorgeschlagene Rollen- & Berechtigungsmatrix (RBAC)'}
+            </span>
           </h4>
           <p className="text-[11px] text-slate-500 mt-0.5">
-            Serverseitige Autorisierungsregeln. Unbestätigte Regeln sind als Vorschlag gekennzeichnet.
+            {language === 'ru'
+              ? 'Серверные правила авторизации на уровне бэкенда. Неподтвержденные правила помечены как предложения.'
+              : 'Serverseitige Autorisierungsregeln. Unbestätigte Regeln sind als Vorschlag gekennzeichnet.'}
           </p>
         </div>
         <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
-          Status: Empfohlen (Backend-RBAC)
+          {language === 'ru' ? 'Статус: Рекомендовано (Backend-RBAC)' : 'Status: Empfohlen (Backend-RBAC)'}
         </span>
       </div>
 
@@ -57,12 +78,24 @@ export const RoleMatrixVisualizer: React.FC = () => {
         <table className="w-full text-left text-xs">
           <thead className="bg-slate-50 text-slate-600 font-mono text-[11px] uppercase border-b border-slate-200">
             <tr>
-              <th className="py-2.5 px-3">Aktion / Geschäftsfunktion</th>
-              <th className="py-2.5 px-2 text-center w-24">Arbeiter</th>
-              <th className="py-2.5 px-2 text-center w-24">Vorarbeiter</th>
-              <th className="py-2.5 px-2 text-center w-24">Büro / Admin</th>
-              <th className="py-2.5 px-2 text-center w-24">Kunde</th>
-              <th className="py-2.5 px-3">Hinweis / Regel</th>
+              <th className="py-2.5 px-3">
+                {language === 'ru' ? 'Действие / Бизнес-операция' : 'Aktion / Geschäftsfunktion'}
+              </th>
+              <th className="py-2.5 px-2 text-center w-24">
+                {language === 'ru' ? 'Рабочий' : 'Arbeiter'}
+              </th>
+              <th className="py-2.5 px-2 text-center w-24">
+                {language === 'ru' ? 'Бригадир' : 'Vorarbeiter'}
+              </th>
+              <th className="py-2.5 px-2 text-center w-24">
+                {language === 'ru' ? 'Офис / Админ' : 'Büro / Admin'}
+              </th>
+              <th className="py-2.5 px-2 text-center w-24">
+                {language === 'ru' ? 'Заказчик' : 'Kunde'}
+              </th>
+              <th className="py-2.5 px-3">
+                {language === 'ru' ? 'Правило / Примечание' : 'Hinweis / Regel'}
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -70,16 +103,32 @@ export const RoleMatrixVisualizer: React.FC = () => {
               <tr key={idx} className="hover:bg-slate-50/60 transition-colors">
                 <td className="py-2.5 px-3 font-medium text-slate-900">{p.action}</td>
                 <td className="py-2.5 px-2 text-center font-mono">
-                  {p.worker ? <span className="text-emerald-700 font-bold">Ja</span> : <span className="text-slate-300">Nein</span>}
+                  {p.worker ? (
+                    <span className="text-emerald-700 font-bold">{language === 'ru' ? 'Да' : 'Ja'}</span>
+                  ) : (
+                    <span className="text-slate-300">{language === 'ru' ? 'Нет' : 'Nein'}</span>
+                  )}
                 </td>
                 <td className="py-2.5 px-2 text-center font-mono">
-                  {p.foreman ? <span className="text-emerald-700 font-bold">Ja</span> : <span className="text-slate-300">Nein</span>}
+                  {p.foreman ? (
+                    <span className="text-emerald-700 font-bold">{language === 'ru' ? 'Да' : 'Ja'}</span>
+                  ) : (
+                    <span className="text-slate-300">{language === 'ru' ? 'Нет' : 'Nein'}</span>
+                  )}
                 </td>
                 <td className="py-2.5 px-2 text-center font-mono">
-                  {p.office ? <span className="text-emerald-700 font-bold">Ja</span> : <span className="text-slate-300">Nein</span>}
+                  {p.office ? (
+                    <span className="text-emerald-700 font-bold">{language === 'ru' ? 'Да' : 'Ja'}</span>
+                  ) : (
+                    <span className="text-slate-300">{language === 'ru' ? 'Нет' : 'Nein'}</span>
+                  )}
                 </td>
                 <td className="py-2.5 px-2 text-center font-mono">
-                  {p.customer ? <span className="text-sky-700 font-bold">Ja</span> : <span className="text-slate-300">Nein</span>}
+                  {p.customer ? (
+                    <span className="text-sky-700 font-bold">{language === 'ru' ? 'Да' : 'Ja'}</span>
+                  ) : (
+                    <span className="text-slate-300">{language === 'ru' ? 'Нет' : 'Nein'}</span>
+                  )}
                 </td>
                 <td className="py-2.5 px-3 text-slate-500 text-[11px]">{p.note}</td>
               </tr>
@@ -94,32 +143,42 @@ export const RoleMatrixVisualizer: React.FC = () => {
 /**
  * 2. CLIENTS: Datenmodell-Hierarchie Customer → Project → Site
  */
-export const EntityHierarchyVisualizer: React.FC = () => {
+export const EntityHierarchyVisualizer: React.FC<VisualizerProps> = ({ language = 'ru' }) => {
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
             <Layers className="w-4 h-4 text-emerald-700" />
-            <span>Datenmodell-Hierarchie: Customer → Project → Site</span>
+            <span>
+              {language === 'ru'
+                ? 'Иерархия доменной модели: Customer → Project → Site'
+                : 'Datenmodell-Hierarchie: Customer → Project → Site'}
+            </span>
           </h4>
           <p className="text-[11px] text-slate-500 mt-0.5">
-            Strikte Trennung verhindert Datenvermischung bei GPS, Tripletex und Preisregeln.
+            {language === 'ru'
+              ? 'Строгое разделение исключает путаницу геозон, тарифов и синхронизации с Tripletex.'
+              : 'Strikte Trennung verhindert Datenvermischung bei GPS, Tripletex und Preisregeln.'}
           </p>
         </div>
         <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
-          Status: Empfohlenes Domänenmodell
+          {language === 'ru' ? 'Статус: Рекомендованная модель' : 'Status: Empfohlenes Domänenmodell'}
         </span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-900">1. Customer (Kunde)</span>
+            <span className="text-xs font-bold text-slate-900">
+              {language === 'ru' ? '1. Customer (Заказчик)' : '1. Customer (Kunde)'}
+            </span>
             <span className="text-[10px] font-mono text-slate-400">Master: Tripletex</span>
           </div>
           <p className="text-[11px] text-slate-600 leading-relaxed">
-            Auftraggeber, Rechnungsempfänger, Zahlungskonditionen und Rahmenpreislisten.
+            {language === 'ru'
+              ? 'Юридическое лицо, плательщик, условия оплаты и рамочные прайс-листы.'
+              : 'Auftraggeber, Rechnungsempfänger, Zahlungskonditionen und Rahmenpreislisten.'}
           </p>
           <div className="text-[10px] font-mono text-slate-500 bg-white p-2 rounded border border-slate-200/60">
             • id (UUID)<br/>
@@ -131,11 +190,15 @@ export const EntityHierarchyVisualizer: React.FC = () => {
 
         <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-900">2. Project (Projekt)</span>
+            <span className="text-xs font-bold text-slate-900">
+              {language === 'ru' ? '2. Project (Проект)' : '2. Project (Projekt)'}
+            </span>
             <span className="text-[10px] font-mono text-slate-400">1 : n zu Customer</span>
           </div>
           <p className="text-[11px] text-slate-600 leading-relaxed">
-            Kaufmännisches Projekt, Budget, Festpreis oder Regie, Projektleiter.
+            {language === 'ru'
+              ? 'Договорной проект, бюджет, фикс/почасовая оплата, ответственный инженер.'
+              : 'Kaufmännisches Projekt, Budget, Festpreis oder Regie, Projektleiter.'}
           </p>
           <div className="text-[10px] font-mono text-slate-500 bg-white p-2 rounded border border-slate-200/60">
             • id (UUID)<br/>
@@ -148,11 +211,15 @@ export const EntityHierarchyVisualizer: React.FC = () => {
 
         <div className="p-3.5 bg-emerald-50/40 rounded-lg border border-emerald-200 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-emerald-950">3. Site (Baustelle / Einsatzort)</span>
+            <span className="text-xs font-bold text-emerald-950">
+              {language === 'ru' ? '3. Site (Стройплощадка)' : '3. Site (Baustelle / Einsatzort)'}
+            </span>
             <span className="text-[10px] font-mono text-emerald-700">1 : n zu Project</span>
           </div>
           <p className="text-[11px] text-slate-600 leading-relaxed">
-            Physischer Ausführungsort mit Adresse, GPS-Koordinaten und optionalem Geofence.
+            {language === 'ru'
+              ? 'Физический адрес стройки с координатами GPS и радиусом геозоны.'
+              : 'Physischer Ausführungsort mit Adresse, GPS-Koordinaten und optionalem Geofence.'}
           </p>
           <div className="text-[10px] font-mono text-slate-700 bg-white p-2 rounded border border-emerald-200/60">
             • id (UUID)<br/>
@@ -164,9 +231,11 @@ export const EntityHierarchyVisualizer: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-3 bg-slate-100/70 rounded-lg text-xs text-slate-700 flex items-center justify-between font-mono">
-        <span className="font-semibold text-slate-800">Zuordnung der Arbeit:</span>
-        <span>Site ──(verknüpft mit)──► WorkSession (Zeit) & WorkReport (Aufmaß)</span>
+      <div className="p-3 bg-slate-100/70 rounded-lg text-xs text-slate-700 flex flex-wrap items-center justify-between font-mono">
+        <span className="font-semibold text-slate-800">
+          {language === 'ru' ? 'Связь с фактической работой:' : 'Zuordnung der Arbeit:'}
+        </span>
+        <span>Site ──► WorkSession (Время) &amp; WorkReport (Замеры)</span>
       </div>
     </div>
   );
@@ -175,53 +244,64 @@ export const EntityHierarchyVisualizer: React.FC = () => {
 /**
  * 3. RAPORT: Aufmaß-Struktur & Modell-Vorschau
  */
-export const WorkReportPreviewVisualizer: React.FC = () => {
+export const WorkReportPreviewVisualizer: React.FC<VisualizerProps> = ({ language = 'ru' }) => {
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
             <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
-            <span>Aufmaß-Struktur & Gewerkespezifische Rapport-Vorschau</span>
+            <span>
+              {language === 'ru'
+                ? 'Структура замеров и отраслевые операции ProRiv'
+                : 'Aufmaß-Struktur & Gewerkespezifische Rapport-Vorschau'}
+            </span>
           </h4>
           <p className="text-[11px] text-slate-500 mt-0.5">
-            Hauptarbeitsarten von ProRiv mit korrekten physikalischen Einheiten (ohne Scheinpreise).
+            {language === 'ru'
+              ? 'Основные типы работ ProRiv с физическими единицами (без вымышленных цен).'
+              : 'Hauptarbeitsarten von ProRiv mit korrekten physikalischen Einheiten (ohne Scheinpreise).'}
           </p>
         </div>
         <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
-          Status: ProRiv Projektstandard
+          {language === 'ru' ? 'Стандарт ProRiv' : 'ProRiv Projektstandard'}
         </span>
       </div>
 
-      {/* 3 Work Categories */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
         <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-          <span className="font-bold text-slate-900 block mb-1">A. Kernbohren</span>
+          <span className="font-bold text-slate-900 block mb-1">
+            {language === 'ru' ? 'А. Алмазное бурение' : 'A. Kernbohren'}
+          </span>
           <ul className="space-y-1 text-slate-600 text-[11px]">
-            <li>• <strong>Durchmesser:</strong> in Millimeter (z. B. Ø 110 mm, Ø 200 mm)</li>
-            <li>• <strong>Bohrtiefe:</strong> in Zentimeter (Bauteildicke)</li>
-            <li>• <strong>Anzahl:</strong> Stückzahl Bohrungen</li>
-            <li>• <strong>Ausrichtung:</strong> Wand, Decke/Boden oder Überkopf</li>
+            <li>• <strong>{language === 'ru' ? 'Диаметр:' : 'Durchmesser:'}</strong> в мм (например, Ø 110 мм, Ø 200 мм)</li>
+            <li>• <strong>{language === 'ru' ? 'Глубина:' : 'Bohrtiefe:'}</strong> в сантиметрах (толщина конструкции)</li>
+            <li>• <strong>{language === 'ru' ? 'Количество:' : 'Anzahl:'}</strong> число отверстий</li>
+            <li>• <strong>{language === 'ru' ? 'Положение:' : 'Ausrichtung:'}</strong> стена, пол, перекрытие, потолок</li>
           </ul>
         </div>
 
         <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-          <span className="font-bold text-slate-900 block mb-1">B. Bodensäge</span>
+          <span className="font-bold text-slate-900 block mb-1">
+            {language === 'ru' ? 'Б. Нарезка швов пола' : 'B. Bodensäge'}
+          </span>
           <ul className="space-y-1 text-slate-600 text-[11px]">
-            <li>• <strong>Schnitttiefe:</strong> in Zentimeter (z. B. 15 cm, 25 cm)</li>
-            <li>• <strong>Schnittlänge:</strong> in laufenden Metern (m)</li>
-            <li>• <strong>Anzahl Schnitte:</strong> zur Erfassung von Teilabschnitten</li>
-            <li>• <strong>Schnittvolumen / Fläche:</strong> abgeleitet</li>
+            <li>• <strong>{language === 'ru' ? 'Глубина реза:' : 'Schnitttiefe:'}</strong> в см (например, 15 см, 25 см)</li>
+            <li>• <strong>{language === 'ru' ? 'Длина реза:' : 'Schnittlänge:'}</strong> в погонных метрах (м)</li>
+            <li>• <strong>{language === 'ru' ? 'Количество линий:' : 'Anzahl Schnitte:'}</strong> число участков</li>
+            <li>• <strong>{language === 'ru' ? 'Площадь реза:' : 'Schnittfläche:'}</strong> расчетная величина</li>
           </ul>
         </div>
 
         <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-          <span className="font-bold text-slate-900 block mb-1">C. Wandsäge / Handsäge</span>
+          <span className="font-bold text-slate-900 block mb-1">
+            {language === 'ru' ? 'В. Стенорезка и ручная резка' : 'C. Wandsäge / Handsäge'}
+          </span>
           <ul className="space-y-1 text-slate-600 text-[11px]">
-            <li>• <strong>Schnitttiefe:</strong> in Zentimeter</li>
-            <li>• <strong>Schnittlänge:</strong> in laufenden Metern (m)</li>
-            <li>• <strong>Verfahren:</strong> Schienengeführt oder Handtrennschleifer</li>
-            <li>• <strong>Bauteil:</strong> Beton, Mauerwerk, Deckenöffnung</li>
+            <li>• <strong>{language === 'ru' ? 'Глубина реза:' : 'Schnitttiefe:'}</strong> в сантиметрах</li>
+            <li>• <strong>{language === 'ru' ? 'Длина реза:' : 'Schnittlänge:'}</strong> в погонных метрах (м)</li>
+            <li>• <strong>{language === 'ru' ? 'Тип:' : 'Verfahren:'}</strong> рельсовая пила или ручной бензорез</li>
+            <li>• <strong>{language === 'ru' ? 'Материал:' : 'Bauteil:'}</strong> бетон, кирпич, проем</li>
           </ul>
         </div>
       </div>
@@ -229,10 +309,24 @@ export const WorkReportPreviewVisualizer: React.FC = () => {
       {/* Surcharge Catalog */}
       <div className="p-3.5 bg-slate-50/70 rounded-lg border border-slate-200 space-y-2">
         <span className="text-xs font-bold text-slate-900 block">
-          Erfasster Katalog von Zusatzleistungen & Erschwernissen (Zuschläge):
+          {language === 'ru'
+            ? 'Каталог дополнительных услуг и сложностей (надбавки):'
+            : 'Erfasster Katalog von Zusatzleistungen & Erschwernissen (Zuschläge):'}
         </span>
         <div className="flex flex-wrap gap-1.5 text-[11px]">
-          {[
+          {(language === 'ru' ? [
+            'Транспорт / выезд',
+            'Монтаж оборудования',
+            'Подъемник / вышка',
+            'Пробное бурение',
+            'Подсобный рабочий',
+            'Почасовые допработы',
+            'Сухое бурение с пылесосом',
+            'Гранит / асфальт',
+            'Массив дерева / композит',
+            'Тяжелая арматура',
+            'Работа на потолке'
+          ] : [
             'Transport / Anfahrt',
             'Baustelleneinrichtung / Rüsten',
             'Hebebühne',
@@ -244,7 +338,7 @@ export const WorkReportPreviewVisualizer: React.FC = () => {
             'Massivholz / Verbund',
             'Starke Eisenbewehrung',
             'Überkopfarbeiten'
-          ].map((item, i) => (
+          ]).map((item, i) => (
             <span key={i} className="px-2 py-0.5 bg-white border border-slate-200 text-slate-700 rounded font-medium">
               {item}
             </span>
@@ -254,7 +348,9 @@ export const WorkReportPreviewVisualizer: React.FC = () => {
 
       {/* Status workflow */}
       <div className="p-3 bg-emerald-50/40 rounded-lg border border-emerald-200 text-xs space-y-1.5">
-        <span className="font-bold text-emerald-950 block">Rapport-Lebenszyklus & Revisionssicherheit:</span>
+        <span className="font-bold text-emerald-950 block">
+          {language === 'ru' ? 'Жизненный цикл рапорта и версионирование:' : 'Rapport-Lebenszyklus & Revisionssicherheit:'}
+        </span>
         <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] text-slate-700">
           <span className="px-2 py-0.5 bg-white rounded border border-slate-200 font-semibold">Draft</span>
           <span>→</span>
@@ -262,10 +358,14 @@ export const WorkReportPreviewVisualizer: React.FC = () => {
           <span>→</span>
           <span className="px-2 py-0.5 bg-white rounded border border-slate-200 font-semibold">ForemanApproved</span>
           <span>→</span>
-          <span className="px-2 py-0.5 bg-emerald-100 rounded border border-emerald-300 font-bold text-emerald-900">OfficeApproved (PriceSnapshot Locked)</span>
+          <span className="px-2 py-0.5 bg-emerald-100 rounded border border-emerald-300 font-bold text-emerald-900">
+            OfficeApproved (PriceSnapshot Locked)
+          </span>
         </div>
         <p className="text-[11px] text-slate-600 mt-1">
-          Korrekturschleife: <em>Submitted → CorrectionRequested → Revised → Submitted</em>. Nach Freigabe werden Änderungen nur über eine neue Revision (WorkReportRevision) mit Audit-Trail zugelassen.
+          {language === 'ru'
+            ? 'Цикл правок: Submitted → CorrectionRequested → Revised → Submitted. Правки утвержденных документов только через ревизию WorkReportRevision с аудитом.'
+            : 'Korrekturschleife: Submitted → CorrectionRequested → Revised → Submitted. Nach Freigabe werden Änderungen nur über eine neue Revision (WorkReportRevision) mit Audit-Trail zugelassen.'}
         </p>
       </div>
     </div>
@@ -275,21 +375,27 @@ export const WorkReportPreviewVisualizer: React.FC = () => {
 /**
  * 4. VREMYA: Dreiteilung WorkSession != TimesheetEntry != WorkReport
  */
-export const TimeTripleDivisionVisualizer: React.FC = () => {
+export const TimeTripleDivisionVisualizer: React.FC<VisualizerProps> = ({ language = 'ru' }) => {
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
             <Clock className="w-4 h-4 text-emerald-700" />
-            <span>Fundamentale Dreiteilung: WorkSession ≠ TimesheetEntry ≠ WorkReport</span>
+            <span>
+              {language === 'ru'
+                ? 'Фундаментальное разделение: WorkSession ≠ TimesheetEntry ≠ WorkReport'
+                : 'Fundamentale Dreiteilung: WorkSession ≠ TimesheetEntry ≠ WorkReport'}
+            </span>
           </h4>
           <p className="text-[11px] text-slate-500 mt-0.5">
-            Drei eigenständige Entitäten für Anwesenheit, Lohnabrechnung und Leistungsnachweis.
+            {language === 'ru'
+              ? 'Три независимые сущности для присутствия, зарплатного табеля и строительного отчета.'
+              : 'Drei eigenständige Entitäten für Anwesenheit, Lohnabrechnung und Leistungsnachweis.'}
           </p>
         </div>
         <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
-          Status: Architektur-Kernregel
+          {language === 'ru' ? 'Архитектурное правило' : 'Status: Architektur-Kernregel'}
         </span>
       </div>
 
@@ -300,14 +406,19 @@ export const TimeTripleDivisionVisualizer: React.FC = () => {
             <span className="text-xs font-bold text-slate-900">1. WorkSession</span>
           </div>
           <p className="text-[11px] text-slate-600 leading-relaxed">
-            <strong>Was es ist:</strong> Die physische Anwesenheitszeit (Clock-in / Clock-out) an einem Einsatzort.
+            <strong>{language === 'ru' ? 'Что это:' : 'Was es ist:'}</strong>{' '}
+            {language === 'ru'
+              ? 'Физическое время присутствия (Clock-in / Clock-out) на конкретной стройплощадке.'
+              : 'Die physische Anwesenheitszeit (Clock-in / Clock-out) an einem Einsatzort.'}
           </p>
           <div className="text-[10px] font-mono text-slate-600 bg-white p-2 rounded border border-slate-200/60 space-y-0.5">
             <div>• startTimestamp / endTimestamp</div>
             <div>• clockInLocation (Lat, Long, Accuracy)</div>
-            <div>• exceptionFlag (Kein GPS / Außerhalb Geofence)</div>
+            <div>• exceptionFlag (Нет GPS / Вне геозоны)</div>
           </div>
-          <span className="text-[10px] text-slate-400 block italic">Dient als technischer Nachweis</span>
+          <span className="text-[10px] text-slate-400 block italic">
+            {language === 'ru' ? 'Техническое подтверждение смены' : 'Dient als technischer Nachweis'}
+          </span>
         </div>
 
         <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
@@ -316,14 +427,19 @@ export const TimeTripleDivisionVisualizer: React.FC = () => {
             <span className="text-xs font-bold text-slate-900">2. TimesheetEntry</span>
           </div>
           <p className="text-[11px] text-slate-600 leading-relaxed">
-            <strong>Was es ist:</strong> Die abrechnungsrelevante Arbeitszeit nach Abzug von Pausen und Prüfung.
+            <strong>{language === 'ru' ? 'Что это:' : 'Was es ist:'}</strong>{' '}
+            {language === 'ru'
+              ? 'Оплачиваемые рабочие часы после вычета перерывов и проверки бригадиром.'
+              : 'Die abrechnungsrelevante Arbeitszeit nach Abzug von Pausen und Prüfung.'}
           </p>
           <div className="text-[10px] font-mono text-slate-600 bg-white p-2 rounded border border-slate-200/60 space-y-0.5">
             <div>• workerId, projectId, activityCode</div>
             <div>• approvedHours, overtimeMultiplier</div>
             <div>• status (Submitted, Approved, Exported)</div>
           </div>
-          <span className="text-[10px] text-slate-400 block italic">Fließt nach Vorarbeiterfreigabe zu Tripletex</span>
+          <span className="text-[10px] text-slate-400 block italic">
+            {language === 'ru' ? 'Экспортируется в Tripletex для зарплаты' : 'Fließt nach Vorarbeiterfreigabe zu Tripletex'}
+          </span>
         </div>
 
         <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
@@ -332,14 +448,19 @@ export const TimeTripleDivisionVisualizer: React.FC = () => {
             <span className="text-xs font-bold text-slate-900">3. WorkReport</span>
           </div>
           <p className="text-[11px] text-slate-600 leading-relaxed">
-            <strong>Was es ist:</strong> Das bauliche Aufmaß der ausgeführten Bohrungen, Schnitte und Regieleistungen.
+            <strong>{language === 'ru' ? 'Что это:' : 'Was es ist:'}</strong>{' '}
+            {language === 'ru'
+              ? 'Строительный замер выполненных объемов бурения, резки и допработ.'
+              : 'Das bauliche Aufmaß der ausgeführten Bohrungen, Schnitte und Regieleistungen.'}
           </p>
           <div className="text-[10px] font-mono text-slate-600 bg-white p-2 rounded border border-slate-200/60 space-y-0.5">
-            <div>• lines (Ø mm, Tiefe cm, Schnitte m)</div>
-            <div>• evidence (Fotos, Kundenunterschrift)</div>
-            <div>• priceSnapshot (Preise & Zuschläge)</div>
+            <div>• lines (Ø mm, глубина см, резка м)</div>
+            <div>• evidence (фото, подпись заказчика)</div>
+            <div>• priceSnapshot (фиксированные тарифы)</div>
           </div>
-          <span className="text-[10px] text-slate-400 block italic">Wird dem Kunden zur Prüfung vorgelegt</span>
+          <span className="text-[10px] text-slate-400 block italic">
+            {language === 'ru' ? 'Предоставляется заказчику на проверку' : 'Wird dem Kunden zur Prüfung vorgelegt'}
+          </span>
         </div>
       </div>
 
@@ -347,12 +468,26 @@ export const TimeTripleDivisionVisualizer: React.FC = () => {
       <div className="p-3.5 bg-amber-50/50 rounded-lg border border-amber-200/70 text-xs space-y-1.5">
         <div className="flex items-center gap-2 font-bold text-amber-950">
           <AlertTriangle className="w-4 h-4 text-amber-700" />
-          <span>GPS-Ausnahmepfad beim Einstempeln: Niemals den Arbeiter blockieren</span>
+          <span>
+            {language === 'ru'
+              ? 'Исключения GPS при чекине: Никогда не блокировать рабочего на объекте'
+              : 'GPS-Ausnahmepfad beim Einstempeln: Niemals den Arbeiter blockieren'}
+          </span>
         </div>
         <p className="text-[11px] text-slate-700 leading-relaxed">
-          Wenn ein Betonbohrer in einem Keller oder Tiefgarage ohne GPS eincheckt, bricht die App <strong>nicht</strong> ab.
-          Stattdessen wird die WorkSession mit dem Event <code className="font-mono bg-white px-1 py-0.5 rounded border border-amber-200">ClockInExceptionRecorded</code> versehen.
-          Der Vorarbeiter sieht die Auffälligkeit in seiner Freigabeliste und entscheidet fachlich.
+          {language === 'ru' ? (
+            <>
+              Если бурильщик чекинится в подвале или подземном паркинге без GPS, приложение <strong>не</strong> блокирует работу.
+              Смене присваивается событие <code className="font-mono bg-white px-1 py-0.5 rounded border border-amber-200">ClockInExceptionRecorded</code>.
+              Бригадир видит отметку в очереди согласования и принимает решение.
+            </>
+          ) : (
+            <>
+              Wenn ein Betonbohrer in einem Keller oder Tiefgarage ohne GPS eincheckt, bricht die App <strong>nicht</strong> ab.
+              Stattdessen wird die WorkSession mit dem Event <code className="font-mono bg-white px-1 py-0.5 rounded border border-amber-200">ClockInExceptionRecorded</code> versehen.
+              Der Vorarbeiter sieht die Auffälligkeit in seiner Freigabeliste und entscheidet fachlich.
+            </>
+          )}
         </p>
       </div>
     </div>
@@ -362,21 +497,27 @@ export const TimeTripleDivisionVisualizer: React.FC = () => {
 /**
  * 5. API: Integrationsarchitektur Tripletex <-> ISA
  */
-export const ApiArchitectureVisualizer: React.FC = () => {
+export const ApiArchitectureVisualizer: React.FC<VisualizerProps> = ({ language = 'ru' }) => {
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
             <Server className="w-4 h-4 text-emerald-700" />
-            <span>Integrationsarchitektur & Datenfluss: Tripletex ↔ ISA Work API</span>
+            <span>
+              {language === 'ru'
+                ? 'Архитектура интеграции: Tripletex ↔ ISA Work API'
+                : 'Integrationsarchitektur & Datenfluss: Tripletex ↔ ISA Work API'}
+            </span>
           </h4>
           <p className="text-[11px] text-slate-500 mt-0.5">
-            Klare Schnittstellentrennung, asynchrone Warteschlangen und Idempotenz.
+            {language === 'ru'
+              ? 'Четкое разделение ответственности, асинхронные очереди и идемпотентность.'
+              : 'Klare Schnittstellentrennung, asynchrone Warteschlangen und Idempotenz.'}
           </p>
         </div>
         <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
-          Status: Empfohlener Integrationsstandard
+          {language === 'ru' ? 'Рекомендованный стандарт' : 'Status: Empfohlener Integrationsstandard'}
         </span>
       </div>
 
@@ -385,38 +526,33 @@ export const ApiArchitectureVisualizer: React.FC = () => {
         <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
           <div className="flex items-center gap-2 font-bold text-slate-900">
             <ArrowRight className="w-3.5 h-3.5 text-sky-600" />
-            <span>Tripletex → ISA (Stammdatenabgleich)</span>
+            <span>
+              {language === 'ru' ? 'Tripletex → ISA (Справочники)' : 'Tripletex → ISA (Stammdatenabgleich)'}
+            </span>
           </div>
           <ul className="space-y-1.5 text-[11px] text-slate-600">
-            <li>• <strong>Kunden:</strong> Stammdaten und Kontaktadressen aus ERP importieren</li>
-            <li>• <strong>Projekte:</strong> Projektnummern, Bezeichnungen und Status</li>
-            <li>• <strong>Aktivitäten:</strong> Tripletex-Aktivitätscodes (Boring, Saging, Reisetid)</li>
-            <li>• <strong>Mitarbeiter:</strong> Benutzerkonten und Tripletex-Employee-IDs</li>
+            <li>• <strong>{language === 'ru' ? 'Заказчики:' : 'Kunden:'}</strong> {language === 'ru' ? 'Реквизиты и контакты из ERP' : 'Stammdaten und Kontaktadressen aus ERP'}</li>
+            <li>• <strong>{language === 'ru' ? 'Проекты:' : 'Projekte:'}</strong> {language === 'ru' ? 'Номера проектов и статусы' : 'Projektnummern, Bezeichnungen und Status'}</li>
+            <li>• <strong>{language === 'ru' ? 'Виды работ:' : 'Aktivitäten:'}</strong> {language === 'ru' ? 'Коды Tripletex (бурение, пила, дорога)' : 'Tripletex-Aktivitätscodes (Boring, Saging, Reisetid)'}</li>
+            <li>• <strong>{language === 'ru' ? 'Сотрудники:' : 'Mitarbeiter:'}</strong> {language === 'ru' ? 'Идентификаторы Tripletex Employee ID' : 'Benutzerkonten und Employee-IDs'}</li>
           </ul>
-          <div className="text-[10px] text-slate-400 pt-1">Periodischer Abgleich oder Webhooks</div>
         </div>
 
         {/* Outbound */}
         <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
           <div className="flex items-center gap-2 font-bold text-slate-900">
             <ArrowRight className="w-3.5 h-3.5 text-emerald-600" />
-            <span>ISA → Tripletex (Geprüfte Ausführungsdaten)</span>
+            <span>
+              {language === 'ru' ? 'ISA → Tripletex (Выгрузка часов)' : 'ISA → Tripletex (Geprüfte Ausführungsdaten)'}
+            </span>
           </div>
           <ul className="space-y-1.5 text-[11px] text-slate-600">
-            <li>• <strong>Freigegebene Stunden:</strong> Mitarbeiter, Projekt, Aktivität, Stunden</li>
-            <li>• <strong>Rapport-Referenz:</strong> Verlinkung des PDF-Prüfberichts in S3</li>
-            <li>• <strong>Idempotenter Export:</strong> Idempotency-Key verhindert Doppelbuchungen</li>
-            <li>• <strong>Fehler-Retry:</strong> Fehlgeschlagene Übertragungen verbleiben in Queue</li>
+            <li>• <strong>{language === 'ru' ? 'Часы:' : 'Freigegebene Stunden:'}</strong> {language === 'ru' ? 'Сотрудник, проект, вид работ, часы' : 'Mitarbeiter, Projekt, Aktivität, Stunden'}</li>
+            <li>• <strong>{language === 'ru' ? 'Ссылка на рапорт:' : 'Rapport-Referenz:'}</strong> {language === 'ru' ? 'Ссылка на PDF в S3' : 'Verlinkung des PDF-Prüfberichts in S3'}</li>
+            <li>• <strong>{language === 'ru' ? 'Идемпотентность:' : 'Idempotenter Export:'}</strong> {language === 'ru' ? 'Ключ исключает дублирование записей' : 'Idempotency-Key verhindert Doppelbuchungen'}</li>
+            <li>• <strong>{language === 'ru' ? 'Повторы при сбоях:' : 'Fehler-Retry:'}</strong> {language === 'ru' ? 'Сбои сети остаются в очереди' : 'Fehlgeschlagene Übertragungen verbleiben in Queue'}</li>
           </ul>
-          <div className="text-[10px] text-slate-400 pt-1">Fachliche Freigabe ≠ Exportstatus</div>
         </div>
-      </div>
-
-      <div className="p-3 bg-slate-100/60 rounded-lg text-[11px] text-slate-600 space-y-1">
-        <span className="font-semibold text-slate-800 block">Wichtiger technischer Grundsatz:</span>
-        <p>
-          Ein fehlgeschlagener Tripletex-API-Call (z. B. Netzwerk-Timeout) darf niemals die fachliche Vorarbeiter-Freigabe in ISA aufheben. Der Datensatz verbleibt im Zustand <code className="font-mono bg-white px-1 py-0.5 rounded">ForemanApproved</code> und geht in den Status <code className="font-mono bg-white px-1 py-0.5 rounded">TripletexExportFailed</code> zur automatischen Wiederholung.
-        </p>
       </div>
     </div>
   );
@@ -425,21 +561,27 @@ export const ApiArchitectureVisualizer: React.FC = () => {
 /**
  * 6. MOBILE APP: Technische Architektur (React Native, Cognito, S3, PostgreSQL)
  */
-export const MobileTechStackVisualizer: React.FC = () => {
+export const MobileTechStackVisualizer: React.FC<VisualizerProps> = ({ language = 'ru' }) => {
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
             <Smartphone className="w-4 h-4 text-emerald-700" />
-            <span>Vorgeschriebene Technologie-Architektur aus der Originalskizze</span>
+            <span>
+              {language === 'ru'
+                ? 'Технологический стек из оригинального эскиза сеньора'
+                : 'Vorgeschriebene Technologie-Architektur aus der Originalskizze'}
+            </span>
           </h4>
           <p className="text-[11px] text-slate-500 mt-0.5">
-            React Native, AWS Cognito und AWS Storage S3 werden verbindlich beibehalten.
+            {language === 'ru'
+              ? 'React Native, AWS Cognito и AWS Storage S3 строго сохраняются.'
+              : 'React Native, AWS Cognito und AWS Storage S3 werden verbindlich beibehalten.'}
           </p>
         </div>
         <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
-          Vorgabe der Senior-Skizze
+          {language === 'ru' ? 'Эскиз сеньора' : 'Vorgabe der Senior-Skizze'}
         </span>
       </div>
 
@@ -450,9 +592,13 @@ export const MobileTechStackVisualizer: React.FC = () => {
             <span>React Native</span>
           </div>
           <p className="text-[11px] text-slate-600">
-            Plattformübergreifend für iOS & Android. Offline-fähig via lokaler SQLite-Datenbank.
+            {language === 'ru'
+              ? 'Кроссплатформенный клиент iOS & Android с локальной SQLite.'
+              : 'Plattformübergreifend für iOS & Android. Offline-fähig via lokaler SQLite-Datenbank.'}
           </p>
-          <span className="text-[10px] font-mono text-emerald-800 block">In Originalskizze</span>
+          <span className="text-[10px] font-mono text-emerald-800 block">
+            {language === 'ru' ? 'В эскизе' : 'In Originalskizze'}
+          </span>
         </div>
 
         <div className="p-3 bg-emerald-50/30 rounded-lg border border-emerald-200 space-y-1.5">
@@ -461,9 +607,13 @@ export const MobileTechStackVisualizer: React.FC = () => {
             <span>AWS Cognito</span>
           </div>
           <p className="text-[11px] text-slate-600">
-            User Pools, JWT-Token, sichere Authentifizierung und Offline-Token-Refresh.
+            {language === 'ru'
+              ? 'User Pools, JWT-токены, безопасный оффлайн-рефреш сессий.'
+              : 'User Pools, JWT-Token, sichere Authentifizierung und Offline-Token-Refresh.'}
           </p>
-          <span className="text-[10px] font-mono text-emerald-800 block">In Originalskizze</span>
+          <span className="text-[10px] font-mono text-emerald-800 block">
+            {language === 'ru' ? 'В эскизе' : 'In Originalskizze'}
+          </span>
         </div>
 
         <div className="p-3 bg-emerald-50/30 rounded-lg border border-emerald-200 space-y-1.5">
@@ -472,9 +622,13 @@ export const MobileTechStackVisualizer: React.FC = () => {
             <span>AWS Storage S3</span>
           </div>
           <p className="text-[11px] text-slate-600">
-            Sichere Ablage von Baustellenfotos, Unterschriften und generierten Rapport-PDFs via Presigned URLs.
+            {language === 'ru'
+              ? 'Надежное хранилище фото со стройки и PDF через Presigned URLs.'
+              : 'Sichere Ablage von Baustellenfotos, Unterschriften und generierten Rapport-PDFs via Presigned URLs.'}
           </p>
-          <span className="text-[10px] font-mono text-emerald-800 block">In Originalskizze</span>
+          <span className="text-[10px] font-mono text-emerald-800 block">
+            {language === 'ru' ? 'В эскизе' : 'In Originalskizze'}
+          </span>
         </div>
 
         <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1.5">
@@ -483,17 +637,12 @@ export const MobileTechStackVisualizer: React.FC = () => {
             <span>PostgreSQL (+ PostGIS)</span>
           </div>
           <p className="text-[11px] text-slate-600">
-            Relationale Work-API-Datenbank mit Geofencing-Unterstützung (AWS RDS Option).
+            {language === 'ru'
+              ? 'Реляционная база Work API с поддержкой геозон и транзакций.'
+              : 'Relationale Work-API-Datenbank mit Geofencing-Unterstützung (AWS RDS Option).'}
           </p>
-          <span className="text-[10px] font-mono text-slate-500 block">Ergänzende Empfehlung</span>
-        </div>
-      </div>
-
-      <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div>
-          <span className="font-bold text-slate-900 block">MVP-Abgrenzung: Was bauen wir NICHT?</span>
-          <span className="text-[11px] text-slate-500">
-            Kein vollständiges Bau-ERP, keine Finanzbuchhaltung, kein 3D-BIM, kein 24/7-Hintergrund-GPS, keine universelle Workflow-Engine.
+          <span className="text-[10px] font-mono text-slate-500 block">
+            {language === 'ru' ? 'Рекомендация бэкенда' : 'Ergänzende Empfehlung'}
           </span>
         </div>
       </div>

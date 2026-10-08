@@ -10,6 +10,7 @@ interface OriginalSketchCanvasProps {
   databaseState: DatabaseState;
   language: Language;
   onSelectTopic: (topicId: TopicId) => void;
+  onStartWorkshop: () => void;
   onOpenCalibration: () => void;
   onImageChanged: (dataUrl?: string) => void;
 }
@@ -18,6 +19,7 @@ export const OriginalSketchCanvas: React.FC<OriginalSketchCanvasProps> = ({
   databaseState,
   language,
   onSelectTopic,
+  onStartWorkshop,
   onOpenCalibration,
   onImageChanged
 }) => {
@@ -70,6 +72,22 @@ export const OriginalSketchCanvas: React.FC<OriginalSketchCanvasProps> = ({
 
   return (
     <div className="flex flex-col items-center w-full min-h-[calc(100vh-3.5rem)] bg-slate-100/70 p-4 sm:p-6 lg:p-8">
+      <div className="w-full max-w-5xl mb-4 bg-slate-900 text-white rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-emerald-300">
+            {language === 'ru' ? 'Встреча с сеньором' : 'Vorbereitung Senior-Meeting'}
+          </div>
+          <h2 className="text-lg font-bold mt-1">
+            {language === 'ru' ? 'Понять процесс, обсудить решения' : 'Kundenprozess verstehen und Entscheidungen klären'}
+          </h2>
+          <p className="text-xs text-slate-300 mt-1">
+            {language === 'ru' ? 'Одна интерактивная карта: потребности, исследования, OSS и открытые вопросы.' : 'Eine interaktive Karte: Kundenbedarf, Recherche, OSS-Optionen und offene Fragen.'}
+          </p>
+        </div>
+        <button onClick={onStartWorkshop} className="shrink-0 bg-emerald-500 text-slate-950 hover:bg-emerald-400 rounded-lg px-5 py-2.5 text-sm font-bold">
+          {language === 'ru' ? 'Открыть мастерскую →' : 'Senior-Workshop starten →'}
+        </button>
+      </div>
       {/* Control bar above the sketch */}
       <div className="w-full max-w-5xl mb-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600 bg-white border border-slate-200/90 rounded-lg px-4 py-2.5 shadow-xs">
         <div className="flex items-center gap-2">

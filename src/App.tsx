@@ -216,6 +216,7 @@ export default function App() {
             language={language}
             onSelectTopic={(topicId) => navigateTo('topic', topicId)}
             onStartWorkshop={() => navigateTo('workshop')}
+            onNavigateSection={(section) => navigateTo(section)}
             onOpenCalibration={() => setIsCalibrationOpen(true)}
             onImageChanged={(dataUrl) => {
               setDatabaseState(prev => prev ? { ...prev, customImage: dataUrl } : null);

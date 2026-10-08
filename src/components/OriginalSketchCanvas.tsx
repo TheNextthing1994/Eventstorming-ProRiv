@@ -5,12 +5,14 @@ import { TOPIC_DEFINITIONS } from '../db/defaultData';
 import { SketchVectorFallback } from './SketchVectorFallback';
 import { saveCustomImage, removeCustomImage } from '../db/indexedDb';
 import { getTranslation, getDualText } from '../i18n/translations';
+import { WorkshopFlowView } from './WorkshopFlowView';
 
 interface OriginalSketchCanvasProps {
   databaseState: DatabaseState;
   language: Language;
   onSelectTopic: (topicId: TopicId) => void;
   onStartWorkshop: () => void;
+  onNavigateSection: (section: string) => void;
   onOpenCalibration: () => void;
   onImageChanged: (dataUrl?: string) => void;
 }
@@ -20,10 +22,12 @@ export const OriginalSketchCanvas: React.FC<OriginalSketchCanvasProps> = ({
   language,
   onSelectTopic,
   onStartWorkshop,
+  onNavigateSection,
   onOpenCalibration,
   onImageChanged
 }) => {
   const [hoveredTopic, setHoveredTopic] = useState<TopicId | null>(null);
+  const [homeMode, setHomeMode] = useState<'sketch' | 'flow'>('sketch');
   const [useVectorOnly, setUseVectorOnly] = useState<boolean>(!databaseState.customImage);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -70,8 +74,42 @@ export const OriginalSketchCanvas: React.FC<OriginalSketchCanvasProps> = ({
     }
   };
 
+  const viewSwitcher = (
+    <div className="w-full max-w-5xl flex flex-wrap items-center justify-between gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2.5 mb-4 shadow-sm">
+      <span className="text-xs font-medium text-slate-600">
+        {language === 'ru' ? 'Главный вид проекта:' : 'Projekt-Hauptansicht:'}
+      </span>
+      <div className="inline-flex gap-1 bg-slate-100 rounded-lg p-1" role="group" aria-label={language === 'ru' ? 'Переключение вида' : 'Ansicht umschalten'}>
+        <button type="button" aria-pressed={homeMode === 'sketch'} onClick={() => setHomeMode('sketch')}
+          className={`rounded-md px-3 py-2 text-xs font-semibold transition-colors ${homeMode === 'sketch' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-white'}`}>
+          {language === 'ru' ? '① Круги / эскиз' : '① Kreis-Ansicht'}
+        </button>
+        <button type="button" aria-pressed={homeMode === 'flow'} onClick={() => setHomeMode('flow')}
+          className={`rounded-md px-3 py-2 text-xs font-semibold transition-colors ${homeMode === 'flow' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-white'}`}>
+          {language === 'ru' ? '② Этапы / Workshop Flow' : '② Phasen-Ansicht / Workshop-Flow'}
+        </button>
+      </div>
+    </div>
+  );
+
+  if (homeMode === 'flow') {
+    return (
+      <div className="flex flex-col items-center w-full min-h-[calc(100vh-3.5rem)] bg-slate-100/70 p-4 sm:p-6 lg:p-8">
+        {viewSwitcher}
+        <WorkshopFlowView
+          databaseState={databaseState}
+          language={language}
+          onStartWorkshop={onStartWorkshop}
+          onSelectTopic={onSelectTopic}
+          onNavigateSection={onNavigateSection}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center w-full min-h-[calc(100vh-3.5rem)] bg-slate-100/70 p-4 sm:p-6 lg:p-8">
+      {viewSwitcher}
       <div className="w-full max-w-5xl mb-4 bg-slate-900 text-white rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
         <div>
           <div className="text-[10px] font-semibold uppercase tracking-widest text-emerald-300">

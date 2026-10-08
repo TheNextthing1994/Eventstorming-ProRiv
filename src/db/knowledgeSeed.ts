@@ -209,7 +209,9 @@ export const SENIOR_DECISION_QUESTIONS: SeniorDecisionItem[] = [
     date: '2026-10-09',
     connectedTopics: ['vremya', 'users', 'clients', 'api']
   }
-];\n\nexport const DOMAIN_EVENTS_LIST: DomainEventItem[] = [
+];
+
+export const DOMAIN_EVENTS_LIST: DomainEventItem[] = [
   {
     id: 'de-1',
     name: 'WorkSessionStarted',

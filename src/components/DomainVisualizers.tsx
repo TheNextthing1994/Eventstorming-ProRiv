@@ -354,18 +354,14 @@ export const WorkReportPreviewVisualizer: React.FC<VisualizerProps> = ({ languag
         <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] text-slate-700">
           <span className="px-2 py-0.5 bg-white rounded border border-slate-200 font-semibold">Draft</span>
           <span>→</span>
-          <span className="px-2 py-0.5 bg-white rounded border border-slate-200 font-semibold">Submitted</span>
+          <span className="px-2 py-0.5 bg-white rounded border border-slate-200 font-semibold">SentToCustomer</span>
           <span>→</span>
-          <span className="px-2 py-0.5 bg-white rounded border border-slate-200 font-semibold">ForemanApproved</span>
-          <span>→</span>
-          <span className="px-2 py-0.5 bg-emerald-100 rounded border border-emerald-300 font-bold text-emerald-900">
-            OfficeApproved (PriceSnapshot Locked)
-          </span>
+          <span className="px-2 py-0.5 bg-emerald-100 rounded border border-emerald-300 font-bold text-emerald-900">Confirmed / Rejected / Commented</span>
         </div>
         <p className="text-[11px] text-slate-600 mt-1">
           {language === 'ru'
-            ? 'Цикл правок: Submitted → CorrectionRequested → Revised → Submitted. Правки утвержденных документов только через ревизию WorkReportRevision с аудитом.'
-            : 'Korrekturschleife: Submitted → CorrectionRequested → Revised → Submitted. Nach Freigabe werden Änderungen nur über eine neue Revision (WorkReportRevision) mit Audit-Trail zugelassen.'}
+            ? 'Из разговора: рапорт отправляет рабочий. Обязательное согласование прорабом НЕ подтверждено. Исправления и версии требуют уточнения.'
+            : 'Laut Kundengespräch versendet der Arbeiter den Rapport selbst. Eine verpflichtende Vorarbeiterfreigabe ist NICHT bestätigt. Korrektur- und Versionsregeln bleiben offen.'}
         </p>
       </div>
     </div>

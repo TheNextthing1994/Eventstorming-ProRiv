@@ -56,14 +56,14 @@ export const TOPIC_DEFINITIONS: Record<TopicId, TopicMeta> = {
     ],
     briefing: {
       seniorAsked: 'Wie viele Rollen brauchen wir, wer trägt welche Verantwortung und wer darf was im System tun?',
-      findingsSummary: 'Vier Rollen identifiziert: Arbeiter (Zeiten, Bohrungen/Schnitte, Fotos erfassen); Vorarbeiter (GPS-Ausnahmen prüfen, Stunden und Rapporte separat freigeben); Büro/Admin (Preise, Stammdaten, Tripletex-Überwachung); Kunde (sieht freigegebenen Rapport per Magic-Link).',
+      findingsSummary: 'Kundengespräch: Arbeiter erfasst Zeit und Rapport und sendet Rapport selbst an Kunden; Kunde bestätigt, lehnt ab oder kommentiert; Vorarbeiter prüft Stunden in Tripletex; Buchhaltung arbeitet ausschließlich in Tripletex. Aufgaben des Vorarbeiters in ISA noch offen.',
       competitorSummary: 'SmartDok und QuickBooks Time trennen Arbeiter-Erfassung und Vorarbeiter-Freigabe strikt. Arbeiter sehen in der Regel keine kaufmännischen Preise.',
       recommendationSummary: 'Serverseitiges RBAC. Ausgeblendete Buttons im UI reichen nicht. Stundenfreigabe und Rapportfreigabe müssen fachlich unabhängig bleiben.',
       openSummary: 'Darf der Arbeiter Preise sehen? Darf der Vorarbeiter Preise ändern? Wer darf freigegebene Rapporte wieder öffnen?'
     },
     briefingRu: {
       seniorAsked: 'Сколько типов пользователей нужно, кто за что отвечает и у кого какие права?',
-      findingsSummary: 'Выделены 4 роли: Рабочий (чекины, бурение/резка, замеры, фото); Бригадир (проверка GPS-отклонений, раздельное согласование часов и рапортов); Офис/Админ (тарифы, справочники, синхронизация с Tripletex); Заказчик (просмотр рапорта по ссылке).',
+      findingsSummary: 'Согласно разговору: рабочий фиксирует время, делает и сам отправляет рапорт клиенту; клиент подтверждает, отклоняет или комментирует; прораб проверяет часы в Tripletex; бухгалтерия работает только в Tripletex. Доступ прораба к ISA ещё нужно уточнить.',
       competitorSummary: 'SmartDok и QuickBooks Time четко разделяют ввод рабочим и проверку бригадиром. Рабочие, как правило, не видят коммерческие цены.',
       recommendationSummary: 'Бэкенд-валидация RBAC на уровне API (скрывать кнопки в UI недостаточно). Согласование часов и согласование рапорта должны быть независимы.',
       openSummary: 'Видит ли рабочий цены? Имеет ли бригадир право менять тарифы? Кто может открывать уже утвержденный рапорт?'
@@ -130,14 +130,14 @@ export const TOPIC_DEFINITIONS: Record<TopicId, TopicMeta> = {
       seniorAsked: 'Wie genau wird ein Rapport erstellt, wer hat Zugriff, welche Typen/Status gibt es und wie laufen Aktualisierungen und Dateianhänge?',
       findingsSummary: 'Kernarbeitsarten für ProRiv: Kernbohren (Durchmesser mm, Tiefe cm, Anzahl, Wand/Decke/Überkopf), Bodensäge (Tiefe cm, Länge m), Wandsäge. Katalog von Zusatzleistungen (Rüsten, Hebebühne, Bewehrung). Revisionssicherer PriceSnapshot bei Freigabe.',
       competitorSummary: 'PlanRadar und Dalux bieten touch-optimierte Formulare. Freigegebene Rapporte werden niemals direkt überschrieben, sondern erzeugen versionierte Revisionen.',
-      recommendationSummary: 'Statuspfad: Draft → Submitted → ForemanApproved → OfficeApproved (Korrekturschleife: CorrectionRequested → Revised). Entkoppelte Kundenprüfung per zeitlich begrenztem Link. Foto-Uploads via AWS S3.',
+      recommendationSummary: 'Vorschlag: Arbeiter erstellt Rapport → sendet an Kunden → Kunde bestätigt, kommentiert oder lehnt ab. Ein obligatorisches ForemanApproved/OfficeApproved für Rapporte ist NICHT vom Kunden beschrieben. Korrekturen und Preisversionierung getrennt klären.',
       openSummary: 'Welche Felder und Fotos sind pro Arbeitsart zwingend erforderlich? Muss jeder Rapport vor dem Lohnexport vom Kunden unterschrieben sein?'
     },
     briefingRu: {
       seniorAsked: 'Как создается рапорт, кто имеет доступ, можно ли менять, какие типы, статусы и фото?',
       findingsSummary: 'Специфика ProRiv: Алмазное бурение (диаметр мм, глубина см, количество, положение: стена/пол/потолок), нарезка швов пола (глубина см, метры), стенорезка. Каталог доплат (монтаж, вышка, арматура). Снимок цен PriceSnapshot при фиксации.',
       competitorSummary: 'PlanRadar и Dalux используют формы под пальцы на объекте. Утвержденные рапорты никогда не перезаписываются "на лету", а создают версионированную ревизию.',
-      recommendationSummary: 'Статусы: Draft → Submitted → ForemanApproved → OfficeApproved (петля правок: CorrectionRequested → Revised). Проверка клиентом по временной ссылке без логина. Фото напрямую в S3.',
+      recommendationSummary: 'Предложение: рабочий создаёт рапорт → сам отправляет клиенту → клиент подтверждает, комментирует или отклоняет. Обязательное утверждение прорабом/офисом клиент НЕ подтверждал. Исправления и версии цен надо уточнить.',
       openSummary: 'Какие поля обязательны для каждой операции? Обязательна ли подпись клиента для экспорта часов в зарплату?'
     }
   },
@@ -195,14 +195,14 @@ export const TOPIC_DEFINITIONS: Record<TopicId, TopicMeta> = {
     ],
     briefing: {
       seniorAsked: 'Welche APIs und Endpunkte brauchen wir, was senden wir wohin, brauchen wir Sync und was wird nach Abschluss aktualisiert?',
-      findingsSummary: 'AppSheet wird abgelöst. Tripletex ist das ERP-Zielsystem. Datenfluss: Tripletex liefert Kunden/Projekte/Aktivitäten; ISA sendet freigegebene Arbeitsstunden und verlinkte Rapport-PDFs. Fachliche Freigabe ist strikt getrennt vom ERP-Exportstatus.',
+      findingsSummary: 'Ist: AppSheet für Rapporte, Tripletex für Zeitprüfung/Buchhaltung. Ziel: ISA erfasst Stunden und soll sie projekt- und mitarbeiterbezogen via API nach Tripletex senden. Rückrichtung, API-Rechte und PDF-Transfer sind noch NICHT verifiziert. Vorarbeiter genehmigt Stunden in Tripletex.',
       competitorSummary: 'Tripletex API unterstützt projektbezogene Stundenerfassung; Binärdateien und Fotos sollten in S3 verbleiben und per URL referenziert werden.',
       recommendationSummary: 'Eigene Work API als Puffer zwischen React Native und Tripletex. Idempotente Export-Jobs (Idempotency Key) mit Retry-Muster, um doppelte Stundenbuchungen auszuschließen.',
       openSummary: 'Können vollständige Rapport-PDFs direkt in das Tripletex-Konto von ProRiv abgelegt werden oder nur Referenzen? Wie behandeln wir Stornos nach dem Export?'
     },
     briefingRu: {
       seniorAsked: 'API, что куда отправляем, нужна ли синхронизация и что обновлять по завершении?',
-      findingsSummary: 'Заменяем AppSheet. Tripletex — целевая ERP. Поток: Tripletex передает клиентов/проекты/активности; ISA отправляет подтвержденные часы и ссылки на PDF рапортов. Согласование бригадиром не зависит от доступности Tripletex.',
+      findingsSummary: 'Сейчас: AppSheet для рапортов, Tripletex для проверки часов и бухгалтерии. Цель: ISA передаёт часы с проектом и сотрудником через API. Обратный обмен, права API и PDF-передача не подтверждены. Прораб согласует часы в Tripletex.',
       competitorSummary: 'API Tripletex принимает учет рабочего времени по проектам; тяжелые фото и файлы остаются в S3 и передаются ссылками.',
       recommendationSummary: 'Собственный Work API бэкенд как прослойка. Идемпотентные выгрузки (Idempotency Key) с повторными попытками (Retry), исключающие дублирование часов в ERP.',
       openSummary: 'Принимает ли конкретный тариф Tripletex ProRiv файлы PDF напрямую или только ссылки? Как оформлять сторно после экспорта?'
@@ -226,8 +226,8 @@ const QUESTION_TRANSLATIONS: Record<string, QuestionSeedMeta> = {
   'Skolko typov polzovoteley ?': {
     de: 'Wie viele Benutzertypen / Rollen gibt es im System?',
     ru: 'Сколько типов пользователей / ролей нам необходимо в системе?',
-    proposalDe: 'Administrator (Büro): Vollzugriff auf Preise, Stammdaten, Kunden & Tripletex-Export\nVorarbeiter (Prorab): Baustellen-Zuweisung, Ausnahmenprüfung, Freigabe von Zeiten & Aufmaßen\nArbeiter: Zeiterfassung (Clock-in/out), Bohr- & Säge-Aufmaße, Fotoupload\nKunde: Nur passiver Lese- & Signierzugriff über zeitlich begrenzten Magic-Link',
-    proposalRu: 'Администратор (Офис): полный доступ к тарифам, клиентам и выгрузке в Tripletex\nБригадир (Прораб): согласование смен, проверка GPS-исключений, приемка объемов на объекте\nРабочий: чекин времени, замеры бурения и резки, загрузка фото\nКлиент: только просмотр и подпись рапорта по разовой ссылке',
+    proposalDe: 'Administrator (Büro): Vollzugriff auf Preise, Stammdaten, Kunden & Tripletex-Export\nVorarbeiter (Prorab): prüft Stunden in Tripletex; Aufgaben in ISA noch klären\nArbeiter: Zeiterfassung (Clock-in/out), Bohr- & Säge-Aufmaße, Fotoupload\nKunde: Nur passiver Lese- & Signierzugriff über zeitlich begrenzten Magic-Link',
+    proposalRu: 'Администратор (Офис): полный доступ к тарифам, клиентам и выгрузке в Tripletex\nБригадир (Прораб): проверяет часы в Tripletex; функции в ISA пока не определены\nРабочий: чекин времени, замеры бурения и резки, загрузка фото\nКлиент: только просмотр и подпись рапорта по разовой ссылке',
     clientQuestionDe: 'Gibt es bei ProRiv noch weitere Rollen (z. B. Subunternehmer, externe Bauleiter des Generalunternehmers)? Müssen Vorarbeiter mehrere Baustellen parallel verwalten können?',
     clientQuestionRu: 'Есть ли у ProRiv дополнительные роли (субподрядчики, внешние технадзоры)? Ведет ли один прораб несколько объектов одновременно?',
     needsClientClarification: true
@@ -244,7 +244,7 @@ const QUESTION_TRANSLATIONS: Record<string, QuestionSeedMeta> = {
   'Kakaya u nix vzaimosvyaz\'?': {
     de: 'Welche hierarchische Beziehung und Interaktion besteht zwischen den Rollen?',
     ru: 'Какая между ними иерархия и взаимосвязь при передаче данных?',
-    proposalDe: 'Kaskadierende Prozesskette: Büro weist Baustelle zu -> Vorarbeiter teilt Mitarbeiter ein -> Mitarbeiter erfasst Schicht & Rapport -> Vorarbeiter genehmigt vor Ort -> Büro schließt ab. Der Kunde steht außerhalb der Kern-App.',
+    proposalDe: 'Laut Kundengespräch: Arbeiter erfasst Zeit und Rapport -> Arbeiter sendet Rapport direkt an Kunden -> Kunde antwortet. Arbeitsstunden gelangen nach Tripletex -> Vorarbeiter prüft sie DORT -> Buchhaltung arbeitet DORT. Ob Kundenantwort den Stundenexport blockiert, ist OFFEN.',
     proposalRu: 'Каскадная цепочка: Офис назначает объект -> Прораб распределяет людей -> Рабочий фиксирует смену и замеры -> Прораб утверждает -> Офис закрывает. Заказчик вне контура приложения.',
     clientQuestionDe: 'Kommt es vor, dass erfahrene Arbeiter ohne zugewiesenen Vorarbeiter direkt auf Kleinbaustellen arbeiten? Wer übernimmt in diesem Fall die Freigabe der Stunden?',
     clientQuestionRu: 'Бывают ли у ProRiv мелкие выезды, где рабочий работает один без прораба? Кто в этом случае согласует его смену?',
@@ -307,7 +307,7 @@ const QUESTION_TRANSLATIONS: Record<string, QuestionSeedMeta> = {
   'Ktom imeet dostup ?': {
     de: 'Wer hat Lese-, Bearbeitungs- oder Freigabezugriff auf Rapporte?',
     ru: 'Кто имеет доступ к просмотру, редактированию и согласованию рапортов?',
-    proposalDe: 'Ersteller (Arbeiter) hat Schreibrecht bis zur Einreichung. Vorarbeiter hat Prüfrecht. Büro hat kaufmännisches Freigaberecht. Kunde sieht freigegebenen Bericht per Link.',
+    proposalDe: 'Kundengespräch: Mitarbeiter erstellen und senden ihre Rapporte selbst an Kunden. Der Vorarbeiter prüft STUNDEN in Tripletex. Ob und durch wen die Rapporte vor Versand geprüft werden, ist nicht bestätigt.',
     proposalRu: 'Автор (рабочий) редактирует до отправки. Прораб проверяет и утверждает. Офис проверяет цены. Клиент смотрит по ссылке.',
     clientQuestionDe: 'Dürfen Bauleiter des Generalunternehmers Einsicht in die Rohdaten nehmen, bevor das ProRiv-Büro den Rapport freigegeben hat?',
     clientQuestionRu: 'Может ли заказчик видеть черновик рапорта до утверждения офисом ProRiv?',
@@ -325,7 +325,7 @@ const QUESTION_TRANSLATIONS: Record<string, QuestionSeedMeta> = {
   'Statusi ?': {
     de: 'Welche Status gibt es (z. B. Entwurf, Zur Prüfung, Freigegeben, Verrechnet)?',
     ru: 'Какие статусы рапорта (Черновик, На проверке, Согласован бригадиром, Офис)?',
-    proposalDe: 'Draft -> Submitted -> ForemanApproved -> OfficeApproved -> ExportedToTripletex (bei Fehlern: RevisionRequested).',
+    proposalDe: 'Entwurf (Rapport) -> vom Arbeiter versendet -> Kundenantwort (bestätigt/abgelehnt). Separat: Zeit erfasst -> Tripletex-Übertragung -> dortige Vorarbeiterprüfung. Andere Freigabeschritte offen.',
     proposalRu: 'Черновик -> Отправлен -> Утвержден прорабом -> Утвержден офисом -> Выгружен в Tripletex (или Требует правок).',
     clientQuestionDe: 'Reicht eine mündliche Freigabe durch den Vorarbeiter oder muss jeder Schritt digital dokumentiert sein?',
     clientQuestionRu: 'Достаточно ли цифровой отметки прораба в приложении для бухгалтерии?',
@@ -406,7 +406,7 @@ const QUESTION_TRANSLATIONS: Record<string, QuestionSeedMeta> = {
   'API, chto kuda otpravlyaem ?': {
     de: 'Welche API-Endpunkte existieren und welche Nutzdaten werden übertragen?',
     ru: 'API, что куда отправляем (какие эндпоинты в Tripletex и наш Work API)?',
-    proposalDe: 'Eigene Work API: Speichert Sessions, Aufmaße, Fotos & Revisionen. Tripletex API: Empfängt freigegebene Arbeitsstunden & PDF-Dokument-Referenzen.',
+    proposalDe: 'Architekturvorschlag: ISA API verwaltet Sitzungen, Leistungen, Fotos und Versionen. Tripletex-Export von Stunden ist gewünscht; genaue API-Felder, Berechtigungen und PDF-Anhänge müssen noch geprüft werden.',
     proposalRu: 'Наш Work API: хранит смены, замеры, фото и ревизии. Tripletex API: принимает утвержденные часы и ссылки на рапорты.',
     clientQuestionDe: 'Sind die Tripletex-Zugangsdaten (API-Tokens) für die Testumgebung von ProRiv bereits verfügbar?',
     clientQuestionRu: 'Готовы ли тестовые API-токены Tripletex компании ProRiv для интеграции?',

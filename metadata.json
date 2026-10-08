@@ -1,0 +1,6 @@
+{
+  "name": "Architecture & Research Navigator",
+  "description": "Interaktive Recherche- und Wissensplattform basierend auf der Originalskizze mit Detailanalysen, Wettbewerbsrecherche und Präsentationsmodus.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

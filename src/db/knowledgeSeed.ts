@@ -19,7 +19,7 @@ import {
 } from '../types';
 import { PRORIV_PRICE_SHEET_EVIDENCE } from '../data/prorivPriceSheetEvidence';
 
-export const SEED_VERSION = 9;
+export const SEED_VERSION = 10;
 
 export const MVP_STRATEGIC_STATEMENT = {
   quote: "Wir bauen kein zweites Dalux und kein neues Tripletex. Wir entwickeln eine schlanke Baustellen-Ausführungsschicht für ProRiv und integrieren bestehende Systeme.",
@@ -747,10 +747,10 @@ export const INITIAL_RESEARCH_FINDINGS: ResearchFinding[] = [
     topicId: 'raport',
     title: 'Separate norwegische Preisliste: Leistungen, Zuschläge und Abrechnungsregeln',
     titleRu: 'Отдельный норвежский прайс-лист: услуги, надбавки и условия оплаты',
-    content: 'PRIMÄRQUELLE: Zwei am 09.10.2026 hochgeladene Fotos eines Dokuments „PRISLISTE“, Abschnitte BETONGBORING, GULVSAG, VEGGSAG & HÅNDSAG, ANDRE KOSTNADER FOR KJERNEBORING & BETONGSAGING und BETINGELSER. Keine Datierung oder verifizierte Preisgültigkeit im Bild; vom Nutzer ProRiv zugeordnet. Diese Quelle ist NICHT der Einzelrapport („Andre tjenester (4)“). Grundpreise: Kernbohren nach Durchmesser und cm Decke/Wand; Boden-, Wand- und Handsägen nach Tiefe und laufendem Meter. Zusätzliche Belege (ohne veröffentlichte interne Preisbeträge):\n' + PRORIV_PRICE_SHEET_EVIDENCE.map(item => '[' + item.group + '] ' + item.norwegian + ' — ' + item.de).join('\n') + '\nAsphalt, Verbundmaterial und Pflicht zur Absaugung sind nicht nachgewiesen. Alle Preisbeträge, Identitäten und Bilder bleiben aus dem öffentlichen GitHub heraus. Mit Isa aktuellen Preisstand, Vertragsbezug und korrekte Zuschlagsberechnung bestätigen.',
-    contentRu: 'ПЕРВИЧНЫЙ ИСТОЧНИК: два скриншота «PRISLISTE», загруженные 09.10.2026. Разделы: BETONGBORING, GULVSAG, VEGGSAG & HÅNDSAG, ANDRE KOSTNADER и BETINGELSER. Это отдельный прайс-лист, НЕ четыре строки из одного рапорта. Дата действия тарифов неизвестна. Базовые цены: бурение по диаметру и сантиметрам; резка по глубине и погонным метрам. Дополнения и правила без конфиденциальных расценок:\n' + PRORIV_PRICE_SHEET_EVIDENCE.map(item => '[' + item.group + '] ' + item.norwegian + ' — ' + item.ru).join('\n') + '\nАсфальт, композиты и обязательный пылеотсос не подтверждены. Не публиковать цены и персональные сведения в открытом GitHub. Уточнить действие прайса у Исы.',
+    content: 'PRIMÄRQUELLE: Zwei am 09.10.2026 hochgeladene Fotos eines Dokuments „PRISLISTE“, Abschnitte BETONGBORING, GULVSAG, VEGGSAG & HÅNDSAG, ANDRE KOSTNADER FOR KJERNEBORING & BETONGSAGING und BETINGELSER. Keine Datierung auf dem Preisblatt selbst erkennbar; Nutzer hat am 09.10.2026 ausdrücklich bestätigt, dass es sich um Isas aktuelle Preise handelt. Diese Quelle ist NICHT der Einzelrapport („Andre tjenester (4)“). Grundpreise: Kernbohren nach Durchmesser und cm Decke/Wand; Boden-, Wand- und Handsägen nach Tiefe und laufendem Meter. Zusätzliche Belege (ohne veröffentlichte interne Preisbeträge):\n' + PRORIV_PRICE_SHEET_EVIDENCE.map(item => '[' + item.group + '] ' + item.norwegian + ' — ' + item.de).join('\n') + '\nAsphalt, Verbundmaterial und Pflicht zur Absaugung sind nicht nachgewiesen. Alle Preisbeträge, Identitäten und Bilder bleiben aus dem öffentlichen GitHub heraus. Aktueller Preisstand durch Nutzeraussage bestätigt. Vertragsbezogene Ausnahmen und die genaue Anwendung einzelner Zuschläge bleiben bei Bedarf zu klären.',
+    contentRu: 'ПЕРВИЧНЫЙ ИСТОЧНИК: два скриншота «PRISLISTE», загруженные 09.10.2026. Разделы: BETONGBORING, GULVSAG, VEGGSAG & HÅNDSAG, ANDRE KOSTNADER и BETINGELSER. Это отдельный прайс-лист, НЕ четыре строки из одного рапорта. На самом прайс-листе не видна дата, но пользователь 09.10.2026 прямо подтвердил, что это актуальные цены Исы. Базовые цены: бурение по диаметру и сантиметрам; резка по глубине и погонным метрам. Дополнения и правила без конфиденциальных расценок:\n' + PRORIV_PRICE_SHEET_EVIDENCE.map(item => '[' + item.group + '] ' + item.norwegian + ' — ' + item.ru).join('\n') + '\nАсфальт, композиты и обязательный пылеотсос не подтверждены. Не публиковать цены и персональные сведения в открытом GitHub. Актуальность цен подтверждена пользователем; конкретные договорные исключения и правила расчёта при необходимости уточнить.',
     origin: 'project_context',
-    status: 'open_decision',
+    status: 'confirmed',
     createdAt: '2026-10-09T00:00:00Z',
     updatedAt: '2026-10-09T00:00:00Z'
   },

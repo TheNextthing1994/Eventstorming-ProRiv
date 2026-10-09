@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ExternalLink, ChevronDown } from 'lucide-react';
 import { Language } from '../types';
-import { AuditLens, SeniorAuditItem, SENIOR_SOURCE_AUDIT_DATE, seniorAuditRelevant } from '../data/seniorSourceAudit';
+import { AuditLens, SeniorAuditItem, SENIOR_SOURCE_AUDIT_DATE, seniorAuditRelevant, seniorAuditAdoption } from '../data/seniorSourceAudit';
 
 interface Props { lens: AuditLens; language: Language }
 const localText = (item: SeniorAuditItem, key: 'need'|'proven'|'use'|'boundary'|'nextTest', lang: Language): string =>
@@ -41,6 +41,16 @@ export const SeniorSourceAuditPanel: React.FC<Props> = ({lens, language}) => {
               <span className="text-[10px] rounded px-1.5 py-0.5 bg-slate-100 text-slate-700 font-semibold">
                 {item.kind === 'oss' ? 'OSS' : item.kind === 'api' ? 'API / Service' : label('Konkurrent / Vorbild','Конкурент / пример')}
               </span>
+            </div>
+            <div className="text-[11px] font-semibold text-emerald-950">
+              {label('Unsere Einstufung: ', 'Наш вывод: ')}
+              {seniorAuditAdoption(item.id) === 'prototype'
+                ? label('Als Baustein / Prototyp testen', 'Проверить как компонент / прототип')
+                : seniorAuditAdoption(item.id) === 'existing'
+                  ? label('Bestehenden Bestand anbinden / prüfen', 'Подключить / проверить существующую систему')
+                  : seniorAuditAdoption(item.id) === 'defer'
+                    ? label('Vorerst nicht einbauen', 'Пока не внедрять')
+                    : label('Nur als Markt-/UX-Vorbild vergleichen', 'Только сравнить как пример')}
             </div>
             <p className="text-[11px]">
               <strong className="text-slate-500">{label('Kundenbedarf: ','Потребность: ')}</strong>

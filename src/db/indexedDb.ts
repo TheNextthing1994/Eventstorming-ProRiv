@@ -206,7 +206,11 @@ export async function initializeDatabase(): Promise<DatabaseState> {
           && existing.title === 'Katalog möglicher Zusatzleistungen & Zuschläge'
           && existing.content === 'Transport, Baustelleneinrichtung / Rüsten, Hebebühne, Pilotbohrung, Hilfsarbeiter, zusätzliche Regiestunden, Trockenbohren, Granit / Asphalt, Massivholz, starke Bewehrung, Überkopfarbeiten. Pflichtfelder müssen noch mit ProRiv bestätigt werden.'
           && existing.updatedAt === '2026-10-08T00:00:00Z';
-        if (isOldUnchangedAddOnSeed) {
+        const isPreviousUnchangedAddOnSeed = item.id === 'f-raport-2'
+          && existing.title === 'Zusatzleistungen: vier im Kundengespräch dokumentierte Beispiele (offen)'
+          && existing.content === "Im Gesprächs-RAW dokumentierte Beispiele: (1) Transport / Anfahrt, (2) Vorbereitung / Rüsten, (3) Hebebühne / Gerüst, (4) Hilfsarbeiter. Diese sind im RAW als Beispiele aus der bestehenden Rapportierung zusammengefasst, nicht als bestätigte Zuschlags-/Preisregeln. Norwegische Originalbezeichnungen, Preise, Einheiten und Pflichtfelder bleiben abzugleichen. Quelle: /Isa Projekt System/Разговор с клиентом.md, §4 Vorbereitung des Rapports und §8 Screenshots 3 (Zusätzliche Leistungen) sowie 8 (Zuschläge und Bedingungen)."
+          && existing.updatedAt === '2026-10-08T00:00:00Z';
+        if (isOldUnchangedAddOnSeed || isPreviousUnchangedAddOnSeed) {
           await putToStore('findings', {
             ...existing,
             title: item.title,
@@ -339,7 +343,10 @@ export async function initializeDatabase(): Promise<DatabaseState> {
           summary: TOPIC_DEFINITIONS[topicId].briefing.findingsSummary,
           updatedAt: now
         });
-      } else if (topicId === 'raport' && existing.summary === 'Kernarbeitsarten für ProRiv: Kernbohren (Durchmesser mm, Tiefe cm, Anzahl, Wand/Decke/Überkopf), Bodensäge (Tiefe cm, Länge m), Wandsäge. Katalog von Zusatzleistungen (Rüsten, Hebebühne, Bewehrung). Revisionssicherer PriceSnapshot bei Freigabe.') {
+      } else if (topicId === 'raport' && (
+        existing.summary === 'Kernarbeitsarten für ProRiv: Kernbohren (Durchmesser mm, Tiefe cm, Anzahl, Wand/Decke/Überkopf), Bodensäge (Tiefe cm, Länge m), Wandsäge. Katalog von Zusatzleistungen (Rüsten, Hebebühne, Bewehrung). Revisionssicherer PriceSnapshot bei Freigabe.'
+        || existing.summary === "Kernarbeitsarten für ProRiv: Kernbohren (Durchmesser mm, Tiefe cm, Anzahl, Wand/Decke/Überkopf), Bodensäge (Tiefe cm, Länge m), Wandsäge. Zusatzleistungen aus Gesprächsnotizen (Transport/Anfahrt, Rüsten, Hebebühne/Gerüst, Hilfsarbeiter; noch am norwegischen Original abzugleichen). PriceSnapshot ist ein unbestätigter Architekturvorschlag."
+      )) {
         // Replace only the untouched legacy summary; user edits take precedence.
         await putToStore('topics', {
           ...existing,

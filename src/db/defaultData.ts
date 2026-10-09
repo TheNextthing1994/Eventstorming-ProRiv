@@ -128,14 +128,14 @@ export const TOPIC_DEFINITIONS: Record<TopicId, TopicMeta> = {
     ],
     briefing: {
       seniorAsked: 'Wie genau wird ein Rapport erstellt, wer hat Zugriff, welche Typen/Status gibt es und wie laufen Aktualisierungen und Dateianhänge?',
-      findingsSummary: 'Kernarbeitsarten für ProRiv: Kernbohren (Durchmesser mm, Tiefe cm, Anzahl, Wand/Decke/Überkopf), Bodensäge (Tiefe cm, Länge m), Wandsäge. Echter Rapport (ein Beispiel): Merarbeid bei Kernbohrungen (6 h, Text abgeschnitten); Lift/Gerüst (3 h); Helferarbeit (12 h); Rüsten/Transport (1 Stück). Weitere Leistungen und Tarife offen. PriceSnapshot ist ein unbestätigter Architekturvorschlag.',
+      findingsSummary: 'Kernarbeitsarten für ProRiv: Kernbohren (Durchmesser mm, Tiefe cm, Anzahl, Wand/Decke/Überkopf), Bodensäge (Tiefe cm, Länge m), Wandsäge. Echter Rapport: Merarbeid bei Kernbohrungen, Lift/Gerüst, Helferarbeit, Rüsten/Transport (vier Zeilen). Separates norwegisches Preisblatt belegt weitere Zusatzkosten und Zuschläge; Preisstand, Gültigkeit und vollständiger Katalog noch mit Isa prüfen. PriceSnapshot ist ein unbestätigter Architekturvorschlag.',
       competitorSummary: 'PlanRadar und Dalux bieten touch-optimierte Formulare. Freigegebene Rapporte werden niemals direkt überschrieben, sondern erzeugen versionierte Revisionen.',
       recommendationSummary: 'Vorschlag: Arbeiter erstellt Rapport → sendet an Kunden → Kunde bestätigt, kommentiert oder lehnt ab. Ein obligatorisches ForemanApproved/OfficeApproved für Rapporte ist NICHT vom Kunden beschrieben. Korrekturen und Preisversionierung getrennt klären.',
       openSummary: 'Welche Felder und Fotos sind pro Arbeitsart zwingend erforderlich? Muss jeder Rapport vor dem Lohnexport vom Kunden unterschrieben sein?'
     },
     briefingRu: {
       seniorAsked: 'Как создается рапорт, кто имеет доступ, можно ли менять, какие типы, статусы и фото?',
-      findingsSummary: 'Специфика ProRiv: Алмазное бурение (диаметр мм, глубина см, количество, положение: стена/пол/потолок), нарезка швов пола (глубина см, метры), стенорезка. Реальный рапорт (один пример): Merarbeid при бурении (6 ч, название обрезано); подъёмник/леса (3 ч); работа помощника (12 ч); подготовка/транспорт (1 шт.). Остальные позиции и тарифы открыты. PriceSnapshot — неподтверждённый архитектурный вариант.',
+      findingsSummary: 'Специфика ProRiv: Алмазное бурение (диаметр мм, глубина см, количество, положение: стена/пол/потолок), нарезка швов пола (глубина см, метры), стенорезка. Реальный рапорт: дополнительная работа при бурении, подъёмник/леса, помощник, подготовка/транспорт (четыре строки). Отдельный норвежский прайс-лист показывает другие надбавки и услуги; актуальность и полный каталог уточнить у Исы. PriceSnapshot — неподтверждённый архитектурный вариант.',
       competitorSummary: 'PlanRadar и Dalux используют формы под пальцы на объекте. Утвержденные рапорты никогда не перезаписываются "на лету", а создают версионированную ревизию.',
       recommendationSummary: 'Предложение: рабочий создаёт рапорт → сам отправляет клиенту → клиент подтверждает, комментирует или отклоняет. Обязательное утверждение прорабом/офисом клиент НЕ подтверждал. Исправления и версии цен надо уточнить.',
       openSummary: 'Какие поля обязательны для каждой операции? Обязательна ли подпись клиента для экспорта часов в зарплату?'

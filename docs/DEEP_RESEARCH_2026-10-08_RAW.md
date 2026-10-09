@@ -4,6 +4,24 @@
 >
 > Für das Meeting ist die kundenbezogene Ansicht `#/workshop` maßgeblich. Kundenaussagen und eigene Vorschläge strikt trennen.
 
+## Quellen-Audit / Korrekturen vom 09.10.2026
+
+**Diese Datei bleibt als historischer Recherche-Entwurf erhalten. Ihre älteren Aussagen sind nicht automatisch richtig.** Im Cockpit gilt zusätzlich die kuratierte [Quellenmatrix](../src/data/seniorSourceAudit.ts), mit Primärquelle je OSS, Hersteller und API.
+
+**Konkrete Korrekturen:**
+
+1. **Jobbkontroll / Tripletex:** Die frühere Behauptung, Jobbkontroll habe *keine* Tripletex-Anbindung, ist laut Hersteller **falsch**. Hersteller nennt Tripletex ausdrücklich unter Accounting integrations. https://www.jobbkontroll.no/ . QR/Geofence, Offline und spezielle Bohr-Rapporte sind damit nicht automatisch bestätigt.
+2. **Tripletex-Anmeldung:** Nicht pauschal OAuth oder Client-Credentials. Für **interne Ein-Firma-Integration**: im Tripletex-Konto erzeugter JWT-/Refresh-Token → POST /token/session/:createFromRefreshToken → Session-Token als Basic-Auth-Passwort. Kommerzielle Multi-Firmen-Integration: Consumer-Token + Employee-Token. Test- und Produktiv-Zugang sind getrennt. https://developer.tripletex.no/docs/documentation/authentication-and-tokens/
+3. **Tripletex-API ≠ funktionierende ISA-Anbindung.** Kein Test mit Isa nachgewiesen: Endpunkte, Stunden-Mapping, Schreibrechte, Modul-Berechtigung, Dubletten, PDF/Fotos bleiben zu prüfen. https://developer.tripletex.no/docs/documentation/integration-best-practices/
+4. **CoreDocket:** Hersteller beschreibt fachliche Bohr-/Sägepreis-Matrix, Zuschläge, Offline-Dockets und Unterschriften. **Kein OSS** und keine belegte norwegische/Tripletex-Integration. https://www.coredocket.com.au/
+5. **SmartDok:** Hersteller bestätigt Zeiterfassung, HMS-Mannschaftsliste und Tripletex-Integration, aber kein von uns getestetes spezielles ProRiv-Preisblatt. https://smartdok.no/
+6. **Lizenzen:** Expo MIT, pdfme MIT, ODK Collect Apache-2.0, Keycloak Apache-2.0, Traccar Apache-2.0, ERPNext GPL-3.0, Solidtime AGPL-3.0 und DocuSeal AGPLv3 **mit zusätzlichen Section-7(b)-Attributionsbedingungen**. OSS-Lizenz ist keine Funktions-/Kompatibilitätsgarantie; genaue Pflichten vor Übernahme prüfen. Original-Repo-Links: [Quellenmatrix](../src/data/seniorSourceAudit.ts).
+7. **Die Abdeckungsquoten 60/80/20 usw. sind nicht gemessen.** Keine Präsentation als Wahrscheinlichkeiten oder Testergebnisse.
+8. **QuickBooks Time:** Das konkrete GPS-Verhalten „blockiert nie bei schlechter Ortung“ wurde nicht belegt; nicht als nachgewiesenes Wettbewerbsverhalten verwenden.
+9. **PoC-Status:** Keine OSS-Integration in ISA und kein erfolgreicher Tripletex-Schreibtest nachgewiesen. Event Storming bleibt ausdrücklich ein Entwurf.
+
+**Meeting-Regel:** Zeige vier Punkte je Kandidat: (a) Isa-Bedarf, (b) nachweisbare Hersteller-/Repo-Funktion mit Link, (c) möglicher ISA-Einsatz, (d) Grenzen und nächsten technischen Test. Herstellerangaben sind noch kein unabhängiger Praxistest.
+
 ---
 
 # Executive Summary  

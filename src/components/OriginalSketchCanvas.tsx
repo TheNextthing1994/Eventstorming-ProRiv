@@ -27,7 +27,7 @@ export const OriginalSketchCanvas: React.FC<OriginalSketchCanvasProps> = ({
   onImageChanged
 }) => {
   const [hoveredTopic, setHoveredTopic] = useState<TopicId | null>(null);
-  const [homeMode, setHomeMode] = useState<'sketch' | 'flow'>('sketch');
+  const [homeMode, setHomeMode] = useState<'sketch' | 'flow'>('flow');
   const [useVectorOnly, setUseVectorOnly] = useState<boolean>(!databaseState.customImage);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);

@@ -18,7 +18,7 @@ import {
   DomainEventItem
 } from '../types';
 
-export const SEED_VERSION = 7;
+export const SEED_VERSION = 8;
 
 export const MVP_STRATEGIC_STATEMENT = {
   quote: "Wir bauen kein zweites Dalux und kein neues Tripletex. Wir entwickeln eine schlanke Baustellen-Ausführungsschicht für ProRiv und integrieren bestehende Systeme.",
@@ -732,10 +732,10 @@ export const INITIAL_RESEARCH_FINDINGS: ResearchFinding[] = [
   {
     id: 'f-raport-2',
     topicId: 'raport',
-    title: 'Zusatzleistungen: vier im Kundengespräch dokumentierte Beispiele (offen)',
-    titleRu: 'Дополнительные услуги: четыре примера из беседы с клиентом (не утверждены)',
-    content: 'Im Gesprächs-RAW dokumentierte Beispiele: (1) Transport / Anfahrt, (2) Vorbereitung / Rüsten, (3) Hebebühne / Gerüst, (4) Hilfsarbeiter. Diese sind im RAW als Beispiele aus der bestehenden Rapportierung zusammengefasst, nicht als bestätigte Zuschlags-/Preisregeln. Norwegische Originalbezeichnungen, Preise, Einheiten und Pflichtfelder bleiben abzugleichen. Quelle: /Isa Projekt System/Разговор с клиентом.md, §4 Vorbereitung des Rapports und §8 Screenshots 3 (Zusätzliche Leistungen) sowie 8 (Zuschläge und Bedingungen).',
-    contentRu: 'В RAW беседы отмечены четыре примера: (1) транспорт / выезд, (2) подготовка / развёртывание, (3) подъёмник / строительные леса, (4) подсобный рабочий. Это примеры из существующего рапорта, не утверждённый каталог доплат. Норвежские исходные формулировки, цены, единицы и обязательные поля ещё нужно сверить. Источник: /Isa Projekt System/Разговор с клиентом.md, §4 и §8 (скриншоты 3 и 8).',
+    title: 'Vier echte Zusatzleistungspositionen aus einem norwegischen Rapport (kein Gesamtkatalog)',
+    titleRu: 'Четыре реальные позиции дополнительных работ в норвежском рапорте (не полный каталог)',
+    content: 'PRIMÄRQUELLE: am 09.10.2026 vom Nutzer hochgeladene Screenshots eines existierenden ProRiv-Rapports, Abschnitt „Andre tjenester / Other services (4)“. Vier tatsächlich sichtbare Zeilen: (1) „Merarbeid ifm. k-boring (tildek…)“ — Zusatzarbeit im Zusammenhang mit Kernbohrungen; Beschreibung abgeschnitten, 6 Timer (= Stunden). (2) „Bruk av heis/stillas“ — Nutzung Lift/Gerüst, 3 Timer. (3) „Hjelpearbeid“ — Helferarbeit, 12 Timer. (4) „Rigg / Transport (bor/sag)“ — Rüsten / Transport für Bohr-/Sägearbeiten, 1 Stk (= Stück). Rüsten und Transport sind EINE Rapportposition. Die vier Zeilen stammen aus EINEM konkreten Beispiel, nicht aus einem belegten vollständigen ProRiv-Leistungs-/Zuschlagskatalog. Preise, Kundendaten und Personennamen sind aus Datenschutz-/Vertraulichkeitsgründen NICHT in das öffentliche Repository übertragen. Frage an Isa: weitere auswählbare Leistungen, Pflichtangaben, Tarife und Regeln bestätigen.',
+    contentRu: 'ПЕРВИЧНЫЙ ИСТОЧНИК: скриншоты настоящего рапорта ProRiv, предоставленные 09.10.2026, раздел «Andre tjenester / Other services (4)». Четыре строки: (1) «Merarbeid ifm. k-boring (tildek…)» — дополнительные работы при колонковом бурении, часть оригинального текста обрезана; 6 часов. (2) «Bruk av heis/stillas» — использование подъёмника / строительных лесов, 3 часа. (3) «Hjelpearbeid» — работа помощника, 12 часов. (4) «Rigg / Transport (bor/sag)» — подготовка / транспорт для бурения и резки, 1 штука. Подготовка и транспорт — ОДНА строка. Это четыре примера из одного рапорта, а не полный подтверждённый каталог ProRiv. Цены и персональные данные не размещаются в открытом GitHub. У Исы ещё требуется уточнить остальные работы, обязательные поля, тарифы и правила.',
     origin: 'project_context',
     status: 'open_decision',
     createdAt: '2026-10-08T00:00:00Z',

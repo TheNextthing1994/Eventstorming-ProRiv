@@ -306,44 +306,42 @@ export const WorkReportPreviewVisualizer: React.FC<VisualizerProps> = ({ languag
         </div>
       </div>
 
-      {/* Surcharge Catalog */}
+      {/* Only examples documented in the customer-interview RAW (section 4).
+          These are NOT a verified Norwegian price list or customer-approved surcharge rules.
+          Source: /Isa Projekt System/Разговор с клиентом.md, sections 4 and 8 (screenshots 3 and 8). */}
       <div className="p-3.5 bg-slate-50/70 rounded-lg border border-slate-200 space-y-2">
         <span className="text-xs font-bold text-slate-900 block">
           {language === 'ru'
-            ? 'Каталог дополнительных услуг и сложностей (надбавки):'
-            : 'Erfasster Katalog von Zusatzleistungen & Erschwernissen (Zuschläge):'}
+            ? 'Дополнительные услуги — примеры из заметок беседы с клиентом:'
+            : 'Zusatzleistungen – Beispiele aus dem dokumentierten Kundengespräch:'}
         </span>
+        <p className="text-[11px] text-amber-800">
+          {language === 'ru'
+            ? 'Не утверждённый прайс-лист: исходные норвежские названия, цены и условия нужно сверить со скриншотами и подтвердить с Isa.'
+            : 'Keine freigegebene Preisliste: Norwegische Originalbezeichnungen, Preise und Bedingungen noch anhand der Screenshots und mit Isa prüfen.'}
+        </p>
         <div className="flex flex-wrap gap-1.5 text-[11px]">
           {(language === 'ru' ? [
             'Транспорт / выезд',
-            'Монтаж оборудования',
-            'Подъемник / вышка',
-            'Пробное бурение',
-            'Подсобный рабочий',
-            'Почасовые допработы',
-            'Сухое бурение с пылесосом',
-            'Гранит / асфальт',
-            'Массив дерева / композит',
-            'Тяжелая арматура',
-            'Работа на потолке'
+            'Подготовка / развёртывание',
+            'Подъёмник / строительные леса',
+            'Подсобный рабочий'
           ] : [
             'Transport / Anfahrt',
-            'Baustelleneinrichtung / Rüsten',
-            'Hebebühne',
-            'Pilotbohrung',
-            'Hilfsarbeiter gestellt',
-            'Zusätzliche Regiestunden',
-            'Trockenbohren mit Absaugung',
-            'Granit oder Asphalt',
-            'Massivholz / Verbund',
-            'Starke Eisenbewehrung',
-            'Überkopfarbeiten'
+            'Vorbereitung / Rüsten',
+            'Hebebühne / Gerüst',
+            'Hilfsarbeiter'
           ]).map((item, i) => (
             <span key={i} className="px-2 py-0.5 bg-white border border-slate-200 text-slate-700 rounded font-medium">
               {item}
             </span>
           ))}
         </div>
+        <p className="text-[10px] text-slate-500">
+          {language === 'ru'
+            ? 'Источник: «Разговор с клиентом.md», § 4 (рапорт), § 8 (скриншоты 3 и 8).'
+            : 'Quelle: „Разговор с клиентом.md“, § 4 (Rapport) und § 8 (Screenshots 3 und 8).'}
+        </p>
       </div>
 
       {/* Status workflow */}

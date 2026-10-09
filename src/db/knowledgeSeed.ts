@@ -18,7 +18,7 @@ import {
   DomainEventItem
 } from '../types';
 
-export const SEED_VERSION = 6;
+export const SEED_VERSION = 7;
 
 export const MVP_STRATEGIC_STATEMENT = {
   quote: "Wir bauen kein zweites Dalux und kein neues Tripletex. Wir entwickeln eine schlanke Baustellen-Ausführungsschicht für ProRiv und integrieren bestehende Systeme.",

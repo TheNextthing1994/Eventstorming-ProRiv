@@ -200,11 +200,29 @@ export async function initializeDatabase(): Promise<DatabaseState> {
       if (!existing) {
         await putToStore('findings', item);
       } else {
-        await putToStore('findings', {
-          ...existing,
-          titleRu: item.titleRu || existing.titleRu,
-          contentRu: item.contentRu || existing.contentRu
-        });
+        // Correct the original, untouched eleven-item seed in existing browsers.
+        // Never replace customer notes or manually edited research records.
+        const isOldUnchangedAddOnSeed = item.id === 'f-raport-2'
+          && existing.title === 'Katalog möglicher Zusatzleistungen & Zuschläge'
+          && existing.content === 'Transport, Baustelleneinrichtung / Rüsten, Hebebühne, Pilotbohrung, Hilfsarbeiter, zusätzliche Regiestunden, Trockenbohren, Granit / Asphalt, Massivholz, starke Bewehrung, Überkopfarbeiten. Pflichtfelder müssen noch mit ProRiv bestätigt werden.'
+          && existing.updatedAt === '2026-10-08T00:00:00Z';
+        if (isOldUnchangedAddOnSeed) {
+          await putToStore('findings', {
+            ...existing,
+            title: item.title,
+            titleRu: item.titleRu,
+            content: item.content,
+            contentRu: item.contentRu
+          });
+        } else if (item.id === 'f-raport-2') {
+          await putToStore('findings', existing);
+        } else {
+          await putToStore('findings', {
+            ...existing,
+            titleRu: item.titleRu || existing.titleRu,
+            contentRu: item.contentRu || existing.contentRu
+          });
+        }
       }
     }
 
@@ -320,6 +338,12 @@ export async function initializeDatabase(): Promise<DatabaseState> {
           id: topicId,
           summary: TOPIC_DEFINITIONS[topicId].briefing.findingsSummary,
           updatedAt: now
+        });
+      } else if (topicId === 'raport' && existing.summary === 'Kernarbeitsarten für ProRiv: Kernbohren (Durchmesser mm, Tiefe cm, Anzahl, Wand/Decke/Überkopf), Bodensäge (Tiefe cm, Länge m), Wandsäge. Katalog von Zusatzleistungen (Rüsten, Hebebühne, Bewehrung). Revisionssicherer PriceSnapshot bei Freigabe.') {
+        // Replace only the untouched legacy summary; user edits take precedence.
+        await putToStore('topics', {
+          ...existing,
+          summary: TOPIC_DEFINITIONS[topicId].briefing.findingsSummary
         });
       }
     }

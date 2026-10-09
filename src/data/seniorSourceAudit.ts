@@ -270,6 +270,45 @@ export const SENIOR_SOURCE_AUDIT: SeniorAuditItem[] = [
     sourceType:'Hersteller',sourceUrl:'https://quickbooks.intuit.com/time-tracking/',integrationTested:false
   },
   {
+    id:'appsheet',name:'AppSheet',kind:'commercial',lenses:['process','market'],
+    needDe:'Bestehende Rapporterfassung verstehen.',needRu:'Понять текущий рапорт.',
+    provenDe:'Existierender No-Code-App-Dienst; laut dokumentiertem Isa-Gespräch heute im Einsatz.',
+    provenRu:'Сервис no-code; по беседе с Исой используется сейчас.',
+    useDe:'Alte Bildschirmfelder als IST-Zustand, nicht als Zieloberfläche.',
+    useRu:'Текущие экраны как исходный процесс.',
+    boundaryDe:'Herstellerfunktion und konkrete Isa-Einrichtung nicht extern gegengeprüft. Beleg für Isa kommt aus Interview/Screenshots.',
+    boundaryRu:'Конкретная конфигурация Исы подтверждается только беседой и скриншотами.',
+    nextTestDe:'Mit Isa prüfen, welche alten Felder in ISA wirklich nötig sind.',
+    nextTestRu:'Уточнить обязательные поля у Исы.',
+    sourceType:'Hersteller',sourceUrl:'https://about.appsheet.com/home/',integrationTested:false
+  },
+  {
+    id:'messages',name:'E-Mail/SMS',kind:'api',lenses:['tech','market'],
+    needDe:'Rapport an Kunde zur Prüfung senden.',needRu:'Отправлять рапорт клиенту.',
+    provenDe:'Kommunikationskanäle, kein einzelnes festgelegtes OSS-Produkt.',
+    provenRu:'Способы отправки, не конкретный OSS-продукт.',
+    useDe:'Zustell-API mit zeitlich begrenztem Kundenlink separat wählen.',
+    useRu:'Выбрать отправку и ссылку отдельно.',
+    boundaryDe:'Kein Anbieter, keine Preise, keine Zustell-/Identitätsgarantie oder Integration ausgewählt.',
+    boundaryRu:'Нет выбранного провайдера и подтверждённой доставки.',
+    nextTestDe:'Kosten, Datenschutz, Nachrichten-Zustellung und Rückläufer testen.',
+    nextTestRu:'Проверить цену, конфиденциальность и доставку.',
+    sourceType:'Offizielle API-Dokumentation',sourceUrl:'https://docs.aws.amazon.com/ses/latest/dg/Welcome.html',integrationTested:false
+  },
+  {
+    id:'node-postgres',name:'Node.js + PostgreSQL',kind:'oss',lenses:['tech'],
+    needDe:'Eigene API für ISA und robuste Speicherung.',needRu:'Собственный API и хранение данных.',
+    provenDe:'Node.js-Laufzeit und PostgreSQL-Datenbank sind etablierte offene Technologien.',
+    provenRu:'Node.js и PostgreSQL — открытые компоненты.',
+    useDe:'Option für eigenen Work-API-Server mit Tripletex-Adapter.',
+    useRu:'Основа собственного сервера и интеграции.',
+    boundaryDe:'Keine fertige ProRiv-Integration; wir müssen API, Rollen, Queues und Sync selbst bauen.',
+    boundaryRu:'Нет готовой ISA; API, роли и синхронизация пишутся отдельно.',
+    nextTestDe:'Kleinen Adapter und Offline-Sync mit Testdaten prototypen.',
+    nextTestRu:'Протестировать адаптер и синхронизацию на тестовых данных.',
+    sourceType:'Offizielle API-Dokumentation',sourceUrl:'https://www.postgresql.org/docs/',integrationTested:false
+  },
+  {
     id:'tripletex',name:'Tripletex API',kind:'api',lenses:['tech','risk','process'],
     needDe:'Stunden und Stammdaten mit bestehendem ERP austauschen.',needRu:'Передавать часы и справочники в существующую ERP.',
     provenDe:'Offizielle API-Dokumentation bestätigt interne JWT-/Session-Token-Anmeldung, separaten kommerziellen Tokenweg, Test- und Produktionsumgebung; REST-API vorhanden.',
@@ -285,7 +324,10 @@ export const SENIOR_SOURCE_AUDIT: SeniorAuditItem[] = [
 ];
 
 export const seniorAuditByName = (name: string): SeniorAuditItem | undefined =>
-  SENIOR_SOURCE_AUDIT.find(item => item.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+  SENIOR_SOURCE_AUDIT.find(item => item.name.toLocaleLowerCase() === name.toLocaleLowerCase()
+    || (name === 'Tripletex' && item.id === 'tripletex')
+    || (name === 'Expo Location' && item.id === 'expo-location')
+    || (name === 'Expo' && item.id === 'expo'));
 
 export const seniorAuditRelevant = (lens: AuditLens): SeniorAuditItem[] =>
   SENIOR_SOURCE_AUDIT.filter(item => item.lenses.includes(lens));

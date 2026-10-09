@@ -210,7 +210,32 @@ export async function initializeDatabase(): Promise<DatabaseState> {
           && existing.title === 'Zusatzleistungen: vier im Kundengespräch dokumentierte Beispiele (offen)'
           && existing.content === "Im Gesprächs-RAW dokumentierte Beispiele: (1) Transport / Anfahrt, (2) Vorbereitung / Rüsten, (3) Hebebühne / Gerüst, (4) Hilfsarbeiter. Diese sind im RAW als Beispiele aus der bestehenden Rapportierung zusammengefasst, nicht als bestätigte Zuschlags-/Preisregeln. Norwegische Originalbezeichnungen, Preise, Einheiten und Pflichtfelder bleiben abzugleichen. Quelle: /Isa Projekt System/Разговор с клиентом.md, §4 Vorbereitung des Rapports und §8 Screenshots 3 (Zusätzliche Leistungen) sowie 8 (Zuschläge und Bedingungen)."
           && existing.updatedAt === '2026-10-08T00:00:00Z';
-        if (isOldUnchangedAddOnSeed || isPreviousUnchangedAddOnSeed) {
+        // Exact match against the previously seeded tariff entry; do not touch
+        // user-edited records. Current price validity was confirmed on 2026-10-09.
+        const legacyPriceListContent = item.id === 'f-raport-pricelist-source'
+          ? item.content
+              .replace("Keine Datierung auf dem Preisblatt selbst erkennbar; Nutzer hat am 09.10.2026 ausdrücklich bestätigt, dass es sich um Isas aktuelle Preise handelt.", "Keine Datierung oder verifizierte Preisgültigkeit im Bild; vom Nutzer ProRiv zugeordnet.")
+              .replace("Aktueller Preisstand durch Nutzeraussage bestätigt. Vertragsbezogene Ausnahmen und die genaue Anwendung einzelner Zuschläge bleiben bei Bedarf zu klären.", "Mit Isa aktuellen Preisstand, Vertragsbezug und korrekte Zuschlagsberechnung bestätigen.")
+          : '';
+        const legacyPriceListContentRu = item.id === 'f-raport-pricelist-source'
+          ? (item.contentRu || '')
+              .replace("На самом прайс-листе не видна дата, но пользователь 09.10.2026 прямо подтвердил, что это актуальные цены Исы.", "Дата действия тарифов неизвестна.")
+              .replace("Актуальность цен подтверждена пользователем; конкретные договорные исключения и правила расчёта при необходимости уточнить.", "Уточнить действие прайса у Исы.")
+          : '';
+        const isUntouchedPriceListSeed = item.id === 'f-raport-pricelist-source'
+          && existing.title === item.title
+          && existing.status === 'open_decision'
+          && existing.content === legacyPriceListContent
+          && (existing.contentRu || '') === legacyPriceListContentRu
+          && existing.updatedAt === '2026-10-09T00:00:00Z';
+        if (isUntouchedPriceListSeed) {
+          await putToStore('findings', {
+            ...existing,
+            content: item.content,
+            contentRu: item.contentRu,
+            status: item.status
+          });
+        } else if (isOldUnchangedAddOnSeed || isPreviousUnchangedAddOnSeed) {
           await putToStore('findings', {
             ...existing,
             title: item.title,
@@ -347,6 +372,7 @@ export async function initializeDatabase(): Promise<DatabaseState> {
         existing.summary === 'Kernarbeitsarten für ProRiv: Kernbohren (Durchmesser mm, Tiefe cm, Anzahl, Wand/Decke/Überkopf), Bodensäge (Tiefe cm, Länge m), Wandsäge. Katalog von Zusatzleistungen (Rüsten, Hebebühne, Bewehrung). Revisionssicherer PriceSnapshot bei Freigabe.'
         || existing.summary === "Kernarbeitsarten für ProRiv: Kernbohren (Durchmesser mm, Tiefe cm, Anzahl, Wand/Decke/Überkopf), Bodensäge (Tiefe cm, Länge m), Wandsäge. Zusatzleistungen aus Gesprächsnotizen (Transport/Anfahrt, Rüsten, Hebebühne/Gerüst, Hilfsarbeiter; noch am norwegischen Original abzugleichen). PriceSnapshot ist ein unbestätigter Architekturvorschlag."
         || existing.summary === "Kernarbeitsarten für ProRiv: Kernbohren (Durchmesser mm, Tiefe cm, Anzahl, Wand/Decke/Überkopf), Bodensäge (Tiefe cm, Länge m), Wandsäge. Echter Rapport (ein Beispiel): Merarbeid bei Kernbohrungen (6 h, Text abgeschnitten); Lift/Gerüst (3 h); Helferarbeit (12 h); Rüsten/Transport (1 Stück). Weitere Leistungen und Tarife offen. PriceSnapshot ist ein unbestätigter Architekturvorschlag."
+        || existing.summary === TOPIC_DEFINITIONS[topicId].briefing.findingsSummary.replace("Preisstand laut Nutzer am 09.10.2026 als aktuelle Preise von Isa bestätigt; vollständige Abdeckung des Katalogs und Anwendung im Einzelfall noch zu klären.", "Preisstand, Gültigkeit und vollständiger Katalog noch mit Isa prüfen.")
       )) {
         // Replace only the untouched legacy summary; user edits take precedence.
         await putToStore('topics', {

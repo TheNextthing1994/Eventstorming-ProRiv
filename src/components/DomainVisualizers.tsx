@@ -373,8 +373,8 @@ export const WorkReportPreviewVisualizer: React.FC<VisualizerProps> = ({ languag
         </summary>
         <p className="text-[11px] text-amber-800 mt-2 mb-3">
           {language === 'ru'
-            ? 'Другой источник: предоставленные 09.10.2026 скриншоты «PRISLISTE» (BETONGBORING, GULVSAG, VEGGSAG & HÅNDSAG, ANDRE KOSTNADER, BETINGELSER). Актуальность цен и применимость к ProRiv уточнить у Исы. Цены не публикуются в открытом GitHub.'
-            : 'Andere Primärquelle: Preisblatt-Screenshots vom 09.10.2026 („PRISLISTE“ mit BETONGBORING, GULVSAG, VEGGSAG & HÅNDSAG, ANDRE KOSTNADER, BETINGELSER). Gültigkeit und konkrete Anwendung bei ProRiv mit Isa klären. Vertrauliche Preise stehen nicht im öffentlichen GitHub.'}
+            ? 'Другой источник: предоставленные 09.10.2026 скриншоты «PRISLISTE» (BETONGBORING, GULVSAG, VEGGSAG & HÅNDSAG, ANDRE KOSTNADER, BETINGELSER). Пользователь подтвердил 09.10.2026, что это действующие цены Исы. Конкретные расценки не публикуются в открытом GitHub; тонкости расчёта по договорам ещё можно уточнять.'
+            : 'Andere Primärquelle: Preisblatt-Screenshots vom 09.10.2026 („PRISLISTE“ mit BETONGBORING, GULVSAG, VEGGSAG & HÅNDSAG, ANDRE KOSTNADER, BETINGELSER). Am 09.10.2026 vom Nutzer ausdrücklich als aktuelle Preise von Isa bestätigt. Beträge stehen nicht im öffentlichen GitHub; einzelne Abrechnungsdetails je Vertrag können noch zu klären sein.'}
         </p>
         {(['cost', 'surcharge', 'rule'] as const).map(group => (
           <div key={group} className="mb-3">

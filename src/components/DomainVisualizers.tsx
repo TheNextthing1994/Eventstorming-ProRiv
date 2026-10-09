@@ -16,6 +16,7 @@ import {
   FileText
 } from 'lucide-react';
 import { Language } from '../types';
+import { PRORIV_PRICE_SHEET_EVIDENCE } from '../data/prorivPriceSheetEvidence';
 
 interface VisualizerProps {
   language?: Language;
@@ -358,6 +359,48 @@ export const WorkReportPreviewVisualizer: React.FC<VisualizerProps> = ({ languag
             : 'Quelle: am 09.10.2026 hochgeladene Screenshots des echten Rapports, Abschnitt „Andre tjenester / Other services (4)“. Erste Positionsbezeichnung abgeschnitten. Kein freigegebener ProRiv-Gesamtkatalog.'}
         </p>
       </div>
+
+      {/* Separate primary source: the price list, NOT the one work-report example.
+          Intentionally collapsed to keep the senior workshop readable. */}
+      <details className="bg-white rounded-lg border border-slate-200 p-3 group">
+        <summary className="cursor-pointer text-xs font-bold text-slate-800">
+          {language === 'ru'
+            ? 'Дополнительно: в норвежском прайс-листе есть другие услуги и надбавки'
+            : 'Weitere Leistungen & Zuschläge aus der norwegischen Preisliste anzeigen'}
+          <span className="ml-2 text-[10px] text-slate-500 font-normal">
+            ({PRORIV_PRICE_SHEET_EVIDENCE.length} {language === 'ru' ? 'пунктов' : 'Belege/Regeln'})
+          </span>
+        </summary>
+        <p className="text-[11px] text-amber-800 mt-2 mb-3">
+          {language === 'ru'
+            ? 'Другой источник: предоставленные 09.10.2026 скриншоты «PRISLISTE» (BETONGBORING, GULVSAG, VEGGSAG & HÅNDSAG, ANDRE KOSTNADER, BETINGELSER). Актуальность цен и применимость к ProRiv уточнить у Исы. Цены не публикуются в открытом GitHub.'
+            : 'Andere Primärquelle: Preisblatt-Screenshots vom 09.10.2026 („PRISLISTE“ mit BETONGBORING, GULVSAG, VEGGSAG & HÅNDSAG, ANDRE KOSTNADER, BETINGELSER). Gültigkeit und konkrete Anwendung bei ProRiv mit Isa klären. Vertrauliche Preise stehen nicht im öffentlichen GitHub.'}
+        </p>
+        {(['cost', 'surcharge', 'rule'] as const).map(group => (
+          <div key={group} className="mb-3">
+            <div className="font-semibold text-[11px] text-slate-700 mb-1.5">
+              {group === 'cost'
+                ? (language === 'ru' ? 'Дополнительные расходы / позиции' : 'Zusätzliche Kostenpositionen')
+                : group === 'surcharge'
+                  ? (language === 'ru' ? 'Процентные надбавки' : 'Prozentuale Aufschläge')
+                  : (language === 'ru' ? 'Условия расчёта' : 'Abrechnungsbedingungen')}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+              {PRORIV_PRICE_SHEET_EVIDENCE.filter(item => item.group === group).map(item => (
+                <div key={item.id} className="p-2 rounded border border-slate-100 bg-slate-50 text-[11px] leading-relaxed">
+                  <div className="font-semibold text-slate-900">{item.norwegian}</div>
+                  <div className="text-slate-600">{language === 'ru' ? item.ru : item.de}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+        <p className="text-[10px] text-slate-500">
+          {language === 'ru'
+            ? 'Не подтверждено прайс-листом: асфальт, композитные материалы и обязательное использование пылеотсоса. Некоторые норвежские формулировки требуют уточнения.'
+            : 'Nicht aus dem Preisblatt belegt: Asphalt, Verbundmaterial und eine Pflicht zur Absaugung beim Trockenbohren. Einzelne Formulierungen bedürfen noch der Klärung.'}
+        </p>
+      </details>
 
       {/* Status workflow */}
       <div className="p-3 bg-emerald-50/40 rounded-lg border border-emerald-200 text-xs space-y-1.5">

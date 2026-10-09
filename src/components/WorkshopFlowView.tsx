@@ -5,6 +5,8 @@ import { WORKSHOP_STEPS, WORKSHOP_ROLE_LABELS, WorkshopStep } from '../data/work
 import { SENIOR_DECISION_QUESTIONS } from '../db/knowledgeSeed';
 import { loadWorkshopNotes, saveWorkshopNotes, saveQuestion, WorkshopNote, WorkshopNotes } from '../db/indexedDb';
 import { prepareSddHandoff, SddHandoff } from '../utils/sddHandoff';
+import { SeniorSourceAuditPanel } from './SeniorSourceAuditPanel';
+import { AuditLens, seniorAuditByName } from '../data/seniorSourceAudit';
 
 interface WorkshopFlowViewProps {
   databaseState: DatabaseState;
@@ -260,12 +262,24 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
               {t('Wichtig: Eine Interview-Zusammenfassung ist kein unterschriebenes Kundenprotokoll. Herstellerlinks belegen nicht automatisch konkrete Produktfunktionen. Aussagen sind vor Entscheidung zu bestätigen.',
                 'Важно: пересказ интервью не равен подписанному протоколу. Ссылка на сайт продукта не доказывает все функции. Утверждения требуют подтверждения.')}
             </p>
-            <div className="font-bold">{t('Vergleich / Open-Source-Kandidaten (noch zu prüfen):','Сравнение / OSS-кандидаты (нужно проверить):')}</div>
+            <div className="font-bold">{t('Vergleich / OSS / API – aktuelle Quellenlage:','Сравнение / OSS / API – статус источников:')}</div>
             {active.choices.map(choice => (
               <div key={choice.name} className="rounded-lg border p-2.5">
                 <span className="font-semibold">{choice.name}</span>
                 <span className="text-slate-500"> · {choice.kind.toUpperCase()}</span>
                 <p className="mt-1">{t(choice.why,choice.whyRu)}</p>
+                {(() => {
+                  const audited = seniorAuditByName(choice.name);
+                  return audited ? <div className="mt-2 space-y-1 rounded-lg bg-slate-50 border border-slate-200 p-2 text-[11px]">
+                    <div className="font-bold text-slate-800">{t('Durch Primärquelle belegte Funktion:','Подтверждено первоисточником:')}</div>
+                    <p>{t(audited.provenDe,audited.provenRu)}</p>
+                    <div><strong>{t('Für uns nutzbar: ','Что можем использовать: ')}</strong>{t(audited.useDe,audited.useRu)}</div>
+                    <div className="text-amber-800"><strong>{t('Noch offen: ','Не подтверждено: ')}</strong>{t(audited.boundaryDe,audited.boundaryRu)}</div>
+                    {audited.license && <div>{t('Lizenz: ','Лицензия: ')}{audited.license}</div>}
+                    <p className="text-amber-900 font-semibold">{t('Integration in ISA: nicht getestet','Интеграция в ISA не тестировалась')}</p>
+                    <a href={audited.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline text-emerald-800">{t('Verifizierte Primärquelle öffnen','Открыть первоисточник')}</a>
+                  </div> : <p className="text-amber-800 mt-2">{t('Für diese Option noch kein eigener Quellen-Audit hinterlegt.','Для этого варианта ещё нет отдельной проверки источника.')}</p>;
+                })()}
                 {choice.link && <a href={choice.link} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex gap-1 items-center text-emerald-800 underline break-all">
                   {t('Quelle / Projektseite öffnen','Открыть сайт / источник')} <ExternalLink className="h-3 w-3"/>
                 </a>}
@@ -361,6 +375,7 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
     </div>
   );
 
+  const auditLens: AuditLens = (['process','market','tech','risk'] as const)[researchIndex];
   const research = RESEARCH_SECTIONS[researchIndex];
   const researchSteps = WORKSHOP_STEPS.filter(step => research.ids.includes(step.id));
   const filteredFindings = databaseState.findings.filter(item => research.topics.includes(item.topicId) || item.additionalTopicIds?.some(id => research.topics.includes(id)));
@@ -462,6 +477,7 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
                 <span className="block text-xs text-slate-500 mt-1">{t(item.hint,item.hintRu)}</span>
               </button>)}
             </div>
+            <SeniorSourceAuditPanel key={auditLens} lens={auditLens} language={language} />
             <h3 className="text-sm font-bold">{t(research.title,research.titleRu)} · {t('Beispiele mit Begründung','Примеры с обоснованием')}</h3>
             {chips(researchSteps)}
             <details className="rounded-lg border p-3" key={'research-'+researchIndex}>

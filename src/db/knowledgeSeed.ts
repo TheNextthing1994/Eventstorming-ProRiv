@@ -18,7 +18,7 @@ import {
   DomainEventItem
 } from '../types';
 
-export const SEED_VERSION = 5;
+export const SEED_VERSION = 6;
 
 export const MVP_STRATEGIC_STATEMENT = {
   quote: "Wir bauen kein zweites Dalux und kein neues Tripletex. Wir entwickeln eine schlanke Baustellen-Ausführungsschicht für ProRiv und integrieren bestehende Systeme.",
@@ -933,7 +933,7 @@ export const INITIAL_PRODUCT_RECOMMENDATIONS: ProductRecommendation[] = [
   {
     id: 'rec-api-1',
     topicId: 'api',
-    title: 'Entkopplung von Fachfreigabe und ERP-Exportstatus',
+    title: 'Trennung von Tripletex-Stundenprüfung und Exportstatus',
     titleRu: 'Развязка согласования бригадиром и технического экспорта в ERP',
     description: 'Ein Rapport kann fachlich freigegeben sein, während der Tripletex-Export noch ansteht oder fehlgeschlagen ist. Fehlgeschlagener Export darf Freigabe nicht stornieren.',
     descriptionRu: 'Рапорт может быть полностью утвержден бригадиром, даже если отправка в Tripletex еще в очереди или произошел сбой сети. Ошибка API не отменяет утверждение.',
@@ -1090,10 +1090,10 @@ export const INITIAL_DECISIONS: Decision[] = [
     title: 'Dreiteilung der Zeit- und Leistungsdatenmodelle',
     titleRu: 'Разделение моделей учета времени и выполненных объемов',
     date: '2026-10-08',
-    rationale: 'WorkSession (Anwesenheit/Stempeln), TimesheetEntry (Abrechnungsstunden) und WorkReport (Aufmaß/Mengen) werden als eigenständige Entitäten modelliert. Keine Vermischung in einem monolithischen Datensatz.',
-    rationaleRu: 'WorkSession (отметка присутствия), TimesheetEntry (оплачиваемые часы табеля) и WorkReport (объемы бурения/резки) разделены на три независимые сущности. Никакого монолитного смешивания.',
+    rationale: 'Architekturvorschlag, noch nicht vom Senior beschlossen: Baustellen-Anwesenheit, projektbezogene Arbeitsstunden und Leistungen/Rapporte im Datenmodell trennen. Gesetzliche HMS-Liste nicht automatisch mit Zeitstempeln gleichsetzen.',
+    rationaleRu: 'Предложение, не утверждено сеньором: разделить посещение объекта, рабочие часы и рапорты по выполненным работам. Не приравнивать обязательный список HMS к табелю времени.',
     responsiblePerson: 'Senior Software Architect',
-    status: 'decided',
+    status: 'draft',
     origin: 'event_storming',
     decisionStatus: 'recommended',
     createdAt: '2026-10-08T00:00:00Z',
@@ -1105,12 +1105,12 @@ export const INITIAL_DECISIONS: Decision[] = [
     title: 'Beibehaltung der Core-Technologien aus der Originalskizze',
     titleRu: 'Сохранение ключевых технологий из оригинального эскиза',
     date: '2026-10-08',
-    rationale: 'Verbindliche Festlegung auf React Native, AWS Cognito und AWS S3 gemäß Skizze des Seniors. Keine stillschweigende Ersetzung durch Dritt-BaaS-Plattformen.',
-    rationaleRu: 'Окончательное утверждение React Native, AWS Cognito и AWS S3 строго по эскизу сеньора. Никаких сторонних замен без ведома архитектора.',
+    rationale: 'Noch nicht beschlossen: In der Originalskizze nennt der Senior React Native, AWS Cognito und AWS S3 als technische Richtung. Verbindliche Stackwahl, Alternativen und Betriebskosten sind gemeinsam zu prüfen.',
+    rationaleRu: 'Не утверждено: в эскизе сеньор указал React Native, AWS Cognito и AWS S3 как возможный стек. Окончательный выбор, альтернативы и затраты требуют обсуждения.',
     responsiblePerson: 'Senior Software Engineer',
-    status: 'decided',
+    status: 'draft',
     origin: 'sketch',
-    decisionStatus: 'project_known',
+    decisionStatus: 'recommended',
     createdAt: '2026-10-08T00:00:00Z',
     updatedAt: '2026-10-08T00:00:00Z'
   },
@@ -1118,12 +1118,12 @@ export const INITIAL_DECISIONS: Decision[] = [
     id: 'dec-3',
     topicId: 'api',
     title: 'Entkopplung von Fachfreigabe und ERP-Exportstatus',
-    titleRu: 'Разделение утверждения бригадиром и сетевого экспорта в ERP',
+    titleRu: 'Разделение проверки часов в Tripletex и статуса передачи данных',
     date: '2026-10-08',
-    rationale: 'Fachliche Freigaben in ISA sind unabhängig vom Netzwerk- oder Übertragungsstatus der Tripletex-Schnittstelle. Exportjobs laufen asynchron über idempotente Queues.',
-    rationaleRu: 'Согласование работ в ISA независимо от статуса сети и доступности Tripletex. Задачи выгрузки выполняются асинхронно через идемпотентную очередь.',
+    rationale: 'Architekturvorschlag, noch nicht beschlossen: Die Übertragung von Arbeitsstunden nach Tripletex ist unabhängig von der fachlichen Stundenprüfung in Tripletex. Fehlgeschlagene Exporte sollen sicher wiederholbar sein; konkrete API- und Queue-Technik ist zu testen.',
+    rationaleRu: 'Предложение, не утверждено: передача часов в Tripletex и проверка часов прорабом в Tripletex — разные действия. Повторные отправки должны быть безопасны; механизм API и очереди ещё проверить.',
     responsiblePerson: 'Lead Developer',
-    status: 'decided',
+    status: 'draft',
     origin: 'architecture_recommendation',
     decisionStatus: 'recommended',
     createdAt: '2026-10-08T00:00:00Z',

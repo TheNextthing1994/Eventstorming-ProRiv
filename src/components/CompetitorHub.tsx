@@ -4,6 +4,7 @@ import { DatabaseState, TopicId, CompetitorEntry, Language } from '../types';
 import { TOPIC_DEFINITIONS } from '../db/defaultData';
 import { StatusBadge } from './StatusBadge';
 import { getTranslation } from '../i18n/translations';
+import { seniorAuditByName } from '../data/seniorSourceAudit';
 
 interface CompetitorHubProps {
   databaseState: DatabaseState;
@@ -44,7 +45,7 @@ export const CompetitorHub: React.FC<CompetitorHubProps> = ({
             <span className="text-xs font-mono text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
               {language === 'ru'
                 ? 'Статус: Предварительные ориентиры — внешне еще не подтверждено'
-                : 'Status: Vorläufige Schwerpunkte – Extern noch nicht belegt'}
+                : 'Historische Vergleichsdaten · aktueller Quellen-Audit in den Karten'}
             </span>
           </div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900">
@@ -125,6 +126,28 @@ export const CompetitorHub: React.FC<CompetitorHubProps> = ({
                 </div>
               </div>
 
+              {/* 2026-10-09 source audit takes precedence over legacy, unverified research wording. */}
+              {(() => {
+                const audited = seniorAuditByName(comp.productName);
+                return audited ? <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 space-y-2 text-[11px]">
+                  <p className="font-bold text-emerald-950">
+                    {language === 'ru' ? 'Проверка первоисточника (09.10.2026)' : 'Primärquellen-Audit (09.10.2026)'}
+                  </p>
+                  <p><strong>{language === 'ru' ? 'Подтверждено: ' : 'Belegbar: '}</strong>
+                    {language === 'ru' ? audited.provenRu : audited.provenDe}</p>
+                  <p><strong>{language === 'ru' ? 'Для ISA: ' : 'Für ISA: '}</strong>
+                    {language === 'ru' ? audited.useRu : audited.useDe}</p>
+                  <p className="text-amber-800"><strong>{language === 'ru' ? 'Не подтверждено/не протестировано: ' : 'Nicht nachgewiesen/nicht getestet: '}</strong>
+                    {language === 'ru' ? audited.boundaryRu : audited.boundaryDe}</p>
+                  <a href={audited.sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-emerald-800 underline">
+                    {language === 'ru' ? 'Оригинальный источник' : 'Offizielle Quelle'} <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div> : null;
+              })()}
+              {/* Legacy observations retained for traceability; do not treat as validated assertions. */}
+              <p className="text-[11px] text-amber-800">
+                {language === 'ru' ? 'Ниже: исторический исследовательский черновик, не независимый тест продукта.' : 'Darunter: historischer Rechercheentwurf, kein unabhängiger Praxistest.'}
+              </p>
               {/* Investigation details */}
               <div className="space-y-2 text-xs">
                 {comp.investigationGoal && (

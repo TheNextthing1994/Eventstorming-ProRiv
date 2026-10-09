@@ -95,7 +95,6 @@ export const OriginalSketchCanvas: React.FC<OriginalSketchCanvasProps> = ({
   if (homeMode === 'flow') {
     return (
       <div className="flex flex-col items-center w-full min-h-[calc(100vh-3.5rem)] bg-slate-100/70 p-4 sm:p-6 lg:p-8">
-        {viewSwitcher}
         <WorkshopFlowView
           databaseState={databaseState}
           language={language}
@@ -103,6 +102,9 @@ export const OriginalSketchCanvas: React.FC<OriginalSketchCanvasProps> = ({
           onSelectTopic={onSelectTopic}
           onNavigateSection={onNavigateSection}
         />
+        <button type="button" onClick={() => setHomeMode('sketch')} className="mt-4 text-xs text-slate-500 underline hover:text-slate-800">
+          {language === 'ru' ? 'Оригинальный эскиз (архив)' : 'Originalskizze optional ansehen'}
+        </button>
       </div>
     );
   }

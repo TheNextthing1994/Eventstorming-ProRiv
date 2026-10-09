@@ -521,6 +521,7 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
                 return <div key={step.id} className="border-t pt-2 text-xs space-y-1">
                   <p className="font-bold">{step.nr}. {t(step.title,step.titleRu)}</p>
                   <p><strong>{t('Ergebnis:','Результат:')}</strong> {note.answer}</p>
+                  {note.revisedCustomerFact !== undefined && <p><strong>{t('Aktualisierter Interviewstand:','Уточнённое понимание интервью:')}</strong> {note.revisedCustomerFact}</p>}
                   <p><strong>{t('Aktueller Vorschlag:','Предложение:')}</strong> {note.revisedRecommendation ?? t(step.recommendation,step.recommendationRu)}</p>
                   <p className="text-slate-500">{t('Verantwortlich:','Ответственный:')} {note.owner || '—'} · {t('Nächster Schritt:','Следующий шаг:')} {note.nextStep || '—'}</p>
                 </div>;
@@ -541,6 +542,8 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
                 return <div key={step.id} className="border-t pt-2 text-xs">
                   <span className="font-semibold">{step.nr}. {t(step.title,step.titleRu)}</span> · {statusText(note.status)}
                   {note.answer && <p className="mt-1 text-slate-600">{note.answer}</p>}
+                  {note.revisedCustomerFact !== undefined && <p className="mt-1 text-slate-600"><strong>{t('Bearbeiteter Interviewstand:','Уточнённое интервью:')}</strong> {note.revisedCustomerFact}</p>}
+                  {note.revisedRecommendation !== undefined && <p className="mt-1 text-slate-600"><strong>{t('Bearbeiteter Vorschlag:','Новое предложение:')}</strong> {note.revisedRecommendation}</p>}
                 </div>;
               })}
               {SENIOR_DECISION_QUESTIONS.filter(item => notes['arch:' + item.id]?.status !== 'decided').map(item => {

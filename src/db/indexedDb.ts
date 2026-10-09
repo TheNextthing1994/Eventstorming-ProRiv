@@ -255,16 +255,38 @@ export async function initializeDatabase(): Promise<DatabaseState> {
     }
 
     const decMap = new Map(currentDecs.map(d => [d.id, d]));
+    // Old research seed mistakenly marked three unapproved architecture proposals
+    // as decided. Correct ONLY untouched copies of those original seed records.
+    // User-edited, genuinely agreed or newer records must never be downgraded.
+    const originalDecisionTexts: Record<string, string> = {
+      'dec-1': 'WorkSession (Anwesenheit/Stempeln), TimesheetEntry (Abrechnungsstunden)',
+      'dec-2': 'Verbindliche Festlegung auf React Native, AWS Cognito und AWS S3',
+      'dec-3': 'Fachliche Freigaben in ISA sind unabhängig'
+    };
     for (const item of INITIAL_DECISIONS) {
       const existing = decMap.get(item.id);
       if (!existing) {
         await putToStore('decisions', item);
       } else {
-        await putToStore('decisions', {
-          ...existing,
-          titleRu: item.titleRu || existing.titleRu,
-          rationaleRu: item.rationaleRu || existing.rationaleRu
-        });
+        const isUntouchedOldSeed = currentSeedVersion < 6
+          && existing.status === 'decided'
+          && existing.updatedAt === '2026-10-08T00:00:00Z'
+          && Boolean(originalDecisionTexts[item.id])
+          && existing.rationale.startsWith(originalDecisionTexts[item.id]);
+        if (isUntouchedOldSeed) {
+          await putToStore('decisions', {
+            ...existing,
+            title: item.title,
+            titleRu: item.titleRu,
+            rationale: item.rationale,
+            rationaleRu: item.rationaleRu,
+            status: 'draft',
+            decisionStatus: item.decisionStatus
+          });
+        } else {
+          // Existing conversation or manual changes win over new research seeds.
+          await putToStore('decisions', existing);
+        }
       }
     }
 

@@ -6,7 +6,9 @@
  *
  * This repository is public. The amounts, customer identities and raw
  * commercial document images are intentionally NOT copied here.
- * Validity date, firm attribution and current applicability are unverified.
+ * On 2026-10-09 the user expressly confirmed this as Isa's CURRENT price list.
+ * Individual small-print readings and applicability to specific contracts may
+ * still require clarification; no validity-start date is visible in the images.
  */
 export type PriceSheetEvidenceGroup = 'cost' | 'surcharge' | 'rule';
 

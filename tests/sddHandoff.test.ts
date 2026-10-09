@@ -5,8 +5,8 @@ import type { DatabaseState, SeniorQuestion, TopicId } from '../src/types';
 import type { WorkshopNotes } from '../src/db/indexedDb';
 
 const topicIds: TopicId[] = ['users','clients','raport','vremya','api','mobile-app'];
-const state = {
-  topics: Object.fromEntries(topicIds.map(id => [id,{id,summary:'',updatedAt:''}])),
+const state: DatabaseState = {
+  topics: Object.fromEntries(topicIds.map(id => [id,{id,summary:'',updatedAt:''}])) as DatabaseState['topics'],
   questions: [],
   findings: [{
     id:'finding-1',topicId:'vremya',title:'Example research',content:'NOT independently verified',
@@ -20,9 +20,9 @@ const state = {
     id:'att-1',topicId:'vremya',title:'Big evidence file',type:'file',
     fileData:'VERY-LARGE-SECRET-BINARY-BLOB',createdAt:''
   }],
-  hotspotSettings: Object.fromEntries(topicIds.map(id => [id,{x:50,y:50,radius:8}])),
+  hotspotSettings: Object.fromEntries(topicIds.map(id => [id,{x:50,y:50,radius:8}])) as DatabaseState['hotspotSettings'],
   customImage: 'DATA-IMAGE-DO-NOT-COPY'
-} as DatabaseState;
+};
 
 const question: SeniorQuestion = {
   id:'q-example',topicId:'vremya',question:'Who is responsible?',

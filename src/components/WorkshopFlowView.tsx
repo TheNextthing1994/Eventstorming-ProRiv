@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowRight, BookOpen, CheckCircle2, ChevronDown, ChevronUp, Download, ExternalLink, GitBranch, Layers3, Search, ShieldCheck } from 'lucide-react';
-import { DatabaseState, Language, TopicId } from '../types';
+import { DatabaseState, Language, TopicId, SeniorQuestion } from '../types';
 import { WORKSHOP_STEPS, WORKSHOP_ROLE_LABELS, WorkshopStep } from '../data/workshopContent';
 import { SENIOR_DECISION_QUESTIONS } from '../db/knowledgeSeed';
-import { loadWorkshopNotes, saveWorkshopNotes, WorkshopNote, WorkshopNotes } from '../db/indexedDb';
+import { loadWorkshopNotes, saveWorkshopNotes, saveQuestion, WorkshopNote, WorkshopNotes } from '../db/indexedDb';
 
 interface WorkshopFlowViewProps {
   databaseState: DatabaseState;
@@ -32,7 +32,7 @@ function downloadFile(name: string, content: string, type: string) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function writeProtocol(notes: WorkshopNotes): string {
+function writeProtocol(notes: WorkshopNotes, questions: SeniorQuestion[]): string {
   const lines = ['# ProRiv (Isa\'s Projekt) – Senior-Gespräch', '', 'Stand: ' + new Date().toISOString(), '', 'Nur ausdrücklich als „Entschieden“ dokumentierte Punkte gelten als Gesprächsergebnis.', ''];
   for (const step of WORKSHOP_STEPS) {
     const note = notes[step.id] || EMPTY_NOTE;
@@ -58,6 +58,13 @@ function writeProtocol(notes: WorkshopNotes): string {
       '**Verantwortlich:** ' + (note.owner || '—'), '',
       '**Nächster Schritt:** ' + (note.nextStep || '—'), '');
   }
+  lines.push('## Rückfragen an Isa – aus der bestehenden Fragenliste', '');
+  for (const q of questions.filter(item => item.needsClientClarification || Boolean(item.clientQuestion?.trim() || item.clientQuestionRu?.trim()))) {
+    lines.push('### ' + (q.clientQuestion || q.question), '',
+      '**Status:** ' + (q.isResolved ? 'Geklärt' : 'Offen'), '',
+      '**Gesprächsnotiz:** ' + (q.notes || '—'), '',
+      '**Herkunft im Datensatz:** ' + (q.origin || 'nicht angegeben'), '');
+  }
   return lines.join('\n');
 }
 
@@ -69,6 +76,12 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
   const [researchIndex, setResearchIndex] = useState(0);
   const [detailOpen, setDetailOpen] = useState(false);
   const [showAllQuestions, setShowAllQuestions] = useState(false);
+  const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
+  const [questionsState, setQuestionsState] = useState<SeniorQuestion[]>(databaseState.questions);
+  const questionsRef = useRef<SeniorQuestion[]>(databaseState.questions);
+  const questionsQueue = useRef<Promise<void>>(Promise.resolve());
+  const questionRev = useRef(0);
+  const [questionSaveState, setQuestionSaveState] = useState<'saved' | 'saving' | 'error'>('saved');
   const [notes, setNotes] = useState<WorkshopNotes>({});
   const notesRef = useRef<WorkshopNotes>({});
   const saveQueue = useRef<Promise<void>>(Promise.resolve());
@@ -108,8 +121,25 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
       .catch(() => { if (revision.current === version) setSaveState('error'); });
   };
 
+  const editQuestion = (id: string, change: Partial<SeniorQuestion>) => {
+    const before = questionsRef.current.find(item => item.id === id);
+    if (!before) return;
+    if (change.isResolved === true && !before.isResolved && !(change.notes ?? before.notes || '').trim()) {
+      window.alert(t('Bitte zuerst die Antwort oder Klärung als Notiz dokumentieren.','Сначала запишите ответ или уточнение.'));
+      return;
+    }
+    const next: SeniorQuestion = { ...before, ...change, updatedAt: new Date().toISOString() };
+    questionsRef.current = questionsRef.current.map(item => item.id === id ? next : item);
+    setQuestionsState(questionsRef.current);
+    setQuestionSaveState('saving');
+    const v = ++questionRev.current;
+    questionsQueue.current = questionsQueue.current.catch(() => {}).then(() => saveQuestion(next))
+      .then(() => { if (v === questionRev.current) setQuestionSaveState('saved'); })
+      .catch(() => { if (v === questionRev.current) setQuestionSaveState('error'); });
+  };
+
   const active = WORKSHOP_STEPS.find(step => step.id === selectedStep);
-  const clientQuestions = databaseState.questions.filter(q => q.needsClientClarification || Boolean(q.clientQuestion?.trim() || q.clientQuestionRu?.trim()));
+  const clientQuestions = questionsState.filter(q => q.needsClientClarification || Boolean(q.clientQuestion?.trim() || q.clientQuestionRu?.trim()));
   const decided = WORKSHOP_STEPS.filter(step => notes[step.id]?.status === 'decided').length;
   const verify = WORKSHOP_STEPS.filter(step => notes[step.id]?.status === 'test').length;
 
@@ -351,9 +381,31 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
               </div>
               {(showAllQuestions ? clientQuestions : clientQuestions.slice(0,5)).map(q => (
                 <div className="border-t py-2 text-xs" key={q.id}>
-                  <div className="flex items-start gap-2"><span className="shrink-0 text-amber-800">{q.isResolved ? '✓' : '○'}</span>
-                    <p>{t(q.clientQuestion || q.question, q.clientQuestionRu || q.questionRu || q.question)}</p></div>
-                  <p className="text-[10px] ml-5 text-slate-500 mt-1">{t('Quelle: Projekt-Fragenliste · Status: ','Источник: список вопросов · статус: ')}{q.isResolved ? t('geklärt','выяснено') : t('offen','открыто')}</p>
+                  <button type="button" onClick={() => setSelectedQuestion(old => old === q.id ? null : q.id)}
+                    aria-expanded={selectedQuestion === q.id} className="flex w-full text-left items-start gap-2">
+                    <span className="shrink-0 text-amber-800">{q.isResolved ? '✓' : '○'}</span>
+                    <span className="font-semibold flex-1">{t(q.clientQuestion || q.question, q.clientQuestionRu || q.questionRu || q.question)}</span>
+                    {selectedQuestion === q.id ? <ChevronUp className="h-4 w-4"/> : <ChevronDown className="h-4 w-4"/>}
+                  </button>
+                  <p className="text-[10px] ml-5 text-slate-500 mt-1">{t('Quelle: Projekt-Fragenliste · Herkunft: ','Источник: список вопросов · происхождение: ')}{q.origin || t('nicht dokumentiert','не указано')} · {q.isResolved ? t('geklärt','выяснено') : t('offen','открыто')}</p>
+                  {selectedQuestion === q.id && <div className="mt-2 ml-5 p-3 border rounded-lg bg-white space-y-2">
+                    <div className="bg-emerald-50 rounded p-2">
+                      <p className="text-[11px] font-bold">{t('Bisheriger Vorschlag · nicht entschieden','Предложение · не утверждено')}</p>
+                      <p className="mt-1">{t(q.answer || '—', q.answerRu || q.answer || '—')}</p>
+                    </div>
+                    <label className="block font-semibold">{t('Antwort / Klärung aus dem Gespräch','Ответ / уточнение в ходе встречи')}
+                      <textarea rows={2} value={q.notes || ''} onChange={e => editQuestion(q.id,{notes:e.target.value})}
+                        className="block border rounded-lg p-2 w-full mt-1 font-normal bg-white" placeholder={t('Was wurde tatsächlich geklärt?','Что выяснили?')}/>
+                    </label>
+                    <div className="flex flex-wrap justify-between items-center gap-2">
+                      <button type="button" onClick={() => editQuestion(q.id,{isResolved:!q.isResolved})} className="border rounded-lg px-3 py-2 font-semibold bg-slate-50">
+                        {q.isResolved ? t('Wieder öffnen','Открыть снова') : t('Als geklärt markieren','Отметить как выяснено')}
+                      </button>
+                      <span className={'text-[11px] ' + (questionSaveState === 'error' ? 'text-red-700' : 'text-slate-500')}>
+                        {questionSaveState === 'saving' ? t('Speichert…','Сохранение…') : questionSaveState === 'saved' ? t('Im Browser gespeichert','Сохранено в браузере') : t('Speichern fehlgeschlagen','Ошибка сохранения')}
+                      </span>
+                    </div>
+                  </div>}
                 </div>
               ))}
               {clientQuestions.length === 0 && <p className="text-xs text-slate-500">{t('Keine Einträge geladen.','Нет записей.')}</p>}
@@ -424,10 +476,10 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
               {architectureInspector}
             </details>
             <div className="flex flex-wrap gap-2 pt-2 border-t">
-              <button className="rounded-lg border bg-slate-900 text-white text-xs px-3 py-2 inline-flex items-center gap-2" onClick={() => downloadFile('ProRiv_Senior_Protokoll.md',writeProtocol(notesRef.current),'text/markdown')}>
+              <button className="rounded-lg border bg-slate-900 text-white text-xs px-3 py-2 inline-flex items-center gap-2" onClick={() => downloadFile('ProRiv_Senior_Protokoll.md',writeProtocol(notesRef.current,questionsRef.current),'text/markdown')}>
                 <Download className="h-4 w-4"/>{t('Gesprächsprotokoll exportieren','Экспорт протокола')}
               </button>
-              <button className="rounded-lg border border-slate-300 bg-white text-xs px-3 py-2 inline-flex items-center gap-2" onClick={() => downloadFile('ProRiv_WorkshopNotes_Backup.json',JSON.stringify({exportedAt:new Date().toISOString(),workshopNotes:notesRef.current},null,2),'application/json')}>
+              <button className="rounded-lg border border-slate-300 bg-white text-xs px-3 py-2 inline-flex items-center gap-2" onClick={() => downloadFile('ProRiv_WorkshopNotes_Backup.json',JSON.stringify({exportedAt:new Date().toISOString(),workshopNotes:notesRef.current,questions:questionsRef.current},null,2),'application/json')}>
                 <Download className="h-4 w-4"/>{t('Notizen-Backup (JSON)','Резервная копия JSON')}
               </button>
             </div>

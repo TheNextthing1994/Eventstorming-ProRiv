@@ -148,7 +148,7 @@ export const GuidedPresentation: React.FC<GuidedPresentationProps> = ({
           <button onClick={onExit} className="p-2 rounded-lg hover:bg-slate-800" aria-label={t('Workshop verlassen','Выйти')}><ArrowLeft className="w-4 h-4"/></button>
           <div>
             <p className="text-[10px] text-emerald-300 uppercase tracking-widest font-semibold">{t('Geführtes Senior-Meeting','Презентация для сеньора')}</p>
-            <h1 className="font-bold text-sm sm:text-base">ProRiv / ISA · {t(...LABELS[slide])}</h1>
+            <h1 className="font-bold text-sm sm:text-base">ProRiv / ISA · {t(LABELS[slide][0], LABELS[slide][1])}</h1>
           </div>
         </div>
         <div className="flex flex-wrap gap-1.5 items-center">
@@ -169,7 +169,7 @@ export const GuidedPresentation: React.FC<GuidedPresentationProps> = ({
           {LABELS.map((label,i)=>(
             <button key={i} onClick={()=>changeSlide(i)}
               className={"px-3 py-2 rounded-lg text-xs font-semibold "+(i===slide?'bg-slate-900 text-white':'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50')}>
-              {i+1}. {t(...label)}
+              {i+1}. {t(label[0], label[1])}
             </button>
           ))}
         </div>
@@ -180,7 +180,7 @@ export const GuidedPresentation: React.FC<GuidedPresentationProps> = ({
               <p className="text-[11px] uppercase font-semibold tracking-widest text-emerald-800">
                 {t('Schritt','Шаг')} {slide+1} / {LABELS.length} · {t('Gemeinsam verstehen und entscheiden','Понять и решить вместе')}
               </p>
-              <h2 className="mt-1 text-xl sm:text-2xl font-bold">{t(...LABELS[slide])}</h2>
+              <h2 className="mt-1 text-xl sm:text-2xl font-bold">{t(LABELS[slide][0], LABELS[slide][1])}</h2>
             </div>
 
             {slide===0 && <>

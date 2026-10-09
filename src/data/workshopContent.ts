@@ -120,6 +120,7 @@ export const WORKSHOP_STEPS: WorkshopStep[] = [
     choices: [
       {name:'DocuSeal',kind:'oss',why:'Selbsthostbare E-Signatur (AGPL, Bedingungen prüfen); Ablehnungslogik selbst bauen.',whyRu:'Электронная подпись (AGPL); отказ нужно реализовать отдельно.',link:'https://github.com/docusealco/docuseal'},
       {name:'Signature Pad',kind:'oss',why:'Unterschrift direkt am Bildschirm; MIT-Lizenz.',whyRu:'Подпись на экране; лицензия MIT.',link:'https://github.com/szimek/signature_pad'},
+      {name:'SmartDok',kind:'vorbild',why:'Herstellerbelegte Unterschrift des Auftraggebers auf Tablet/App sowie bei Zeiterfassung; reine Funktionsreferenz, kein OSS.',whyRu:'Подтверждённая производителем подпись заказчика в приложении/на планшете и при учёте времени; только функциональный пример, не OSS.',link:'https://smartdok.no/funksjoner/'},
       {name:'CoreDocket',kind:'vorbild',why:'Kundenbezogener Rapportprozess als UX-Inspiration.',whyRu:'Опыт процесса рапортов и клиентов.',link:'https://www.coredocket.com.au/'}
     ]
   },

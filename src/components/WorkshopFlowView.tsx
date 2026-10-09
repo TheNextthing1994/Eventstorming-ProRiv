@@ -124,7 +124,7 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
   const editQuestion = (id: string, change: Partial<SeniorQuestion>) => {
     const before = questionsRef.current.find(item => item.id === id);
     if (!before) return;
-    if (change.isResolved === true && !before.isResolved && !(change.notes ?? before.notes || '').trim()) {
+    if (change.isResolved === true && !before.isResolved && !(change.notes ?? before.notes ?? '').trim()) {
       window.alert(t('Bitte zuerst die Antwort oder Klärung als Notiz dokumentieren.','Сначала запишите ответ или уточнение.'));
       return;
     }

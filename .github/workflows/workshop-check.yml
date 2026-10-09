@@ -20,5 +20,7 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: TypeScript check
         run: npm run lint
+      - name: SDD handoff tests
+        run: npm run test:sdd
       - name: Production build
         run: npm run build

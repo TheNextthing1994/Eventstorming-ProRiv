@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ArrowRight, BookOpen, CheckCircle2, ChevronDown, ChevronUp, Download, ExternalLink, GitBranch, Layers3, Search, ShieldCheck } from 'lucide-react';
 import { DatabaseState, Language, TopicId } from '../types';
 import { WORKSHOP_STEPS, WORKSHOP_ROLE_LABELS, WorkshopStep } from '../data/workshopContent';
+import { SENIOR_DECISION_QUESTIONS } from '../db/knowledgeSeed';
 import { loadWorkshopNotes, saveWorkshopNotes, WorkshopNote, WorkshopNotes } from '../db/indexedDb';
 
 interface WorkshopFlowViewProps {
@@ -46,6 +47,17 @@ function writeProtocol(notes: WorkshopNotes): string {
       '**Verantwortlich:** ' + (note.owner || '—'), '',
       '**Nächster Schritt:** ' + (note.nextStep || '—'), '');
   }
+  for (const arch of SENIOR_DECISION_QUESTIONS) {
+    const note = notes['arch:' + arch.id] || EMPTY_NOTE;
+    lines.push('## Architekturfrage ' + arch.number + ': ' + arch.question, '',
+      '**Vorschlag, nicht beschlossen:** ' + arch.currentProposal, '',
+      '**Begründung aus dem Projektbestand:** ' + arch.rationale, '',
+      '**Herkunft:** Interne Architekturfragenliste; extern nicht automatisch verifiziert.', '',
+      '**Gesprächsstatus:** ' + (note.status === 'decided' ? 'Entschieden' : note.status === 'test' ? 'Zu prüfen' : 'Offen'), '',
+      '**Besprochene Antwort / Begründung:** ' + (note.answer || '—'), '',
+      '**Verantwortlich:** ' + (note.owner || '—'), '',
+      '**Nächster Schritt:** ' + (note.nextStep || '—'), '');
+  }
   return lines.join('\n');
 }
 
@@ -53,6 +65,7 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
   const t = (de: string, ru: string) => language === 'ru' ? ru : de;
   const [phase, setPhase] = useState<number | null>(null);
   const [selectedStep, setSelectedStep] = useState<string | null>(null);
+  const [selectedArchitecture, setSelectedArchitecture] = useState<string | null>(null);
   const [researchIndex, setResearchIndex] = useState(0);
   const [detailOpen, setDetailOpen] = useState(false);
   const [showAllQuestions, setShowAllQuestions] = useState(false);
@@ -111,9 +124,11 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
   const togglePhase = (index: number) => {
     setPhase(old => old === index ? null : index);
     setSelectedStep(null);
+    setSelectedArchitecture(null);
     setDetailOpen(false);
   };
   const choose = (id: string) => {
+    setSelectedArchitecture(null);
     setSelectedStep(old => old === id ? null : id);
     setDetailOpen(false);
   };
@@ -231,6 +246,55 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
     </div>
   );
 
+
+  const arch = SENIOR_DECISION_QUESTIONS.find(item => item.id === selectedArchitecture);
+  const archKey = arch ? 'arch:' + arch.id : '';
+  const archNote = (arch ? notes[archKey] : undefined) || EMPTY_NOTE;
+  const architectureInspector = arch && (
+    <div className="mt-3 border-2 border-emerald-200 rounded-xl p-4 space-y-3 bg-white">
+      <div className="flex justify-between gap-2">
+        <h4 className="font-bold text-sm">{t(arch.question,arch.questionRu || arch.question)}</h4>
+        <button className="text-xs shrink-0 underline" onClick={() => setSelectedArchitecture(null)}>{t('Schließen','Закрыть')}</button>
+      </div>
+      <p className="text-[11px] font-semibold text-slate-500">{t('Interne Architekturfragenliste · offen bis Gesprächsbestätigung · Priorität: ','Внутренний список · требует подтверждения · приоритет: ')}{arch.priority.toUpperCase()}</p>
+      <div className="grid sm:grid-cols-2 gap-2">
+        <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-lg">
+          <p className="text-xs font-bold">{t('Vorläufiger Vorschlag','Предварительное предложение')}</p>
+          <p className="text-xs mt-1 leading-relaxed">{t(arch.currentProposal,arch.currentProposalRu || arch.currentProposal)}</p>
+        </div>
+        <div className="p-3 bg-slate-50 border rounded-lg">
+          <p className="text-xs font-bold">{t('Warum schlagen wir das vor?','Почему предлагаем?')}</p>
+          <p className="text-xs mt-1 leading-relaxed">{t(arch.rationale,arch.rationaleRu || arch.rationale)}</p>
+          <p className="mt-2 text-[11px] text-amber-800">{t('Interne Begründung, kein externer Nachweis.','Внутреннее обоснование, не внешний источник.')}</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-1.5">
+        {(['open','test','decided'] as const).map(status => (
+          <button key={status} type="button" disabled={!loaded} onClick={() => updateNote(archKey,{status})}
+            className={'border rounded-lg py-2 text-xs font-semibold disabled:opacity-40 ' +
+              (archNote.status === status ? 'bg-emerald-50 border-emerald-600 text-emerald-900' : 'border-slate-200 bg-white')}>
+            {statusText(status)}
+          </button>
+        ))}
+      </div>
+      <label className="block text-xs font-semibold">{t('Gesprächsergebnis mit Begründung','Результат и обоснование')}
+        <textarea rows={3} disabled={!loaded} value={archNote.answer} onChange={e => updateNote(archKey,{answer:e.target.value})}
+          className="block w-full border rounded-lg p-2 text-sm font-normal mt-1" placeholder={t('Nicht als entschieden markieren, bevor eine Antwort vorliegt.','Не отмечать решённым без ответа.')}/>
+      </label>
+      <div className="grid sm:grid-cols-2 gap-2">
+        <label className="block text-xs font-semibold">{t('Verantwortlich','Ответственный')}
+          <input disabled={!loaded} value={archNote.owner} onChange={e => updateNote(archKey,{owner:e.target.value})} className="block w-full border rounded-lg p-2 text-sm font-normal mt-1"/>
+        </label>
+        <label className="block text-xs font-semibold">{t('Nächster Schritt','Следующий шаг')}
+          <input disabled={!loaded} value={archNote.nextStep} onChange={e => updateNote(archKey,{nextStep:e.target.value})} className="block w-full border rounded-lg p-2 text-sm font-normal mt-1"/>
+        </label>
+      </div>
+      <p className={'text-xs ' + (saveState === 'error' ? 'text-red-700' : 'text-slate-500')} aria-live="polite">
+        {saveState === 'saved' ? t('In diesem Browser gespeichert','Сохранено в браузере') : saveState === 'saving' ? t('Speichert automatisch…','Автосохранение…') : saveState === 'error' ? t('Speichern fehlgeschlagen – bitte Backup exportieren','Ошибка сохранения — экспортируйте данные') : t('Notizen laden…','Загрузка…')}
+      </p>
+    </div>
+  );
+
   const research = RESEARCH_SECTIONS[researchIndex];
   const researchSteps = WORKSHOP_STEPS.filter(step => research.ids.includes(step.id));
   const filteredFindings = databaseState.findings.filter(item => research.topics.includes(item.topicId) || item.additionalTopicIds?.some(id => research.topics.includes(id)));
@@ -345,6 +409,20 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
           {phase === 4 && <div className="space-y-4">
             <p className="text-sm">{t('Das sind Gesprächsstatus, keine automatisch genehmigten Architekturentscheidungen. Öffne einen Punkt, trage Ergebnis, Verantwortlichen und nächsten Schritt ein. Änderungen werden direkt in diesem Browser gespeichert.','Это статусы обсуждения, не автоматическое одобрение архитектуры. Укажите решение, ответственного и следующий шаг. Записи хранятся в браузере.')}</p>
             {chips(WORKSHOP_STEPS)}
+            <details className="rounded-xl border bg-slate-50 p-3">
+              <summary className="cursor-pointer text-sm font-bold">{t('Zusätzliche Architekturfragen – öffnen bei Bedarf','Дополнительные архитектурные вопросы')} ({SENIOR_DECISION_QUESTIONS.length})</summary>
+              <p className="text-xs text-slate-500 mt-2">{t('Diese Vorschläge sind getrennte interne Fragen – keine bestätigten Beschlüsse. Antworten werden hier gemeinsam mit den Prozessnotizen gespeichert.','Это отдельные внутренние вопросы, ещё не утверждённые решения. Ответы сохраняются вместе с заметками.')}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {SENIOR_DECISION_QUESTIONS.map(item => (
+                  <button key={item.id} onClick={() => {setSelectedStep(null);setSelectedArchitecture(old => old === item.id ? null : item.id);}}
+                    className={'rounded-lg border p-2.5 text-left text-xs ' + (selectedArchitecture === item.id ? 'bg-emerald-50 border-emerald-600' : 'bg-white border-slate-200')}>
+                    <span className="block font-semibold">{String(item.number).padStart(2,'0')} · {t(item.question,item.questionRu || item.question)}</span>
+                    <span className="text-[10px] text-slate-500 mt-1 block">{statusText(notes['arch:' + item.id]?.status || 'open')}</span>
+                  </button>
+                ))}
+              </div>
+              {architectureInspector}
+            </details>
             <div className="flex flex-wrap gap-2 pt-2 border-t">
               <button className="rounded-lg border bg-slate-900 text-white text-xs px-3 py-2 inline-flex items-center gap-2" onClick={() => downloadFile('ProRiv_Senior_Protokoll.md',writeProtocol(notesRef.current),'text/markdown')}>
                 <Download className="h-4 w-4"/>{t('Gesprächsprotokoll exportieren','Экспорт протокола')}

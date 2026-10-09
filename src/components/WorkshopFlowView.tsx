@@ -37,8 +37,10 @@ function writeProtocol(notes: WorkshopNotes, questions: SeniorQuestion[]): strin
   for (const step of WORKSHOP_STEPS) {
     const note = notes[step.id] || EMPTY_NOTE;
     lines.push('## ' + step.nr + '. ' + step.title, '',
-      '**Bisheriger Interviewstand, noch zu prüfen:** ' + step.customerFact, '',
-      '**Unser Vorschlag, nicht beschlossen:** ' + step.recommendation, '',
+      '**Originalinterview – unverändert:** ' + step.customerFact, '',
+      '**Aktueller Interviewstand – bearbeitbare Interpretation:** ' + (note.revisedCustomerFact ?? step.customerFact), '',
+      '**Ursprünglicher Vorschlag – unverändert:** ' + step.recommendation, '',
+      '**Aktueller Vorschlag – noch nicht automatisch beschlossen:** ' + (note.revisedRecommendation ?? step.recommendation), '',
       '**Offene Frage:** ' + step.openQuestion, '',
       '**Herkunft laut Projektbestand:** ' + step.source, '',
       '**Beleg-/Prüfhinweise:** ' + step.evidence, '',
@@ -110,7 +112,11 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
       window.alert(t('Zuerst die besprochene Antwort und Begründung eintragen.','Сначала запишите ответ и обоснование.'));
       return;
     }
-    const next = { ...notesRef.current, [id]: { ...existing, ...change, updatedAt: new Date().toISOString() } };
+    // A material change to an already decided assumption or proposal requires renewed review.
+    const revisesWorkText = Object.prototype.hasOwnProperty.call(change, 'revisedCustomerFact')
+      || Object.prototype.hasOwnProperty.call(change, 'revisedRecommendation');
+    const status = revisesWorkText && existing.status === 'decided' && change.status === undefined ? 'test' : (change.status ?? existing.status);
+    const next = { ...notesRef.current, [id]: { ...existing, ...change, status, updatedAt: new Date().toISOString() } };
     notesRef.current = next;
     setNotes(next);
     setSaveState('saving');
@@ -142,6 +148,12 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
   const clientQuestions = questionsState.filter(q => q.needsClientClarification || Boolean(q.clientQuestion?.trim() || q.clientQuestionRu?.trim()));
   const decided = WORKSHOP_STEPS.filter(step => notes[step.id]?.status === 'decided').length;
   const verify = WORKSHOP_STEPS.filter(step => notes[step.id]?.status === 'test').length;
+  const resolvedArchitecture = SENIOR_DECISION_QUESTIONS.filter(item => notes['arch:' + item.id]?.status === 'decided');
+  const openClientQuestions = clientQuestions.filter(question => !question.isResolved);
+  const followUpEntries = [
+    ...WORKSHOP_STEPS.map(step => ({ key: step.id, label: step.title, note: notes[step.id] })),
+    ...SENIOR_DECISION_QUESTIONS.map(item => ({ key: 'arch:' + item.id, label: item.question, note: notes['arch:' + item.id] }))
+  ].filter(entry => Boolean(entry.note?.nextStep?.trim()));
 
   const phases = [
     {title:'Kundenbedarf', ru:'Запрос клиента', q:'Was hat Isa gesagt – was ist noch unklar?', qr:'Что сказал Иса и что надо уточнить?', icon:BookOpen},
@@ -198,14 +210,31 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
       </div>
       <div className="grid md:grid-cols-2 gap-3 text-sm">
         <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-          <p className="font-bold text-[11px] text-slate-600 uppercase">{t('Interviewstand · nicht freigegeben','Из интервью · не утверждено')}</p>
-          <p className="mt-2 text-slate-800 leading-relaxed">{t(active.customerFact,active.customerFactRu)}</p>
+          <div className="flex flex-wrap justify-between items-center gap-2">
+            <p className="font-bold text-[11px] text-slate-600 uppercase">{t('Aktueller Interviewstand · Arbeitsannahme','Текущее понимание интервью · гипотеза')}</p>
+            {phase === 3 && <button type="button" disabled={!loaded} onClick={() => updateNote(active.id,{revisedCustomerFact:undefined})} className="text-[11px] underline disabled:opacity-50">{t('Original übernehmen','Вернуть оригинал')}</button>}
+          </div>
+          {phase === 3 ? (
+            <textarea rows={5} disabled={!loaded} value={notes[active.id]?.revisedCustomerFact ?? t(active.customerFact,active.customerFactRu)}
+              onChange={e => updateNote(active.id,{revisedCustomerFact:e.target.value})}
+              className="mt-2 w-full border rounded-lg p-2 text-sm leading-relaxed font-normal bg-white" aria-label={t('Aktuellen Interviewstand bearbeiten','Изменить текущее понимание интервью')}/>
+          ) : <p className="mt-2 text-slate-800 leading-relaxed">{notes[active.id]?.revisedCustomerFact ?? t(active.customerFact,active.customerFactRu)}</p>}
+          {notes[active.id]?.revisedCustomerFact !== undefined && <p className="mt-2 text-[11px] text-amber-800">{t('Bearbeitete Interpretation – Original bleibt in den Quellen erhalten.','Редактируемое понимание — оригинал сохранён в источниках.')}</p>}
         </div>
         <div className="bg-emerald-50/60 rounded-lg p-3 border border-emerald-200">
-          <p className="font-bold text-[11px] text-emerald-800 uppercase">{t('Unser Vorschlag · nicht beschlossen','Наше предложение · не утверждено')}</p>
-          <p className="mt-2 text-slate-800 leading-relaxed">{t(active.recommendation,active.recommendationRu)}</p>
+          <div className="flex flex-wrap justify-between items-center gap-2">
+            <p className="font-bold text-[11px] text-emerald-800 uppercase">{t('Aktueller Vorschlag · nicht beschlossen','Актуальное предложение · не утверждено')}</p>
+            {phase === 3 && <button type="button" disabled={!loaded} onClick={() => updateNote(active.id,{revisedRecommendation:undefined})} className="text-[11px] underline disabled:opacity-50">{t('Original übernehmen','Вернуть оригинал')}</button>}
+          </div>
+          {phase === 3 ? (
+            <textarea rows={5} disabled={!loaded} value={notes[active.id]?.revisedRecommendation ?? t(active.recommendation,active.recommendationRu)}
+              onChange={e => updateNote(active.id,{revisedRecommendation:e.target.value})}
+              className="mt-2 w-full border rounded-lg p-2 text-sm leading-relaxed font-normal bg-white" aria-label={t('Aktuellen Vorschlag bearbeiten','Изменить актуальное предложение')}/>
+          ) : <p className="mt-2 text-slate-800 leading-relaxed">{notes[active.id]?.revisedRecommendation ?? t(active.recommendation,active.recommendationRu)}</p>}
+          {notes[active.id]?.revisedRecommendation !== undefined && <p className="mt-2 text-[11px] text-amber-800">{t('Überarbeiteter Vorschlag – noch keine Freigabe.','Изменённое предложение — ещё не утверждено.')}</p>}
         </div>
       </div>
+      {phase === 3 && <p className="text-xs text-slate-600">{t('Diese beiden Texte können direkt geändert werden. Die Gesprächsantwort darunter bleibt eine getrennte Notiz; sie überschreibt nichts automatisch. Eine Änderung an einem bereits entschiedenen Punkt setzt ihn auf „Zu prüfen“. Manuelle Texte werden in beiden Sprachansichten identisch angezeigt.','Эти два текста можно изменять отдельно. Заметка ниже не заменяет их автоматически. Изменение ранее принятого решения переводит статус в «Проверить». Редактированный текст одинаков в обеих языковых версиях.')}</p>}
       <div className="p-3 rounded-lg border border-amber-200 bg-amber-50">
         <p className="text-[11px] font-bold text-amber-900 uppercase">{t('Offene Klärung','Открытый вопрос')}</p>
         <p className="text-sm mt-1 leading-relaxed">{t(active.openQuestion, active.openQuestionRu)}</p>
@@ -219,6 +248,8 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
         {detailOpen && (
           <div className="p-4 text-xs leading-relaxed space-y-3">
             <div><strong>{t('Genannte interne Herkunft:','Указанный внутренний источник:')}</strong> {active.source}</div>
+            <div><strong>{t('Originalinterview (unverändert):','Оригинал интервью (без изменений):')}</strong> {t(active.customerFact,active.customerFactRu)}</div>
+            <div><strong>{t('Ursprünglicher Vorschlag (unverändert):','Исходное предложение (без изменений):')}</strong> {t(active.recommendation,active.recommendationRu)}</div>
             <div><strong>{t('Vorliegende Begründung und Prüfhaken:','Основания и что проверить:')}</strong> {active.evidence}</div>
             <p className="text-amber-800 bg-amber-50 border border-amber-100 p-2 rounded">
               {t('Wichtig: Eine Interview-Zusammenfassung ist kein unterschriebenes Kundenprotokoll. Herstellerlinks belegen nicht automatisch konkrete Produktfunktionen. Aussagen sind vor Entscheidung zu bestätigen.',
@@ -456,25 +487,84 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
           {phase === 3 && <div className="space-y-4">
             <p className="text-sm">{t('Diskutiere jeweils nur eine Empfehlung. Ein Vorschlag wird erst nach begründeter Antwort als entschieden markiert. Quelle und Alternativen liegen direkt im aufgeklappten Punkt.','Обсуждайте по одному предложению. Статус «решено» требует обоснования. Источники открываются внутри пункта.')}</p>
             {chips(WORKSHOP_STEPS)}
+            <details className="rounded-xl border bg-slate-50 p-3">
+                          <summary className="cursor-pointer text-sm font-bold">{t('Zusätzliche Architekturfragen – öffnen bei Bedarf','Дополнительные архитектурные вопросы')} ({SENIOR_DECISION_QUESTIONS.length})</summary>
+                          <p className="text-xs text-slate-500 mt-2">{t('Diese Vorschläge sind getrennte interne Fragen – keine bestätigten Beschlüsse. Antworten werden hier gemeinsam mit den Prozessnotizen gespeichert.','Это отдельные внутренние вопросы, ещё не утверждённые решения. Ответы сохраняются вместе с заметками.')}</p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {SENIOR_DECISION_QUESTIONS.map(item => (
+                              <button key={item.id} onClick={() => {setSelectedStep(null);setSelectedArchitecture(old => old === item.id ? null : item.id);}}
+                                className={'rounded-lg border p-2.5 text-left text-xs ' + (selectedArchitecture === item.id ? 'bg-emerald-50 border-emerald-600' : 'bg-white border-slate-200')}>
+                                <span className="block font-semibold">{String(item.number).padStart(2,'0')} · {t(item.question,item.questionRu || item.question)}</span>
+                                <span className="text-[10px] text-slate-500 mt-1 block">{statusText(notes['arch:' + item.id]?.status || 'open')}</span>
+                              </button>
+                            ))}
+                          </div>
+                          {architectureInspector}
+                        </details>
           </div>}
 
           {phase === 4 && <div className="space-y-4">
-            <p className="text-sm">{t('Das sind Gesprächsstatus, keine automatisch genehmigten Architekturentscheidungen. Öffne einen Punkt, trage Ergebnis, Verantwortlichen und nächsten Schritt ein. Änderungen werden direkt in diesem Browser gespeichert.','Это статусы обсуждения, не автоматическое одобрение архитектуры. Укажите решение, ответственного и следующий шаг. Записи хранятся в браузере.')}</p>
-            {chips(WORKSHOP_STEPS)}
-            <details className="rounded-xl border bg-slate-50 p-3">
-              <summary className="cursor-pointer text-sm font-bold">{t('Zusätzliche Architekturfragen – öffnen bei Bedarf','Дополнительные архитектурные вопросы')} ({SENIOR_DECISION_QUESTIONS.length})</summary>
-              <p className="text-xs text-slate-500 mt-2">{t('Diese Vorschläge sind getrennte interne Fragen – keine bestätigten Beschlüsse. Antworten werden hier gemeinsam mit den Prozessnotizen gespeichert.','Это отдельные внутренние вопросы, ещё не утверждённые решения. Ответы сохраняются вместе с заметками.')}</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {SENIOR_DECISION_QUESTIONS.map(item => (
-                  <button key={item.id} onClick={() => {setSelectedStep(null);setSelectedArchitecture(old => old === item.id ? null : item.id);}}
-                    className={'rounded-lg border p-2.5 text-left text-xs ' + (selectedArchitecture === item.id ? 'bg-emerald-50 border-emerald-600' : 'bg-white border-slate-200')}>
-                    <span className="block font-semibold">{String(item.number).padStart(2,'0')} · {t(item.question,item.questionRu || item.question)}</span>
-                    <span className="text-[10px] text-slate-500 mt-1 block">{statusText(notes['arch:' + item.id]?.status || 'open')}</span>
-                  </button>
-                ))}
-              </div>
-              {architectureInspector}
-            </details>
+            <p className="text-sm">{t('Dies ist die automatische Zusammenfassung der Gesprächsergebnisse aus dem Living Workshop. Hier wird nichts doppelt bearbeitet; Änderungen erfolgen in Phase 4. Nur ausdrücklich markierte Einträge gelten als entschieden.','Это автоматическая сводка решений из рабочего обсуждения. Изменения вносятся на этапе 4; без явного подтверждения решения не считаются принятыми.')}</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {[
+                {label:t('Entschiedene Prozesspunkte','Решено по процессам'), count:decided},
+                {label:t('Entschiedene Architekturfragen','Решено по архитектуре'), count:resolvedArchitecture.length},
+                {label:t('Prozesspunkte zu prüfen','Процессы на проверке'), count:verify},
+                {label:t('Offene Kundenfragen','Вопросы заказчику'), count:openClientQuestions.length}
+              ].map(item => <div key={item.label} className="bg-slate-50 border rounded-lg p-3"><div className="text-xl font-bold">{item.count}</div><div className="text-xs text-slate-600">{item.label}</div></div>)}
+            </div>
+            <div className="rounded-xl border p-3 space-y-3">
+              <h3 className="text-sm font-bold">{t('1. Bestätigte Gesprächsentscheidungen','1. Подтверждённые решения')}</h3>
+              {decided === 0 && resolvedArchitecture.length === 0 && <p className="text-xs text-slate-500">{t('Noch keine Entscheidungen ausdrücklich bestätigt.','Пока нет подтверждённых решений.')}</p>}
+              {WORKSHOP_STEPS.filter(step => notes[step.id]?.status === 'decided').map(step => {
+                const note = notes[step.id];
+                return <div key={step.id} className="border-t pt-2 text-xs space-y-1">
+                  <p className="font-bold">{step.nr}. {t(step.title,step.titleRu)}</p>
+                  <p><strong>{t('Ergebnis:','Результат:')}</strong> {note.answer}</p>
+                  <p><strong>{t('Aktueller Vorschlag:','Предложение:')}</strong> {note.revisedRecommendation ?? t(step.recommendation,step.recommendationRu)}</p>
+                  <p className="text-slate-500">{t('Verantwortlich:','Ответственный:')} {note.owner || '—'} · {t('Nächster Schritt:','Следующий шаг:')} {note.nextStep || '—'}</p>
+                </div>;
+              })}
+              {resolvedArchitecture.map(item => {
+                const note = notes['arch:' + item.id];
+                return <div key={item.id} className="border-t pt-2 text-xs space-y-1">
+                  <p className="font-bold">{t('Architekturfrage','Архитектура')} {item.number}: {t(item.question,item.questionRu || item.question)}</p>
+                  <p><strong>{t('Ergebnis:','Результат:')}</strong> {note.answer}</p>
+                  <p className="text-slate-500">{t('Verantwortlich:','Ответственный:')} {note.owner || '—'} · {t('Nächster Schritt:','Следующий шаг:')} {note.nextStep || '—'}</p>
+                </div>;
+              })}
+            </div>
+            <div className="rounded-xl border p-3 space-y-2">
+              <h3 className="text-sm font-bold">{t('2. Noch offen / zu prüfen','2. Открыто / на проверку')}</h3>
+              {WORKSHOP_STEPS.filter(step => notes[step.id]?.status !== 'decided').map(step => {
+                const note = notes[step.id] || EMPTY_NOTE;
+                return <div key={step.id} className="border-t pt-2 text-xs">
+                  <span className="font-semibold">{step.nr}. {t(step.title,step.titleRu)}</span> · {statusText(note.status)}
+                  {note.answer && <p className="mt-1 text-slate-600">{note.answer}</p>}
+                </div>;
+              })}
+              {SENIOR_DECISION_QUESTIONS.filter(item => notes['arch:' + item.id]?.status !== 'decided').map(item => {
+                const note = notes['arch:' + item.id] || EMPTY_NOTE;
+                return <div key={item.id} className="border-t pt-2 text-xs">
+                  <span className="font-semibold">{t('Architekturfrage','Архитектура')} {item.number}: {t(item.question,item.questionRu || item.question)}</span> · {statusText(note.status)}
+                </div>;
+              })}
+            </div>
+            <div className="rounded-xl border p-3 space-y-2">
+              <h3 className="text-sm font-bold">{t('3. Offene Fragen an Isa','3. Вопросы к Исе')} ({openClientQuestions.length})</h3>
+              {openClientQuestions.length === 0 ? <p className="text-xs text-slate-500">{t('Keine offenen Kundenfragen in der aktuellen Fragenliste.','В текущем списке нет открытых вопросов.')}</p> : openClientQuestions.map(question => <div key={question.id} className="border-t pt-2 text-xs">
+                <p className="font-semibold">{t(question.clientQuestion || question.question,question.clientQuestionRu || question.questionRu || question.question)}</p>
+                {question.notes && <p className="mt-1 text-slate-600">{question.notes}</p>}
+              </div>)}
+            </div>
+            <div className="rounded-xl border p-3 space-y-2">
+              <h3 className="text-sm font-bold">{t('4. Vereinbarte nächste Schritte','4. Следующие шаги')} ({followUpEntries.length})</h3>
+              {followUpEntries.length === 0 ? <p className="text-xs text-slate-500">{t('Noch keine konkreten Aufgaben notiert.','Пока нет записанных задач.')}</p> : followUpEntries.map(entry => <div key={entry.key} className="border-t pt-2 text-xs">
+                <p className="font-semibold">{entry.label}</p>
+                <p>{entry.note?.nextStep}</p>
+                <p className="text-slate-500">{t('Verantwortlich:','Ответственный:')} {entry.note?.owner || '—'}</p>
+              </div>)}
+            </div>
             <div className="flex flex-wrap gap-2 pt-2 border-t">
               <button className="rounded-lg border bg-slate-900 text-white text-xs px-3 py-2 inline-flex items-center gap-2" onClick={() => downloadFile('ProRiv_Senior_Protokoll.md',writeProtocol(notesRef.current,questionsRef.current),'text/markdown')}>
                 <Download className="h-4 w-4"/>{t('Gesprächsprotokoll exportieren','Экспорт протокола')}
@@ -484,7 +574,7 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
               </button>
             </div>
           </div>}
-          {inspector}
+          {phase !== 4 && inspector}
         </div>
       )}
 

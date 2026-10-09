@@ -115,19 +115,17 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={() => onNavigate('home')}
           className={`px-3 py-2 text-xs font-semibold rounded-lg ${currentView === 'home' ? 'bg-emerald-50 text-emerald-900' : 'text-slate-600 hover:bg-slate-100'}`}>
-          {language === 'ru' ? 'Эскиз' : 'Skizze'}
+          {language === 'ru' ? 'Рабочая панель' : 'Cockpit'}
         </button>
-        <button
-          onClick={() => onNavigate('workshop')}
-          className={`px-3.5 py-2 text-xs font-bold rounded-lg ${currentView === 'workshop' ? 'bg-emerald-700 text-white' : 'bg-slate-900 text-white hover:bg-slate-800'}`}>
-          {language === 'ru' ? 'Встреча с сеньором' : 'Senior-Workshop'}
-        </button>
+
         <details className="relative group">
           <summary className="px-3 py-2 cursor-pointer rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 list-none select-none">
-            {language === 'ru' ? 'Исследование ▾' : 'Recherche ▾'}
+            {language === 'ru' ? 'Архив и инструменты ▾' : 'Archiv & Werkzeuge ▾'}
           </summary>
           <div className="absolute top-full right-0 mt-2 w-56 p-2 bg-white border border-slate-200 rounded-xl shadow-xl z-40 space-y-1">
             {[
+              ['workshop', language === 'ru' ? 'Старый воркшоп' : 'Bisheriger Senior-Workshop'],
+              ['presentation', language === 'ru' ? 'Презентация' : 'Bisherige Präsentation'],
               ['overview', language === 'ru' ? 'Статус' : 'Status & Übersicht'],
               ['competitors', language === 'ru' ? 'Конкуренты' : 'Wettbewerber'],
               ['event-storming', 'Event Storming'],
@@ -185,13 +183,7 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
 
-        <button
-          onClick={onTogglePresentation}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-md transition-colors shadow-xs"
-        >
-          <Presentation className="w-3.5 h-3.5 text-emerald-400" />
-          <span className="hidden sm:inline">{getTranslation('presentation', language)}</span>
-        </button>
+
       </div>
     </header>
   );

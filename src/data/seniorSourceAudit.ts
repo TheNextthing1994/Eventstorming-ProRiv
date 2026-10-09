@@ -323,6 +323,18 @@ export const SENIOR_SOURCE_AUDIT: SeniorAuditItem[] = [
   }
 ];
 
+/**
+ * Recommendation is OUR preliminary adoption filter, not vendor or client approval.
+ * No source-verified capability is automatically "ready for production".
+ */
+export type SeniorAdoption = 'prototype' | 'reference' | 'defer' | 'existing';
+export function seniorAuditAdoption(id: string): SeniorAdoption {
+  if (id === 'tripletex' || id === 'appsheet') return 'existing';
+  if (['expo','expo-location','expo-sqlite','pdfme','signature-pad','odk','node-postgres'].includes(id)) return 'prototype';
+  if (['traccar','docuseal','erpnext','solidtime'].includes(id)) return 'defer';
+  return 'reference';
+}
+
 export const seniorAuditByName = (name: string): SeniorAuditItem | undefined =>
   SENIOR_SOURCE_AUDIT.find(item => item.name.toLocaleLowerCase() === name.toLocaleLowerCase()
     || (name === 'Tripletex' && item.id === 'tripletex')

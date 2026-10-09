@@ -4,6 +4,7 @@ import { DatabaseState, Language, TopicId, SeniorQuestion } from '../types';
 import { WORKSHOP_STEPS, WORKSHOP_ROLE_LABELS, WorkshopStep } from '../data/workshopContent';
 import { SENIOR_DECISION_QUESTIONS } from '../db/knowledgeSeed';
 import { loadWorkshopNotes, saveWorkshopNotes, saveQuestion, WorkshopNote, WorkshopNotes } from '../db/indexedDb';
+import { prepareSddHandoff, SddHandoff } from '../utils/sddHandoff';
 
 interface WorkshopFlowViewProps {
   databaseState: DatabaseState;
@@ -89,6 +90,7 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
   const saveQueue = useRef<Promise<void>>(Promise.resolve());
   const revision = useRef(0);
   const [loaded, setLoaded] = useState(false);
+  const [sddHandoff, setSddHandoff] = useState<SddHandoff | null>(null);
   const [saveState, setSaveState] = useState<'loading' | 'saving' | 'saved' | 'error'>('loading');
 
   useEffect(() => {
@@ -104,6 +106,9 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
     });
     return () => { mounted = false; };
   }, []);
+
+  // Previously prepared downloads become stale if meeting notes or questions change.
+  useEffect(() => { setSddHandoff(null); }, [notes, questionsState]);
 
   const updateNote = (id: string, change: Partial<WorkshopNote>) => {
     if (!loaded) return;
@@ -575,7 +580,61 @@ export const WorkshopFlowView: React.FC<WorkshopFlowViewProps> = ({ databaseStat
               <button className="rounded-lg border border-slate-300 bg-white text-xs px-3 py-2 inline-flex items-center gap-2" onClick={() => downloadFile('ProRiv_WorkshopNotes_Backup.json',JSON.stringify({exportedAt:new Date().toISOString(),workshopNotes:notesRef.current,questions:questionsRef.current},null,2),'application/json')}>
                 <Download className="h-4 w-4"/>{t('Notizen-Backup (JSON)','Резервная копия JSON')}
               </button>
+              <button type="button" disabled={!loaded || saveState === 'saving' || questionSaveState === 'saving'}
+                onClick={() => setSddHandoff(prepareSddHandoff(databaseState, questionsRef.current, notesRef.current))}
+                className="rounded-lg border border-emerald-600 bg-emerald-50 text-emerald-950 text-xs font-bold px-3 py-2 inline-flex items-center gap-2 disabled:opacity-50">
+                <BookOpen className="h-4 w-4"/>{t('Global Spec vorbereiten','Подготовить Global Spec')}
+                <ArrowRight className="h-4 w-4"/>
+              </button>
             </div>
+
+            {sddHandoff && (
+              <div className="rounded-xl border-2 border-emerald-300 bg-emerald-50/40 p-4 space-y-3" aria-live="polite">
+                <div>
+                  <h3 className="font-bold text-sm">{t('SDD-GEN Übergabe vorbereitet — noch NICHT freigegeben','Пакет SDD-GEN подготовлен — НЕ утверждён')}</h3>
+                  <p className="text-xs text-slate-700 mt-1">
+                    {t('Zwei eigenständige Markdown-Dateien aus dem aktuellen Workshopstand. Der Global Spec ist ausdrücklich Draft; die Originaldaten und Quellen bleiben im Raw-Wissen erhalten.',
+                       'Два Markdown-файла по текущим материалам встречи. Global Spec остаётся черновиком; исходные данные и ссылки сохраняются в Raw Knowledge.')}
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                  <div className="rounded-lg border bg-white p-2">
+                    <strong className="block text-lg">{sddHandoff.stats.sourceRecords}</strong>
+                    {t('Quelleneinträge','Исходных записей')}
+                  </div>
+                  <div className="rounded-lg border bg-white p-2">
+                    <strong className="block text-lg">{sddHandoff.stats.decidedWorkshopSteps}</strong>
+                    {t('Prozesspunkte besprochen/markiert','Отмечено решений')}
+                  </div>
+                  <div className="rounded-lg border bg-white p-2">
+                    <strong className="block text-lg">{sddHandoff.stats.unresolvedClientQuestions}</strong>
+                    {t('Offene Kundenfragen','Открытых вопросов')}
+                  </div>
+                  <div className="rounded-lg border bg-white p-2">
+                    <strong className="block text-lg">Draft</strong>
+                    {t('Freigabestatus','Статус')}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" onClick={() => downloadFile('RAW_PROJECT_KNOWLEDGE_CLIENT.md',sddHandoff.rawKnowledge,'text/markdown;charset=utf-8')}
+                    className="rounded-lg border border-emerald-700 bg-white text-emerald-900 text-xs font-bold px-3 py-2 inline-flex gap-2 items-center">
+                    <Download className="h-4 w-4"/>{t('1. Raw Knowledge herunterladen','1. Скачать Raw Knowledge')}
+                  </button>
+                  <button type="button" onClick={() => downloadFile('SPEC-GLOBAL-001-proriv-foundation.md',sddHandoff.globalDraft,'text/markdown;charset=utf-8')}
+                    className="rounded-lg border border-emerald-700 bg-emerald-700 text-white text-xs font-bold px-3 py-2 inline-flex gap-2 items-center">
+                    <Download className="h-4 w-4"/>{t('2. Global Spec (Draft) herunterladen','2. Скачать Global Spec (Draft)')}
+                  </button>
+                </div>
+                <p className="text-xs leading-relaxed text-slate-700">
+                  {t('Ablage im SDD-GEN-Kundenprojekt: project-knowledge/raw/RAW_PROJECT_KNOWLEDGE_CLIENT.md und specs/draft/SPEC-GLOBAL-001-proriv-foundation.md. Die App speichert die beiden Dateien nicht automatisch auf GitHub. Nach Prüfung sind eine unabhängige Spec-Review, menschliche Freigabe und Manifest-Validierung erforderlich.',
+                     'Поместите файлы в проект SDD-GEN: project-knowledge/raw/RAW_PROJECT_KNOWLEDGE_CLIENT.md и specs/draft/SPEC-GLOBAL-001-proriv-foundation.md. Это не автоматическая загрузка в GitHub. Требуются отдельная проверка, утверждение человеком и валидация реестра.')}
+                </p>
+                <p className="text-[11px] text-amber-900">
+                  {t('Achtung: Historische Event-Storming-Regeln und unbelegte Empfehlungen bleiben im Raw Knowledge ausdrücklich unbestätigt. Fotos/Datei-Binärdaten sind nicht enthalten, nur ihre Metadaten.',
+                     'Важно: старые правила Event Storming и непроверенные рекомендации отмечены как неподтверждённые. Вложения представлены метаданными, без бинарных файлов.')}
+                </p>
+              </div>
+            )}
           </div>}
           {phase !== 4 && inspector}
         </div>

@@ -346,6 +346,7 @@ export async function initializeDatabase(): Promise<DatabaseState> {
       } else if (topicId === 'raport' && (
         existing.summary === 'Kernarbeitsarten für ProRiv: Kernbohren (Durchmesser mm, Tiefe cm, Anzahl, Wand/Decke/Überkopf), Bodensäge (Tiefe cm, Länge m), Wandsäge. Katalog von Zusatzleistungen (Rüsten, Hebebühne, Bewehrung). Revisionssicherer PriceSnapshot bei Freigabe.'
         || existing.summary === "Kernarbeitsarten für ProRiv: Kernbohren (Durchmesser mm, Tiefe cm, Anzahl, Wand/Decke/Überkopf), Bodensäge (Tiefe cm, Länge m), Wandsäge. Zusatzleistungen aus Gesprächsnotizen (Transport/Anfahrt, Rüsten, Hebebühne/Gerüst, Hilfsarbeiter; noch am norwegischen Original abzugleichen). PriceSnapshot ist ein unbestätigter Architekturvorschlag."
+        || existing.summary === "Kernarbeitsarten für ProRiv: Kernbohren (Durchmesser mm, Tiefe cm, Anzahl, Wand/Decke/Überkopf), Bodensäge (Tiefe cm, Länge m), Wandsäge. Echter Rapport (ein Beispiel): Merarbeid bei Kernbohrungen (6 h, Text abgeschnitten); Lift/Gerüst (3 h); Helferarbeit (12 h); Rüsten/Transport (1 Stück). Weitere Leistungen und Tarife offen. PriceSnapshot ist ein unbestätigter Architekturvorschlag."
       )) {
         // Replace only the untouched legacy summary; user edits take precedence.
         await putToStore('topics', {

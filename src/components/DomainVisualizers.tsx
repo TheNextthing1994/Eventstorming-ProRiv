@@ -306,41 +306,56 @@ export const WorkReportPreviewVisualizer: React.FC<VisualizerProps> = ({ languag
         </div>
       </div>
 
-      {/* Only examples documented in the customer-interview RAW (section 4).
-          These are NOT a verified Norwegian price list or customer-approved surcharge rules.
-          Source: /Isa Projekt System/Разговор с клиентом.md, sections 4 and 8 (screenshots 3 and 8). */}
+      {/* Grounded in ONE actual ProRiv rapport screenshot supplied 2026-10-09:
+          "Andre tjenester / Other services (4)". Do not infer a complete catalog
+          or publish the underlying customer's identity, workers or unit prices.
+          First Norwegian line is cut off in the screenshot: "Merarbeid ifm. k-boring (tildek...)".
+      */}
       <div className="p-3.5 bg-slate-50/70 rounded-lg border border-slate-200 space-y-2">
         <span className="text-xs font-bold text-slate-900 block">
           {language === 'ru'
-            ? 'Дополнительные услуги — примеры из заметок беседы с клиентом:'
-            : 'Zusatzleistungen – Beispiele aus dem dokumentierten Kundengespräch:'}
+            ? 'Дополнительные услуги — 4 строки из реального рапорта (не полный каталог):'
+            : 'Zusatzleistungen – 4 Positionen aus einem echten Rapport (kein vollständiger Katalog):'}
         </span>
-        <p className="text-[11px] text-amber-800">
+        <p className="text-[11px] text-slate-600">
           {language === 'ru'
-            ? 'Не утверждённый прайс-лист: исходные норвежские названия, цены и условия нужно сверить со скриншотами и подтвердить с Isa.'
-            : 'Keine freigegebene Preisliste: Norwegische Originalbezeichnungen, Preise und Bedingungen noch anhand der Screenshots und mit Isa prüfen.'}
+            ? 'Оригинальные норвежские названия и переводы из скриншота. Три позиции в часах, Rigg / Transport — 1 шт. Цены и данные людей здесь не публикуются; правила тарификации ещё нужно уточнить.'
+            : 'Originalbezeichnungen aus dem norwegischen Screenshot mit Übersetzung: 3 Stundenpositionen, Rigg / Transport als Stück. Preise und Personendaten werden hier nicht veröffentlicht; Abrechnungsregeln sind offen.'}
         </p>
-        <div className="flex flex-wrap gap-1.5 text-[11px]">
-          {(language === 'ru' ? [
-            'Транспорт / выезд',
-            'Подготовка / развёртывание',
-            'Подъёмник / строительные леса',
-            'Подсобный рабочий'
-          ] : [
-            'Transport / Anfahrt',
-            'Vorbereitung / Rüsten',
-            'Hebebühne / Gerüst',
-            'Hilfsarbeiter'
-          ]).map((item, i) => (
-            <span key={i} className="px-2 py-0.5 bg-white border border-slate-200 text-slate-700 rounded font-medium">
-              {item}
-            </span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+          {[
+            {
+              original: 'Merarbeid ifm. k-boring (tildek…)',
+              translation: language === 'ru' ? 'Дополнительная работа при колонковом бурении' : 'Zusatzarbeit bei Kernbohrungen',
+              unit: language === 'ru' ? '6 часов' : '6 Stunden'
+            },
+            {
+              original: 'Bruk av heis/stillas',
+              translation: language === 'ru' ? 'Использование подъёмника / строительных лесов' : 'Benutzung Lift / Gerüst',
+              unit: language === 'ru' ? '3 часа' : '3 Stunden'
+            },
+            {
+              original: 'Hjelpearbeid',
+              translation: language === 'ru' ? 'Работа помощника' : 'Helferarbeit',
+              unit: language === 'ru' ? '12 часов' : '12 Stunden'
+            },
+            {
+              original: 'Rigg / Transport (bor/sag)',
+              translation: language === 'ru' ? 'Подготовка и транспорт (бурение / резка)' : 'Rüsten / Transport (Bohren / Sägen)',
+              unit: language === 'ru' ? '1 шт.' : '1 Stück'
+            }
+          ].map((item, i) => (
+            <div key={i} className="p-2.5 bg-white border border-slate-200 rounded-lg">
+              <div className="text-slate-900 font-semibold">{item.original}</div>
+              <div className="text-slate-600">{item.translation}</div>
+              <div className="mt-1 font-mono text-emerald-700">{item.unit}</div>
+            </div>
           ))}
         </div>
-        <p className="text-[10px] text-slate-500">
+        <p className="text-[10px] text-amber-800">
           {language === 'ru'
-            ? 'Источник: «Разговор с клиентом.md», § 4 (рапорт), § 8 (скриншоты 3 и 8).'
-            : 'Quelle: „Разговор с клиентом.md“, § 4 (Rapport) und § 8 (Screenshots 3 und 8).'}
+            ? 'Источник: загруженные 09.10.2026 скриншоты реального рапорта, раздел «Andre tjenester / Other services (4)». Название первой строки обрезано. Это 4 строки одного рапорта, не утверждённый прайс-лист ProRiv.'
+            : 'Quelle: am 09.10.2026 hochgeladene Screenshots des echten Rapports, Abschnitt „Andre tjenester / Other services (4)“. Erste Positionsbezeichnung abgeschnitten. Kein freigegebener ProRiv-Gesamtkatalog.'}
         </p>
       </div>
 

@@ -852,6 +852,8 @@ export async function importFromJson(jsonString: string): Promise<boolean> {
  */
 export interface WorkshopNote {
   status: 'open' | 'test' | 'decided';
+  /** Explicitly recorded client confirmation; a team decision alone is insufficient. */
+  isaConfirmed?: boolean;
   /** Current working interpretation; never overwrites the source interview seed. */
   revisedCustomerFact?: string;
   /** Editable working proposal; never overwrites the original proposal. */

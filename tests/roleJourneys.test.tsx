@@ -9,6 +9,7 @@ import { ROLE_INTERACTIONS, interactionsBetween, interactionForAdminStep } from 
 import { changeWorkshopNote, readWorkshopRoute, roleJourneyMarkdown } from '../src/utils/roleWorkshop';
 import type { DatabaseState, Language } from '../src/types';
 import type { WorkshopNotes } from '../src/db/indexedDb';
+import { roleKnowledgeItems, roleKnowledgeState, roleQuestions, roleRights } from '../src/data/roleKnowledge';
 
 test('existing process bookmarks survive, role deep links select a validated role and step', () => {
   assert.equal(readWorkshopRoute('#/workshop').mode, 'process');
@@ -127,4 +128,51 @@ test('worker perspective opens the foreman exchange with the original report pol
   assert.ok(html.includes('Existing answer from the admin view'));
   assert.ok(html.includes('Arbeiter → Kunde'));
   assert.ok(html.includes('Arbeiter → Vorarbeiter → Kunde'));
+});
+
+test('role branches retain canonical notes and keep disputed dispatch out of green facts', () => {
+  for (const role of ROLE_JOURNEYS) {
+    for (const branch of ['rights', 'duties', 'flow', 'questions'] as const) {
+      const items = roleKnowledgeItems(role.id, branch);
+      assert.ok(items.length > 0);
+      assert.equal(new Set(items.map(item => item.id)).size, items.length);
+      for (const item of items) assert.ok(item.source.trim());
+    }
+  }
+  assert.equal(roleQuestions('admin').length, 28);
+  const senderKey = journeyQuestionKey('admin', 'report-policy', 'sender');
+  const workerSender = roleQuestions('worker').find(item => item.noteKey === senderKey);
+  const foremanSender = roleQuestions('foreman').find(item => item.noteKey === senderKey);
+  assert.ok(workerSender && foremanSender);
+  assert.equal(roleKnowledgeState(workerSender), 'open');
+  assert.equal(roleKnowledgeItems('worker', 'flow').find(item => item.processStepId === 'send')?.state, 'open');
+  assert.ok(!roleRights('admin').some(item => item.state === 'evidenced'));
+});
+
+test('a team decision cannot become green without explicit Isa confirmation; editing revokes confirmation', () => {
+  const item = roleQuestions('worker').find(item => item.noteKey === journeyQuestionKey('admin', 'report-policy', 'sender'))!;
+  const key = item.noteKey!;
+  const decided = changeWorkshopNote({}, key, { status: 'decided', answer: 'Team prefers foreman review' });
+  assert.equal(roleKnowledgeState(item, decided[key]), 'proposal');
+  const confirmed = changeWorkshopNote(decided, key, { answer: 'Isa confirms direct worker dispatch', isaConfirmed: true });
+  assert.equal(roleKnowledgeState(item, confirmed[key]), 'evidenced');
+  const edited = changeWorkshopNote(confirmed, key, { answer: 'Changed wording and route' });
+  assert.equal(edited[key].isaConfirmed, false);
+  assert.equal(roleKnowledgeState(item, edited[key]), 'proposal');
+  const emptied = changeWorkshopNote(confirmed, key, { answer: '  ', isaConfirmed: true });
+  assert.equal(emptied[key].isaConfirmed, false);
+  assert.equal(roleKnowledgeState(item, emptied[key]), 'open');
+});
+
+test('clearing a source proposal reopens the point and exports preserve the edited proposal and client confirmation', () => {
+  const item = roleQuestions('admin').find(item => item.proposal)!;
+  const key = item.noteKey!;
+  assert.equal(roleKnowledgeState(item), 'proposal');
+  const cleared = changeWorkshopNote({}, key, { revisedRecommendation: ' ' });
+  assert.equal(roleKnowledgeState(item, cleared[key]), 'open');
+  const recorded = changeWorkshopNote(cleared, key, { revisedRecommendation: 'Our edited team proposal', answer: 'Isa agrees', isaConfirmed: true });
+  const markdown = roleJourneyMarkdown(recorded);
+  assert.ok(markdown.includes('**Vorschlag an Isa:** Our edited team proposal'));
+  assert.ok(markdown.includes('**Von Isa bestätigt:** Ja'));
+  assert.ok(markdown.includes('**Besprochene Antwort:** Isa agrees'));
 });

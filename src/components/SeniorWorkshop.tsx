@@ -37,10 +37,11 @@ function createMarkdown(notes: WorkshopNotes) {
     const note = notes[step.id];
     markdown += '## ' + step.nr + '. ' + step.title + '\n\n';
     markdown += '**Kundenaussage (Gesprächsnotiz):** ' + step.customerFact + '\n\n';
-    markdown += '**Vorschlag:** ' + step.recommendation + '\n\n';
+    markdown += '**Vorschlag:** ' + (note?.revisedRecommendation ?? step.recommendation) + '\n\n';
     markdown += '**Offene Frage:** ' + step.openQuestion + '\n\n';
     markdown += '**Ergebnis:** ' + (note?.status === 'decided' ? 'Entschieden' : note?.status === 'test' ? 'Zu prüfen' : 'Offen') + '\n\n';
     markdown += '**Besprochene Antwort:** ' + (note?.answer || '—') + '\n\n';
+    markdown += '**Von Isa bestätigt:** ' + (note?.isaConfirmed && note.answer.trim() ? 'Ja – dokumentierte Antwort' : 'Nein') + '\n\n';
     markdown += '**Verantwortlich:** ' + (note?.owner || '—') + '\n\n';
     markdown += '**Nächster Schritt:** ' + (note?.nextStep || '—') + '\n\n';
     markdown += '**Quelle:** ' + step.source + '\n\n';

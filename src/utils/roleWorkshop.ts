@@ -24,6 +24,8 @@ export function changeWorkshopNote(notes: WorkshopNotes, key: string, change: Pa
   // Removing the answer reopens a recorded decision instead of leaving an
   // apparently decided but empty entry in persisted notes or exports.
   if (note.status === 'decided' && !note.answer.trim()) note.status = 'open';
+  if (change.answer !== undefined && change.answer !== current.answer && change.isaConfirmed === undefined) note.isaConfirmed = false;
+  if (!note.answer.trim()) note.isaConfirmed = false;
   return { ...notes, [key]: note };
 }
 
@@ -42,6 +44,8 @@ export function roleJourneyMarkdown(notes: WorkshopNotes): string {
         lines.push('#### Frage [' + key + ']', '', question.text.de, '', question.text.ru, '');
         if (question.previousAnswer) lines.push('**Vorhandene Antwort (' + (question.provenance === 'team' ? 'Teamvorschlag, unbestätigt' : 'Gesprächsgrundlage, zu bestätigen') + '):** ' + question.previousAnswer.de, question.previousAnswer.ru, '');
         lines.push('**Meeting-Status:** ' + (note?.status === 'decided' ? 'Entschieden' : note?.status === 'test' ? 'Zu prüfen' : 'Offen'), '**Besprochene Antwort:** ' + (note?.answer || '—'), '**Verantwortlich:** ' + (note?.owner || '—'), '**Nächster Schritt:** ' + (note?.nextStep || '—'), '');
+        if (note?.revisedRecommendation?.trim()) lines.push('**Vorschlag an Isa:** ' + note.revisedRecommendation, '');
+        lines.push('**Von Isa bestätigt:** ' + (note?.isaConfirmed && note.answer.trim() ? 'Ja – dokumentierte Antwort' : 'Nein'), '');
       }
     }
   }

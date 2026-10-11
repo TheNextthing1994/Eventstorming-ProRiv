@@ -118,6 +118,12 @@ export const Header: React.FC<HeaderProps> = ({
           {language === 'ru' ? 'Рабочая панель' : 'Cockpit'}
         </button>
 
+        <button
+          onClick={() => onNavigate('roles')}
+          className={`px-3 py-2 text-xs font-semibold rounded-lg ${currentView === 'workshop' ? 'bg-emerald-700 text-white' : 'text-emerald-800 bg-emerald-50 hover:bg-emerald-100'}`}>
+          {language === 'ru' ? 'Роли · Администратор' : 'Rollen · Admin'}
+        </button>
+
         <details className="relative group">
           <summary className="px-3 py-2 cursor-pointer rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 list-none select-none">
             {language === 'ru' ? 'Архив и инструменты ▾' : 'Archiv & Werkzeuge ▾'}
@@ -188,3 +194,4 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
+

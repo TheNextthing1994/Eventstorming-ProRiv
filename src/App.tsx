@@ -91,7 +91,7 @@ export default function App() {
       } else {
         setCurrentView('home');
       }
-    } else if (hash === 'workshop') {
+    } else if (hash === 'workshop' || hash.startsWith('workshop/')) {
       setCurrentView('workshop');
     } else if (hash === 'overview') {
       setCurrentView('overview');
@@ -128,6 +128,9 @@ export default function App() {
       setCurrentView('topic');
     } else if (view === 'workshop') {
       window.location.hash = '#/workshop';
+      setCurrentView('workshop');
+    } else if (view === 'roles') {
+      window.location.hash = '#/workshop/admin';
       setCurrentView('workshop');
     } else if (view === 'overview') {
       window.location.hash = '#/overview';
@@ -213,7 +216,7 @@ export default function App() {
             databaseState={databaseState}
             language={language}
             onSelectTopic={(topicId) => navigateTo('topic', topicId)}
-            onStartWorkshop={() => navigateTo('workshop')}
+            onStartWorkshop={() => navigateTo('roles')}
             onNavigateSection={(section) => navigateTo(section)}
             onOpenCalibration={() => setIsCalibrationOpen(true)}
             onImageChanged={(dataUrl) => {
@@ -311,3 +314,4 @@ export default function App() {
     </div>
   );
 }
+

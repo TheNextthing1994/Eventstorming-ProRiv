@@ -22,5 +22,8 @@ jobs:
         run: npm run lint
       - name: SDD handoff tests
         run: npm run test:sdd
+      - name: Role workshop tests
+        run: npm run test:roles
       - name: Production build
         run: npm run build
+

@@ -4,11 +4,12 @@
 
 ## Current UI (October 2026)
 
+0. **Role walkthrough (11 October):** Click **Rollen · Admin / Роли · Администратор** in the main navigation, or open `#/workshop/admin`. Three role panels expand on selection. **Admin** is the first complete walkthrough: 11 steps, 28 concrete questions, separate previous answers, actual meeting answers and statuses. Worker and foreman link to existing process steps; their complete onboarding-to-exit journeys are still pending. Use `#/workshop/admin/report-policy` to jump directly to the unresolved report dispatch question.
 1. **Original sketch:** The senior engineer's 6 circles remain the orientation anchor. Click **Senior-Workshop starten / Открыть мастерскую** for the actual meeting.
 2. **Living Workshop:** Nine customer-grounded business process steps. Click one step for the context inspector. Customer statement, recommendation and open question are kept separate.
 3. **Depth on demand:** Each step links to original senior questions, findings, OSS/commercial references, and the existing Event Storming research. No research categories have been deleted.
 4. **Meeting notes:** Status **Offen / Zu prüfen / Entschieden**, actual answer, owner and next step. Click **Speichern**. Notes are stored locally in the same browser in IndexedDB.
-5. **Export:** Use **Meeting-Protokoll** to download a Markdown copy. Also use **Recherche → Import / Export** to back up the full research database as JSON.
+5. **Export:** Use **Meeting-Protokoll** to download a Markdown copy including role questions, source answers and meeting outcomes in German/Russian. Role answers reuse the existing IndexedDB notes store with namespaced keys; existing process and architecture notes are preserved. JSON backup/restore and SDD handoff include the role answers and their source context. Also use **Archiv & Werkzeuge → Import / Export** to back up the full research database as JSON.
 6. **Legacy research:** Old TopicDetailView, EventStormingHub, CompetitorHub and SeniorDecisionsHub remain under **Recherche**. Some historical design hypotheses are superseded and must not be interpreted as client approval.
 
 ## What the client actually described (conversation RAW; not an accepted spec)
@@ -48,12 +49,14 @@ npm install
 npm run dev
 ```
 
-Then click `Senior-Workshop` or open the hash route `#/workshop`.
+Then click **Rollen · Admin**, or open `#/workshop/admin`. The existing process map remains at `#/workshop`. A specific Admin step can be bookmarked, e.g. `#/workshop/admin/invite`.
 
 Quality checks:
 
 ```sh
 npm run lint
+npm run test:roles
+npm run test:sdd
 npm run build
 ```
 
@@ -61,9 +64,12 @@ npm run build
 
 This project lives on branch `main`. If your AI Studio Build project is already linked/imported from GitHub, **refresh or re-import/synchronize the repository's latest main branch**; GitHub edits are not guaranteed to appear automatically in an existing Studio preview. Open the Studio preview and use the original sketch's workshop button.
 
+Admin walkthrough details and evidence boundaries: [`docs/ADMIN_ROLLEN_WORKSHOP.md`](docs/ADMIN_ROLLEN_WORKSHOP.md).
+
 ## Known limitations
 
 - Meeting notes are **browser-local**, not shared across devices, browsers or AI Studio preview origins. Export before switching devices.
 - The original sketch image is browser-uploaded, not bundled by default. Use the existing upload control if necessary.
 - This is a source-code update; a deployment/test in the actual Google AI Studio environment must still be verified.
 - Historical seed data remains for transparency and old locally saved records are not rewritten. The Workshop follows the newer customer interview where they conflict.
+

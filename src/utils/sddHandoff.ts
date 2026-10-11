@@ -14,6 +14,7 @@ import { DatabaseState, SeniorQuestion, TopicId } from '../types';
 import { TOPIC_DEFINITIONS } from '../db/defaultData';
 import { DOMAIN_EVENTS_LIST, MVP_STRATEGIC_STATEMENT, SENIOR_DECISION_QUESTIONS } from '../db/knowledgeSeed';
 import { WORKSHOP_STEPS } from '../data/workshopContent';
+import { ROLE_JOURNEYS, journeyQuestionKey } from '../data/roleJourneys';
 import { EVENT_STORMING_LEGACY_RULES, EVENT_STORMING_LEGACY_EXCEPTIONS } from '../data/eventStormingLegacy';
 import type { WorkshopNotes } from '../db/indexedDb';
 
@@ -25,6 +26,8 @@ export interface SddHandoff {
     workshopSteps: number;
     decidedWorkshopSteps: number;
     decidedArchitectureQuestions: number;
+    roleQuestions: number;
+    decidedRoleQuestions: number;
     unresolvedClientQuestions: number;
     historicalEvents: number;
     sourceRecords: number;
@@ -79,6 +82,11 @@ export function prepareSddHandoff(
   const pendingSteps = WORKSHOP_STEPS.filter(step => liveNotes[step.id]?.status !== 'decided');
   const pendingArchitecture = SENIOR_DECISION_QUESTIONS.filter(q =>
     liveNotes['arch:' + q.id]?.status !== 'decided');
+  const roleQuestions = ROLE_JOURNEYS.flatMap(role => role.steps.flatMap(step => step.questions.map(question => ({
+    key: journeyQuestionKey(role.id, step.id, question.id), role, step, question
+  }))));
+  const decidedRoleQuestions = roleQuestions.filter(item => liveNotes[item.key]?.status === 'decided');
+  const pendingRoleQuestions = roleQuestions.filter(item => liveNotes[item.key]?.status !== 'decided');
 
   // Raw knowledge follows the exact SDD-GEN raw template headings.
   // The supplementary inventory makes every transferred claim traceable,
@@ -128,7 +136,11 @@ export function prepareSddHandoff(
       ' | Next: ' + paragraph(liveNotes[s.id]?.nextStep)))),
     ...(decidedArchitecture.map(q => entry('ARCH:' + q.id, q.question,
       'Discussion result: ' + paragraph(liveNotes['arch:' + q.id]?.answer)))),
-    ...(decidedSteps.length + decidedArchitecture.length === 0 ? ['- No explicitly decided workshop entries yet.'] : []),
+    ...decidedRoleQuestions.map(item => entry(item.key, item.question.text.de,
+      'Discussion result: ' + paragraph(liveNotes[item.key]?.answer) +
+      ' | Owner: ' + paragraph(liveNotes[item.key]?.owner) +
+      ' | Next: ' + paragraph(liveNotes[item.key]?.nextStep) + ' | NOT automatic customer acceptance')),
+    ...(decidedSteps.length + decidedArchitecture.length + decidedRoleQuestions.length === 0 ? ['- No explicitly decided workshop entries yet.'] : []),
     '',
     'Repository decision records (include older imported/seed decisions and may NOT be client-approved):',
     ...state.decisions.map(d => entry('DEC:' + d.id, d.title,
@@ -158,6 +170,13 @@ export function prepareSddHandoff(
         ' | Discussion: ' + paragraph(q.notes) +
         ' | Origin: ' + (q.origin || 'not documented'))),
     '',
+    'Role walkthrough questions (proposed interview aid, not accepted functional scope):',
+    ...roleQuestions.map(item => entry(item.key, item.question.text.de,
+      item.question.text.ru + ' | Previous answer: ' + paragraph(item.question.previousAnswer?.de) +
+      ' | Provenance: ' + (item.question.provenance || 'new workshop question') +
+      ' | Source: ' + item.step.source + ' | ' + noteStatus(liveNotes[item.key]) +
+      ' | Discussion: ' + paragraph(liveNotes[item.key]?.answer))),
+    '',
     'Additional architecture questions:',
     ...SENIOR_DECISION_QUESTIONS.map(q => entry('ARCH:' + q.id, q.question,
       'Current proposal: ' + q.currentProposal +
@@ -181,6 +200,7 @@ export function prepareSddHandoff(
     '',
     'Complete textual records from the current browser state and project code. Retained as source evidence; do not treat array membership, imported statuses, or links as verification.',
     jsonSection('Workshop source steps (verbatim historical summaries, proposals, evidence and alternatives)', WORKSHOP_STEPS),
+    jsonSection('Role walkthrough proposals with interview/team provenance; NOT accepted scope', ROLE_JOURNEYS),
     jsonSection('Current workshop annotations (local, editable; status does not imply SDD acceptance)', liveNotes),
     jsonSection('Senior architecture questions (proposals, not accepted)', SENIOR_DECISION_QUESTIONS),
     jsonSection('Live senior and client questions (including locally edited answers)', liveQuestions),
@@ -290,10 +310,13 @@ export function prepareSddHandoff(
     '',
     '- Workshop process steps explicitly marked decided: ' + decidedSteps.length + ' of ' + WORKSHOP_STEPS.length + '.',
     '- Architecture questions explicitly marked decided: ' + decidedArchitecture.length + ' of ' + SENIOR_DECISION_QUESTIONS.length + '.',
+    '- Role walkthrough questions explicitly marked decided: ' + decidedRoleQuestions.length + ' of ' + roleQuestions.length + ' (interview aid, not automatic functional scope).',
     ...(decidedSteps.map(s => '- Recorded decision WS:' + s.id + ': ' +
       line(liveNotes[s.id]?.answer) + ' (local meeting status only; verify scope).')),
     ...(decidedArchitecture.map(q => '- Recorded architecture decision ARCH:' + q.id + ': ' +
       line(liveNotes['arch:' + q.id]?.answer) + ' (local meeting status only).')),
+    ...decidedRoleQuestions.map(item => '- Recorded role decision [' + item.key + ']: ' +
+      line(liveNotes[item.key]?.answer) + ' (local meeting status only; reconcile with source interview).'),
     '',
     '### Blocking open questions and proposed feature handoff',
     '',
@@ -302,6 +325,7 @@ export function prepareSddHandoff(
     ...openClient.slice(0,12).map(q =>
       '- OPEN [Q:' + q.id + ']: ' + line(q.clientQuestion || q.question)),
     ...(openClient.length > 12 ? ['- Additional open questions are indexed in Raw Project Knowledge.'] : []),
+    '- Proposed role interview questions still open or requiring review: ' + pendingRoleQuestions.length + '; see Raw Project Knowledge. Do not infer acceptance of the proposed admin duties from this list.',
     '- Derive separate Feature Specs and SubFeature Specs only after requirements are clarified and this Global Spec is accepted.',
     '- Derive Technical Specs from accepted functional requirements; architecture proposals here are not implementation orders.',
     '- SDD-GEN requires independent draft review, human acceptance, registration in specs/accepted/manifest.json and validation before this document becomes authoritative.',
@@ -314,12 +338,15 @@ export function prepareSddHandoff(
     workshopSteps: WORKSHOP_STEPS.length,
     decidedWorkshopSteps: decidedSteps.length,
     decidedArchitectureQuestions: decidedArchitecture.length,
+    roleQuestions: roleQuestions.length,
+    decidedRoleQuestions: decidedRoleQuestions.length,
     unresolvedClientQuestions: openClient.length,
     historicalEvents: DOMAIN_EVENTS_LIST.length,
     sourceRecords: liveQuestions.length + state.findings.length + state.competitors.length +
       state.recommendations.length + state.openPoints.length + state.decisions.length +
       state.attachments.length + WORKSHOP_STEPS.length + SENIOR_DECISION_QUESTIONS.length +
-      DOMAIN_EVENTS_LIST.length + EVENT_STORMING_LEGACY_RULES.length + EVENT_STORMING_LEGACY_EXCEPTIONS.length
+      DOMAIN_EVENTS_LIST.length + EVENT_STORMING_LEGACY_RULES.length + EVENT_STORMING_LEGACY_EXCEPTIONS.length +
+      roleQuestions.length + ROLE_JOURNEYS.reduce((sum, role) => sum + role.steps.length, 0)
   };
   return {
     createdAt,
@@ -328,3 +355,4 @@ export function prepareSddHandoff(
     stats
   };
 }
+

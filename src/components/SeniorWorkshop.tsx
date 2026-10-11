@@ -5,6 +5,9 @@ import { DOMAIN_EVENTS_LIST } from '../db/knowledgeSeed';
 import { TOPIC_DEFINITIONS } from '../db/defaultData';
 import { loadWorkshopNotes, saveWorkshopNotes, WorkshopNote, WorkshopNotes } from '../db/indexedDb';
 import { WORKSHOP_ROLE_LABELS, WORKSHOP_STEPS, WorkshopStep } from '../data/workshopContent';
+import { RoleJourneyWorkshop } from './RoleJourneyWorkshop';
+import { changeWorkshopNote, readWorkshopRoute, roleJourneyMarkdown } from '../utils/roleWorkshop';
+import type { JourneyRoleId } from '../data/roleJourneys';
 
 interface SeniorWorkshopProps {
   databaseState: DatabaseState;
@@ -41,7 +44,7 @@ function createMarkdown(notes: WorkshopNotes) {
     markdown += '**Nächster Schritt:** ' + (note?.nextStep || '—') + '\n\n';
     markdown += '**Quelle:** ' + step.source + '\n\n';
   }
-  return markdown;
+  return markdown + '\n---\n\n' + roleJourneyMarkdown(notes);
 }
 
 function downloadText(filename: string, text: string, mime: string) {
@@ -61,6 +64,20 @@ export const SeniorWorkshop: React.FC<SeniorWorkshopProps> = ({
   const ru = language === 'ru';
   const dual = language === 'bilingual';
   const t = (de: string, russian: string) => ru ? russian : de;
+  const [roleRoute, setRoleRoute] = useState(() => readWorkshopRoute(window.location.hash));
+  const lastJourneySteps = React.useRef<Partial<Record<JourneyRoleId, string>>>({});
+  useEffect(() => {
+    const sync = () => setRoleRoute(readWorkshopRoute(window.location.hash));
+    window.addEventListener('hashchange', sync);
+    return () => window.removeEventListener('hashchange', sync);
+  }, []);
+  const navigateRole = (roleId: JourneyRoleId, stepId?: string) => {
+    if (roleRoute.stepId) lastJourneySteps.current[roleRoute.roleId] = roleRoute.stepId;
+    const target = stepId || lastJourneySteps.current[roleId];
+    const hash = '#/workshop/' + roleId + (target ? '/' + target : '');
+    window.location.hash = hash;
+    setRoleRoute(readWorkshopRoute(hash));
+  };
   const [selectedId, setSelectedId] = useState(() => {
     try {
       const stored = sessionStorage.getItem('isa_workshop_last_step');
@@ -78,7 +95,7 @@ export const SeniorWorkshop: React.FC<SeniorWorkshopProps> = ({
   useEffect(() => {
     let alive = true;
     loadWorkshopNotes().then(current => { if (alive) { setNotes(current); setLoaded(true); } })
-      .catch(() => { if (alive) { setLoaded(true); setSaveStatus('error'); } });
+      .catch(() => { if (alive) { setSaveStatus('error'); } });
     return () => { alive = false; };
   }, []);
 
@@ -87,17 +104,15 @@ export const SeniorWorkshop: React.FC<SeniorWorkshopProps> = ({
   const currentNote: WorkshopNote = notes[selected.id] || {
     status: 'open', answer: '', owner: '', nextStep: '', updatedAt: ''
   };
-  const updateNote = (change: Partial<WorkshopNote>) => {
+  const updateNoteByKey = (key: string, change: Partial<WorkshopNote>) => {
     if (!loaded) return;
     setSaveStatus('idle');
-    setNotes(prev => ({
-      ...prev,
-      [selected.id]: { ...(prev[selected.id] || currentNote), ...change, updatedAt: new Date().toISOString() }
-    }));
+    setNotes(prev => changeWorkshopNote(prev, key, change));
   };
+  const updateNote = (change: Partial<WorkshopNote>) => updateNoteByKey(selected.id, change);
   const saveNote = async () => {
     if (!loaded) return;
-    if (currentNote.status === 'decided' && !currentNote.answer.trim()) {
+    if (Object.entries(notes).some(([key, note]) => (key === selected.id || key.startsWith('role:')) && note.status === 'decided' && !(note.answer || '').trim())) {
       alert(t('Für „Entschieden“ zuerst die besprochene Antwort dokumentieren.', 'Для статуса «Решено» сначала запишите согласованный ответ.'));
       return;
     }
@@ -120,6 +135,12 @@ export const SeniorWorkshop: React.FC<SeniorWorkshopProps> = ({
   const topicCategory = selected.topicId === 'vremya' ? 'Session & Zeit' :
     selected.topicId === 'api' ? 'ERP & Tripletex' : selected.topicId === 'raport' ? 'Rapport & Aufmaß' : undefined;
   const relatedEvents = DOMAIN_EVENTS_LIST.filter(e => topicCategory && e.category === topicCategory);
+  const openProcessStep = (stepId: string) => {
+    setSelectedId(stepId);
+    setDeepOpen(false);
+    window.location.hash = '#/workshop';
+    setRoleRoute(readWorkshopRoute('#/workshop'));
+  };
 
   return (
     <div className="min-h-[calc(100vh-3.5rem)] bg-slate-50 text-slate-900">
@@ -133,24 +154,37 @@ export const SeniorWorkshop: React.FC<SeniorWorkshopProps> = ({
             <div>
               <div className="flex items-center gap-2 text-[11px] font-semibold tracking-wide text-emerald-800 uppercase">
                 <MapPinned className="w-4 h-4" />
-                {t('Senior-Meeting · ISA / ProRiv', 'Встреча с сеньором · ISA / ProRiv')}
+                {t("Senior-Meeting · ProRiv (Isa's Projekt)", "Встреча с сеньором · ProRiv (проект Исы)")}
               </div>
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight mt-1">
-                {t('So arbeitet ProRiv – vom Einsatz bis Tripletex', 'Как работает ProRiv — от объекта до Tripletex')}
+                {roleRoute.mode === 'roles' ? t('Rollen und Übergaben mit Isa durchgehen', 'Разобрать роли и передачи с Исой') : t('Vom Einsatz bis Tripletex', 'От объекта до Tripletex')}
               </h1>
               <p className="mt-1 text-sm text-slate-600">
-                {t('Schritt auswählen · Kundenwunsch verstehen · Lösung prüfen · Entscheidung festhalten', 'Выберите шаг · поймите запрос · оцените решение · зафиксируйте решение')}
+                {roleRoute.mode === 'roles' ? t('Ein durchgehbarer Rollenablauf mit konkreten Fragen und dokumentierten Antworten.', 'Пошаговый путь роли с конкретными вопросами и записанными ответами.') : t('Schritt auswählen · Kundenwunsch verstehen · Lösung prüfen · Entscheidung festhalten', 'Выберите шаг · поймите запрос · оцените решение · зафиксируйте решение')}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => downloadText('ISA_Senior_Meeting_'+new Date().toISOString().slice(0,10)+'.md', createMarkdown(notes), 'text/markdown')}
-              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold bg-white border border-slate-200 rounded-lg hover:bg-slate-100">
+            <button disabled={!loaded} onClick={() => downloadText('ISA_Senior_Meeting_'+new Date().toISOString().slice(0,10)+'.md', createMarkdown(notes), 'text/markdown')}
+              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold bg-white border border-slate-200 rounded-lg hover:bg-slate-100 disabled:opacity-40">
               <Download className="w-4 h-4" />{t('Meeting-Protokoll', 'Протокол встречи')}
             </button>
           </div>
         </header>
 
+        <nav aria-label={t('Workshop-Ansicht', 'Вид мастерской')} className="flex gap-2">
+          <button type="button" aria-pressed={roleRoute.mode === 'roles'} onClick={() => navigateRole('admin')} className={`rounded-lg px-4 py-2 text-sm font-semibold ${roleRoute.mode === 'roles' ? 'bg-emerald-700 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'}`}>{t('Rollen durchgehen', 'Разобрать роли')}</button>
+          <button type="button" aria-pressed={roleRoute.mode === 'process'} onClick={() => openProcessStep(selected.id)} className={`rounded-lg px-4 py-2 text-sm font-semibold ${roleRoute.mode === 'process' ? 'bg-emerald-700 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'}`}>{t('Prozesslandkarte', 'Карта процесса')}</button>
+        </nav>
+
+        {!loaded && saveStatus === 'error' && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-950">{t('Gespeicherte Notizen konnten nicht geladen werden. Bearbeiten und Export bleiben gesperrt, damit nichts überschrieben wird.', 'Не удалось загрузить сохранённые заметки. Редактирование и экспорт заблокированы, чтобы ничего не перезаписать.')} <button onClick={() => window.location.reload()} className="ml-2 underline font-semibold">{t('Erneut laden', 'Загрузить заново')}</button></div>}
+
+        {roleRoute.mode === 'roles' ? <RoleJourneyWorkshop
+          language={language} roleId={roleRoute.roleId} stepId={roleRoute.stepId}
+          notes={notes} databaseState={databaseState} loaded={loaded} saveStatus={saveStatus}
+          onNavigate={navigateRole} onOpenProcess={openProcessStep} onSelectTopic={onSelectTopic}
+          onUpdateNote={updateNoteByKey} onSave={saveNote}
+        /> : <>
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.85fr)] gap-4 items-start">
           {/* L0: Overview stays on screen when the inspector changes. */}
           <section className="bg-white border border-slate-200 rounded-2xl p-4 md:p-5 shadow-sm space-y-4">
@@ -352,7 +386,9 @@ export const SeniorWorkshop: React.FC<SeniorWorkshopProps> = ({
             </div>
           </section>
         )}
+        </>}
       </div>
     </div>
   );
 };
+

@@ -77,3 +77,23 @@ test('does not include binary attachments or oversized images in markdown export
   assert.doesNotMatch(output.rawKnowledge,/DATA-IMAGE-DO-NOT-COPY/);
   assert.match(output.rawKnowledge,/"binaryFileOmitted": true/);
 });
+
+test('role answers and their source conflict survive SDD handoff without acceptance', () => {
+  const roleNotes: WorkshopNotes = {
+    ...notes,
+    'role:admin:report-policy:sender': {
+      status: 'decided', answer: 'Isa requests foreman review before dispatch',
+      owner: 'Isa', nextStep: 'Validate with Senior', updatedAt: ''
+    }
+  };
+  const output = prepareSddHandoff(state, [question], roleNotes);
+  assert.ok(output.rawKnowledge.includes('Gespräch: Arbeiter sendet direkt.'));
+  assert.ok(output.rawKnowledge.includes('Team-Entwurf: Vorarbeiter prüft'));
+  assert.ok(output.rawKnowledge.includes('Isa requests foreman review before dispatch'));
+  assert.ok(output.globalDraft.includes('role:admin:report-policy:sender'));
+  assert.match(output.globalDraft, /status: Draft/);
+  assert.doesNotMatch(output.globalDraft, /status: Accepted/);
+  assert.equal(output.stats.roleQuestions, 28);
+  assert.equal(output.stats.decidedRoleQuestions, 1);
+});
+

@@ -5,8 +5,11 @@ import { createHash } from 'node:crypto';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { ISA_TEAM_QUESTIONS, ISA_QUESTION_GROUPS, ISA_QUESTION_SOURCE } from '../src/data/isaTeamQuestions';
-import { IsaQuestionCard } from '../src/components/IsaQuestionsWorkshop';
-import { changeIsaQuestionNote, EMPTY_ISA_QUESTION_NOTE, isaQuestionsBackup, isaTemplateMarkdown, parseIsaQuestionsBackup, selectedIsaQuestions } from '../src/utils/isaQuestions';
+import { IsaQuestionCard, IsaQuestionOverview } from '../src/components/IsaQuestionsWorkshop';
+import { ISA_QUESTION_STAGES } from '../src/data/isaQuestionStages';
+import { ISA_PROJECT_SOURCE_COVERAGE } from '../src/data/isaQuestionCoverage';
+import { DOMAIN_EVENTS_LIST } from '../src/db/knowledgeSeed';
+import { changeIsaQuestionNote, EMPTY_ISA_QUESTION_NOTE, isaCatalogMarkdown, isaGroupsForView, isaQuestionGroupId, isaQuestionsForView, isaQuestionsBackup, isaTemplateMarkdown, parseIsaQuestionsBackup, relatedIsaQuestions, selectedIsaQuestions } from '../src/utils/isaQuestions';
 import { readWorkshopRoute } from '../src/utils/roleWorkshop';
 import { loadIsaQuestionNotes, saveIsaQuestionNotes, exportStateAsJson, loadEntireDatabase } from '../src/db/indexedDb';
 
@@ -22,13 +25,87 @@ test('every uploaded question survives verbatim, including both numbering sequen
   const team = ISA_TEAM_QUESTIONS.filter(question => question.catalog === 'team');
   assert.deepEqual(roles.map(question => question.text.ru), original.slice(0, 50));
   assert.deepEqual(team.map(question => question.text.ru), original.slice(50));
-  assert.equal(new Set(ISA_TEAM_QUESTIONS.map(question => question.id)).size, 95);
+  assert.equal(new Set([...roles, ...team].map(question => question.id)).size, 95);
+  assert.equal(new Set(ISA_TEAM_QUESTIONS.map(question => question.id)).size, ISA_TEAM_QUESTIONS.length);
   for (const question of ISA_TEAM_QUESTIONS) {
     assert.ok(question.text.de.length > 20);
     const group = ISA_QUESTION_GROUPS.find(group => group.id === question.groupId)!;
     assert.equal(question.catalog, group.catalog);
     assert.ok(question.number >= group.from && question.number <= group.to);
   }
+});
+
+test('the overall list contains every original and addition once and assigns every question to a process stage', () => {
+  const all = isaQuestionsForView('all');
+  assert.equal(all.length, 155);
+  assert.equal(new Set(all.map(question => question.id)).size, all.length);
+  assert.equal(isaQuestionsForView('team').length, 45);
+  assert.equal(isaQuestionsForView('roles').length, 50);
+  assert.equal(isaQuestionsForView('project').length, 60);
+  assert.equal(isaGroupsForView('all').length, 14);
+  for (const stage of ISA_QUESTION_STAGES) assert.ok(all.some(question => isaQuestionGroupId(question, 'all') === stage.id));
+  for (const question of all) {
+    assert.ok(question.text.ru.length > 20);
+    assert.ok(ISA_QUESTION_STAGES.some(stage => stage.id === question.stageId));
+    for (const id of question.relatedIds || []) assert.ok(all.some(other => other.id === id), `Unknown related question: ${id}`);
+  }
+  const catalog = isaCatalogMarkdown('bilingual');
+  assert.equal((catalog.match(/^### \d+\./gm) || []).length, all.length);
+  for (const question of all) {
+    assert.ok(catalog.includes(question.text.de));
+    assert.ok(catalog.includes(question.text.ru));
+    assert.equal(catalog.split(`ID: ${question.id}\n`).length - 1, 1);
+  }
+});
+
+test('existing workshop questions and every modelled event decision have an explicit coverage reference', () => {
+  const ids = new Set(ISA_TEAM_QUESTIONS.map(question => question.id));
+  assert.equal(new Set(ISA_PROJECT_SOURCE_COVERAGE.map(item => item.sourceKey)).size, ISA_PROJECT_SOURCE_COVERAGE.length);
+  for (const source of ISA_PROJECT_SOURCE_COVERAGE) {
+    assert.ok(source.questionIds.length, `Uncovered source: ${source.sourceKey}`);
+    for (const id of source.questionIds) assert.ok(ids.has(id), `${source.sourceKey}: ${id}`);
+  }
+  for (const event of DOMAIN_EVENTS_LIST) assert.ok(ISA_PROJECT_SOURCE_COVERAGE.some(item => item.sourceKey === `event:${event.id}`));
+  for (const prefix of ['admin:', 'process:', 'senior:', 'open:', 'sketch:', 'raw:', 'screenshots:', 'gate:', 'qa:', 'diagram:']) {
+    assert.ok(ISA_PROJECT_SOURCE_COVERAGE.some(item => item.sourceKey.startsWith(prefix)), prefix);
+  }
+});
+
+test('related perspectives remain independently selected and old backups also accept new project questions', () => {
+  const role = ISA_TEAM_QUESTIONS.find(question => question.id === 'amruddy:roles:01')!;
+  const hms = ISA_TEAM_QUESTIONS.find(question => question.id === 'proriv:project:hms-responsibility')!;
+  let notes = changeIsaQuestionNote({}, first.id, { includeInIsa: true, comment: 'Existing note', proposal: 'Old proposal' });
+  const oldBackup = isaQuestionsBackup(notes);
+  assert.deepEqual(parseIsaQuestionsBackup(oldBackup), notes);
+  assert.ok(relatedIsaQuestions(first).includes(role));
+  assert.equal(notes[role.id], undefined);
+  notes = changeIsaQuestionNote(notes, role.id, { includeInIsa: true });
+  notes = changeIsaQuestionNote(notes, hms.id, { includeInIsa: true, proposal: 'HMS klären', comment: 'Nur intern' });
+  assert.deepEqual(parseIsaQuestionsBackup(isaQuestionsBackup(notes)), notes);
+  assert.equal(notes[first.id].comment, 'Existing note');
+  const template = isaTemplateMarkdown(notes, 'ru');
+  for (const question of [first, role, hms]) assert.equal(template.split(question.text.ru).length - 1, 1);
+  assert.ok(template.includes('HMS klären'));
+  assert.ok(!template.includes('Nur intern'));
+  assert.ok(template.indexOf(first.text.ru) < template.indexOf(hms.text.ru));
+});
+
+test('the phase overview shows complete questions, known context, selections and an editable entry point', () => {
+  const questions = isaQuestionsForView('all').filter(question => question.stageId === 'pricing');
+  const tax = questions.find(question => question.id === 'amruddy:team:14')!;
+  const notes = changeIsaQuestionNote({}, tax.id, { includeInIsa: true, comment: 'Retained draft' });
+  const html = renderToStaticMarkup(<IsaQuestionOverview questions={questions} notes={notes} language="de" editable onOpen={() => {}} onSelect={() => {}} />);
+  assert.equal((html.match(/type="checkbox"/g) || []).length, questions.length);
+  assert.equal((html.match(/checked=""/g) || []).length, 1);
+  assert.ok(html.includes('Preisliste nennt Preise ohne MVA'));
+  assert.ok(html.includes('Notizen ansehen / bearbeiten'));
+  assert.ok(html.includes('Helferregel ab Ø400'));
+  const originalApproval = ISA_TEAM_QUESTIONS.find(question => question.id === 'amruddy:roles:25')!;
+  const card = renderToStaticMarkup(<IsaQuestionCard question={originalApproval} note={EMPTY_ISA_QUESTION_NOTE} language="de" editable onUpdate={() => {}} onOpenQuestion={() => {}} />);
+  assert.ok(card.includes('offener Teamvorschlag'));
+  assert.ok(card.includes('Verwandte Fragen'));
+  assert.equal(EMPTY_ISA_QUESTION_NOTE.includeInIsa, false);
+  assert.equal(EMPTY_ISA_QUESTION_NOTE.proposal, '');
 });
 
 test('checking a question includes it for Isa; unchecking keeps its comments and review progress', () => {
@@ -44,7 +121,7 @@ test('checking a question includes it for Isa; unchecking keeps its comments and
   assert.equal(selectedIsaQuestions(notes).length, 0);
 });
 
-test('Isa template includes only checked questions across both catalogs, keeps proposals and makes comments optional', () => {
+test('Isa template includes only checked questions, keeps proposals and makes comments optional', () => {
   const role = ISA_TEAM_QUESTIONS.find(question => question.catalog === 'roles' && question.number === 47)!;
   let notes = changeIsaQuestionNote({}, first.id, { includeInIsa: true, proposal: 'Наш вариант\nВторая строка', comment: 'Private discussion' });
   notes = changeIsaQuestionNote(notes, second.id, { reviewed: true, proposal: 'Nicht gewählt' });

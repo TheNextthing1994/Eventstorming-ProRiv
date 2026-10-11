@@ -1,7 +1,15 @@
 import { TEAM_TRANSLATIONS, ROLE_TRANSLATIONS } from './isaQuestionTranslations';
 import type { LocalizedText } from './roleJourneys';
+import { originalQuestionStage, type IsaQuestionStageId } from './isaQuestionStages';
+import { ISA_PROJECT_QUESTIONS, ISA_PROJECT_QUESTION_GROUPS } from './isaProjectQuestions';
+import { originalQuestionContext, originalRelatedIds } from './isaQuestionContext';
 
-export type IsaQuestionCatalog = 'team' | 'roles';
+export type IsaQuestionCatalog = 'team' | 'roles' | 'project';
+export type IsaQuestionView = 'all' | IsaQuestionCatalog;
+export interface IsaQuestionContext {
+  kind: 'interview' | 'evidence' | 'proposal';
+  text: LocalizedText;
+}
 export interface IsaQuestionGroup {
   id: string;
   catalog: IsaQuestionCatalog;
@@ -16,6 +24,10 @@ export interface IsaTeamQuestion {
   groupId: string;
   title: LocalizedText;
   text: LocalizedText;
+  stageId: IsaQuestionStageId;
+  sourceKeys: string[];
+  relatedIds?: string[];
+  context?: IsaQuestionContext;
 }
 export const ISA_QUESTION_SOURCE = {
   filename: 'Fragen Amruddy(1).txt',
@@ -25,7 +37,7 @@ export const ISA_QUESTION_SOURCE = {
   teamCount: 45,
 };
 
-export const ISA_QUESTION_GROUPS: IsaQuestionGroup[] = [
+const ORIGINAL_QUESTION_GROUPS: IsaQuestionGroup[] = [
   {
     "id": "team-roles",
     "catalog": "team",
@@ -288,7 +300,9 @@ const rolesRu: string[] = [
   "У клиента договорная цена или скидка. Кто её устанавливает, где она хранится и что происходит, если прайс изменился во время выполнения заказа?"
 ];
 
-function catalog(catalog: IsaQuestionCatalog, russian: string[], german: [string, string][]): IsaTeamQuestion[] {
+export const ISA_QUESTION_GROUPS = [...ORIGINAL_QUESTION_GROUPS, ...ISA_PROJECT_QUESTION_GROUPS];
+
+function catalog(catalog: 'team' | 'roles', russian: string[], german: [string, string][]): IsaTeamQuestion[] {
   return russian.map((ru, i) => ({
     id: `amruddy:${catalog}:${String(i + 1).padStart(2, '0')}`,
     catalog,
@@ -296,11 +310,16 @@ function catalog(catalog: IsaQuestionCatalog, russian: string[], german: [string
     groupId: ISA_QUESTION_GROUPS.find(group => group.catalog === catalog && i + 1 >= group.from && i + 1 <= group.to)!.id,
     title: { de: german[i][0], ru: ru.split('?')[0].replace(/^Я /, '').slice(0, 76) },
     text: { de: german[i][1], ru },
+    stageId: originalQuestionStage(catalog, i + 1),
+    sourceKeys: [`amruddy:${catalog}:${i + 1}`],
+    relatedIds: originalRelatedIds(catalog, i + 1),
+    context: originalQuestionContext(catalog, i + 1),
   }));
 }
 
-/** Compact meeting catalog first; all role questions remain separately reachable. */
+/** Original 95 IDs and ordering stay stable; additions have their own IDs. */
 export const ISA_TEAM_QUESTIONS: IsaTeamQuestion[] = [
   ...catalog('team', teamRu, TEAM_TRANSLATIONS),
   ...catalog('roles', rolesRu, ROLE_TRANSLATIONS),
+  ...ISA_PROJECT_QUESTIONS,
 ];

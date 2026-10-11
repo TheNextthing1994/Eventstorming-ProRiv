@@ -121,7 +121,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={() => onNavigate('roles')}
           className={`px-3 py-2 text-xs font-semibold rounded-lg ${currentView === 'workshop' ? 'bg-emerald-700 text-white' : 'text-emerald-800 bg-emerald-50 hover:bg-emerald-100'}`}>
-          {language === 'ru' ? 'Роли · Администратор' : 'Rollen · Admin'}
+          {language === 'ru' ? 'Карта ролей' : 'Rollenkarte'}
         </button>
 
         <details className="relative group">

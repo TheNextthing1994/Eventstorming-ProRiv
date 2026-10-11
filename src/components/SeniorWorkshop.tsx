@@ -65,16 +65,13 @@ export const SeniorWorkshop: React.FC<SeniorWorkshopProps> = ({
   const dual = language === 'bilingual';
   const t = (de: string, russian: string) => ru ? russian : de;
   const [roleRoute, setRoleRoute] = useState(() => readWorkshopRoute(window.location.hash));
-  const lastJourneySteps = React.useRef<Partial<Record<JourneyRoleId, string>>>({});
   useEffect(() => {
     const sync = () => setRoleRoute(readWorkshopRoute(window.location.hash));
     window.addEventListener('hashchange', sync);
     return () => window.removeEventListener('hashchange', sync);
   }, []);
-  const navigateRole = (roleId: JourneyRoleId, stepId?: string) => {
-    if (roleRoute.stepId) lastJourneySteps.current[roleRoute.roleId] = roleRoute.stepId;
-    const target = stepId || lastJourneySteps.current[roleId];
-    const hash = '#/workshop/' + roleId + (target ? '/' + target : '');
+  const navigateRole = (roleId?: JourneyRoleId, stepId?: string, interactionId?: string) => {
+    const hash = !roleId ? '#/workshop/roles' : '#/workshop/' + roleId + (interactionId ? '/interaction/' + interactionId : stepId ? '/' + stepId : '');
     window.location.hash = hash;
     setRoleRoute(readWorkshopRoute(hash));
   };
@@ -157,10 +154,10 @@ export const SeniorWorkshop: React.FC<SeniorWorkshopProps> = ({
                 {t("Senior-Meeting · ProRiv (Isa's Projekt)", "Встреча с сеньором · ProRiv (проект Исы)")}
               </div>
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight mt-1">
-                {roleRoute.mode === 'roles' ? t('Rollen und Übergaben mit Isa durchgehen', 'Разобрать роли и передачи с Исой') : t('Vom Einsatz bis Tripletex', 'От объекта до Tripletex')}
+                {roleRoute.mode === 'roles' ? t('Rollen und ihre Zusammenarbeit', 'Роли и их взаимодействие') : t('Vom Einsatz bis Tripletex', 'От объекта до Tripletex')}
               </h1>
               <p className="mt-1 text-sm text-slate-600">
-                {roleRoute.mode === 'roles' ? t('Ein durchgehbarer Rollenablauf mit konkreten Fragen und dokumentierten Antworten.', 'Пошаговый путь роли с конкретными вопросами и записанными ответами.') : t('Schritt auswählen · Kundenwunsch verstehen · Lösung prüfen · Entscheidung festhalten', 'Выберите шаг · поймите запрос · оцените решение · зафиксируйте решение')}
+                {roleRoute.mode === 'roles' ? t('Symbol wählen · Perspektive betreten · Zusammenarbeit ansehen', 'Выбрать символ · войти в перспективу · увидеть взаимодействие') : t('Schritt auswählen · Kundenwunsch verstehen · Lösung prüfen · Entscheidung festhalten', 'Выберите шаг · поймите запрос · оцените решение · зафиксируйте решение')}
               </p>
             </div>
           </div>
@@ -173,14 +170,14 @@ export const SeniorWorkshop: React.FC<SeniorWorkshopProps> = ({
         </header>
 
         <nav aria-label={t('Workshop-Ansicht', 'Вид мастерской')} className="flex gap-2">
-          <button type="button" aria-pressed={roleRoute.mode === 'roles'} onClick={() => navigateRole('admin')} className={`rounded-lg px-4 py-2 text-sm font-semibold ${roleRoute.mode === 'roles' ? 'bg-emerald-700 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'}`}>{t('Rollen durchgehen', 'Разобрать роли')}</button>
+          <button type="button" aria-pressed={roleRoute.mode === 'roles'} onClick={() => navigateRole()} className={`rounded-lg px-4 py-2 text-sm font-semibold ${roleRoute.mode === 'roles' ? 'bg-emerald-700 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'}`}>{t('Rollenkarte', 'Карта ролей')}</button>
           <button type="button" aria-pressed={roleRoute.mode === 'process'} onClick={() => openProcessStep(selected.id)} className={`rounded-lg px-4 py-2 text-sm font-semibold ${roleRoute.mode === 'process' ? 'bg-emerald-700 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'}`}>{t('Prozesslandkarte', 'Карта процесса')}</button>
         </nav>
 
         {!loaded && saveStatus === 'error' && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-950">{t('Gespeicherte Notizen konnten nicht geladen werden. Bearbeiten und Export bleiben gesperrt, damit nichts überschrieben wird.', 'Не удалось загрузить сохранённые заметки. Редактирование и экспорт заблокированы, чтобы ничего не перезаписать.')} <button onClick={() => window.location.reload()} className="ml-2 underline font-semibold">{t('Erneut laden', 'Загрузить заново')}</button></div>}
 
         {roleRoute.mode === 'roles' ? <RoleJourneyWorkshop
-          language={language} roleId={roleRoute.roleId} stepId={roleRoute.stepId}
+          language={language} roleId={roleRoute.roleId} stepId={roleRoute.stepId} interactionId={roleRoute.interactionId}
           notes={notes} databaseState={databaseState} loaded={loaded} saveStatus={saveStatus}
           onNavigate={navigateRole} onOpenProcess={openProcessStep} onSelectTopic={onSelectTopic}
           onUpdateNote={updateNoteByKey} onSave={saveNote}

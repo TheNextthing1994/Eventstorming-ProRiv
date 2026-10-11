@@ -4,7 +4,7 @@
 
 ## Current UI (October 2026)
 
-0. **Role walkthrough (11 October):** Click **Rollen · Admin / Роли · Администратор** in the main navigation, or open `#/workshop/admin`. Three role panels expand on selection. **Admin** is the first complete walkthrough: 11 steps, 28 concrete questions, separate previous answers, actual meeting answers and statuses. Worker and foreman link to existing process steps; their complete onboarding-to-exit journeys are still pending. Use `#/workshop/admin/report-policy` to jump directly to the unresolved report dispatch question.
+0. **Interactive role map (11 October):** Click **Rollenkarte / Карта ролей**, or open `#/workshop/roles`. Three large role symbols let you enter the perspective of Admin, Worker or Foreman. The selected role moves to the center; click another role or its connection to see their exchange on the same page. Choose an interaction such as invitation, permissions, site handover or hours review. Questions, source answers and meeting notes appear with that exchange. The original 11 Admin source steps and 28 questions remain available with the same note IDs. Use `#/workshop/admin/interaction/invitation` for the invitation exchange, or `#/workshop/admin/report-policy` for the unresolved report dispatch question.
 1. **Original sketch:** The senior engineer's 6 circles remain the orientation anchor. Click **Senior-Workshop starten / Открыть мастерскую** for the actual meeting.
 2. **Living Workshop:** Nine customer-grounded business process steps. Click one step for the context inspector. Customer statement, recommendation and open question are kept separate.
 3. **Depth on demand:** Each step links to original senior questions, findings, OSS/commercial references, and the existing Event Storming research. No research categories have been deleted.
@@ -49,7 +49,7 @@ npm install
 npm run dev
 ```
 
-Then click **Rollen · Admin**, or open `#/workshop/admin`. The existing process map remains at `#/workshop`. A specific Admin step can be bookmarked, e.g. `#/workshop/admin/invite`.
+Then click **Rollenkarte**, or open `#/workshop/roles`. Enter the Admin perspective with its symbol; select the Worker symbol for invitations/access or the Foreman symbol for site handovers. The existing process map remains at `#/workshop`. Admin source bookmarks such as `#/workshop/admin/invite` still resolve to the corresponding interaction.
 
 Quality checks:
 

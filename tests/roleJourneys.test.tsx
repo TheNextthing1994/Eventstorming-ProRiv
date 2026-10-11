@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { RoleJourneyWorkshop } from '../src/components/RoleJourneyWorkshop';
 import { ADMIN_JOURNEY_STEPS, ROLE_JOURNEYS, journeyQuestionKey } from '../src/data/roleJourneys';
 import { WORKSHOP_STEPS } from '../src/data/workshopContent';
+import { ROLE_INTERACTIONS, interactionsBetween, interactionForAdminStep } from '../src/data/roleInteractions';
 import { changeWorkshopNote, readWorkshopRoute, roleJourneyMarkdown } from '../src/utils/roleWorkshop';
 import type { DatabaseState, Language } from '../src/types';
 import type { WorkshopNotes } from '../src/db/indexedDb';
@@ -15,6 +16,10 @@ test('existing process bookmarks survive, role deep links select a validated rol
   assert.deepEqual(readWorkshopRoute('#/workshop/admin/typo'), { mode: 'roles', roleId: 'admin', stepId: undefined });
   assert.equal(readWorkshopRoute('#/workshop/typo').mode, 'process');
   assert.equal(readWorkshopRoute('#/workshop/foreman').roleId, 'foreman');
+  assert.equal(readWorkshopRoute('#/workshop/roles').roleId, undefined);
+  assert.equal(readWorkshopRoute('#/workshop/roles').mode, 'roles');
+  assert.equal(readWorkshopRoute('#/workshop/admin/interaction/invitation').interactionId, 'invitation');
+  assert.equal(readWorkshopRoute('#/workshop/worker/interaction/site-handover').interactionId, undefined);
 });
 
 test('editing role answers preserves legacy notes and prevents empty decisions', () => {
@@ -62,10 +67,11 @@ function render(language: Language, notes: WorkshopNotes = {}, stepId = 'report-
   />);
 }
 
-test('the renderable walkthrough keeps all three role panels, source alternatives and bilingual content visible', () => {
+test('the role map keeps the selected perspective and shows source alternatives in both languages', () => {
   const de = render('de');
-  assert.ok(de.includes('aria-expanded="true"'));
-  assert.equal((de.match(/aria-expanded="false"/g) || []).length, 2);
+  assert.ok(de.includes('Ausgewählte Rolle: Admin'));
+  assert.ok(de.includes('Zusammenarbeit ansehen: Admin ↔ Arbeiter'));
+  assert.ok(de.includes('Zusammenarbeit ansehen: Admin ↔ Vorarbeiter'));
   assert.ok(de.includes('Arbeiter → Kunde'));
   assert.ok(de.includes('Arbeiter → Vorarbeiter → Kunde'));
   const ru = render('ru');
@@ -80,5 +86,45 @@ test('a failed or pending load leaves answer fields disabled and seed answers ne
   const html = render('de', {}, 'report-policy', false);
   assert.ok(html.includes('<textarea disabled=""'));
   assert.ok(html.includes('0 / 28'));
-  assert.ok(html.includes('aria-valuenow="0"'));
+});
+
+test('every relation resolves to existing notes; changing perspective reuses the same underlying source', () => {
+  for (const relation of ROLE_INTERACTIONS) {
+    assert.equal(relation.participants.length, 2);
+    assert.notEqual(relation.participants[0], relation.participants[1]);
+    if (relation.adminStepId) assert.ok(ADMIN_JOURNEY_STEPS.some(step => step.id === relation.adminStepId));
+    if (relation.processStepId) assert.ok(WORKSHOP_STEPS.some(step => step.id === relation.processStepId));
+    assert.ok(interactionsBetween(...relation.participants).includes(relation));
+    assert.ok(interactionsBetween(relation.participants[1], relation.participants[0]).includes(relation));
+  }
+  const reachable = new Set(ROLE_INTERACTIONS.map(r => r.adminStepId));
+  for (const step of ADMIN_JOURNEY_STEPS) assert.ok(['access', 'company'].includes(step.id) || reachable.has(step.id), step.id);
+  assert.equal(interactionForAdminStep('invite')?.id, 'invitation');
+});
+
+test('the initial page shows three role symbols and does not open a questionnaire before a role or relationship is selected', () => {
+  const html = renderToStaticMarkup(<RoleJourneyWorkshop
+    language="de" notes={{}} databaseState={{ questions: [] } as unknown as DatabaseState}
+    loaded saveStatus="idle" onNavigate={() => {}} onOpenProcess={() => {}} onSelectTopic={() => {}}
+    onUpdateNote={() => {}} onSave={async () => {}}
+  />);
+  assert.ok(html.includes('Admin-Perspektive öffnen'));
+  assert.ok(html.includes('Arbeiter-Perspektive öffnen'));
+  assert.ok(html.includes('Vorarbeiter-Perspektive öffnen'));
+  assert.ok(!html.includes('<textarea'));
+});
+
+test('worker perspective opens the foreman exchange with the original report policy answer', () => {
+  const key = journeyQuestionKey('admin', 'report-policy', 'sender');
+  const notes = changeWorkshopNote({}, key, { answer: 'Existing answer from the admin view', status: 'test' });
+  const html = renderToStaticMarkup(<RoleJourneyWorkshop
+    language="de" roleId="worker" interactionId="rapport-handover" notes={notes}
+    databaseState={{ questions: [] } as unknown as DatabaseState} loaded saveStatus="idle"
+    onNavigate={() => {}} onOpenProcess={() => {}} onSelectTopic={() => {}}
+    onUpdateNote={() => {}} onSave={async () => {}}
+  />);
+  assert.ok(html.includes('Arbeiter ↔ Vorarbeiter'));
+  assert.ok(html.includes('Existing answer from the admin view'));
+  assert.ok(html.includes('Arbeiter → Kunde'));
+  assert.ok(html.includes('Arbeiter → Vorarbeiter → Kunde'));
 });

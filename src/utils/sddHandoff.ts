@@ -15,6 +15,7 @@ import { TOPIC_DEFINITIONS } from '../db/defaultData';
 import { DOMAIN_EVENTS_LIST, MVP_STRATEGIC_STATEMENT, SENIOR_DECISION_QUESTIONS } from '../db/knowledgeSeed';
 import { WORKSHOP_STEPS } from '../data/workshopContent';
 import { ROLE_JOURNEYS, journeyQuestionKey } from '../data/roleJourneys';
+import { ROLE_INTERACTIONS } from '../data/roleInteractions';
 import { EVENT_STORMING_LEGACY_RULES, EVENT_STORMING_LEGACY_EXCEPTIONS } from '../data/eventStormingLegacy';
 import type { WorkshopNotes } from '../db/indexedDb';
 
@@ -201,6 +202,7 @@ export function prepareSddHandoff(
     'Complete textual records from the current browser state and project code. Retained as source evidence; do not treat array membership, imported statuses, or links as verification.',
     jsonSection('Workshop source steps (verbatim historical summaries, proposals, evidence and alternatives)', WORKSHOP_STEPS),
     jsonSection('Role walkthrough proposals with interview/team provenance; NOT accepted scope', ROLE_JOURNEYS),
+    jsonSection('Role relationship views of existing sources; NOT confirmed permissions', ROLE_INTERACTIONS),
     jsonSection('Current workshop annotations (local, editable; status does not imply SDD acceptance)', liveNotes),
     jsonSection('Senior architecture questions (proposals, not accepted)', SENIOR_DECISION_QUESTIONS),
     jsonSection('Live senior and client questions (including locally edited answers)', liveQuestions),

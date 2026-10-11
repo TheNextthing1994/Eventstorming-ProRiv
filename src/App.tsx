@@ -130,7 +130,7 @@ export default function App() {
       window.location.hash = '#/workshop';
       setCurrentView('workshop');
     } else if (view === 'roles') {
-      window.location.hash = '#/workshop/admin';
+      window.location.hash = '#/workshop/roles';
       setCurrentView('workshop');
     } else if (view === 'overview') {
       window.location.hash = '#/overview';

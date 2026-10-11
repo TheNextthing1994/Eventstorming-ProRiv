@@ -124,6 +124,12 @@ export const Header: React.FC<HeaderProps> = ({
           {language === 'ru' ? 'Карта ролей' : 'Rollenkarte'}
         </button>
 
+        <button
+          onClick={() => onNavigate('isa-questions')}
+          className={`px-3 py-2 text-xs font-semibold rounded-lg ${currentView === 'isa-questions' ? 'bg-emerald-700 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
+          {language === 'ru' ? 'Вопросы Исе' : 'Fragen für Isa'}
+        </button>
+
         <details className="relative group">
           <summary className="px-3 py-2 cursor-pointer rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 list-none select-none">
             {language === 'ru' ? 'Архив и инструменты ▾' : 'Archiv & Werkzeuge ▾'}

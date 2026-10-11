@@ -4,6 +4,8 @@
 
 ## Current UI (October 2026)
 
+- **Team questions for Isa (11 October):** Click **Fragen für Isa / Вопросы Исе** or open `#/workshop/questions`. Work through 45 compact questions by topic, with 50 original role questions available for depth. Each question has a team comment, a proposed answer for Isa and an explicit **Für Isa übernehmen** checkbox. Checked questions and proposals form a grouped German/Russian template with preview, copy and download. Changes autosave locally; a dedicated JSON backup can be restored on another device. See [`docs/TEAM_FRAGEN_ISA.md`](docs/TEAM_FRAGEN_ISA.md).
+
 0. **Interactive role map (11 October):** Click **Rollenkarte / Карта ролей**, or open `#/workshop/roles`. Three large role symbols let you enter the perspective of Admin, Worker or Foreman. The selected role moves to the center; click another role or its connection to see their exchange on the same page. Choose an interaction such as invitation, permissions, site handover or hours review. Questions, source answers and meeting notes appear with that exchange. The original 11 Admin source steps and 28 questions remain available with the same note IDs. Use `#/workshop/admin/interaction/invitation` for the invitation exchange, or `#/workshop/admin/report-policy` for the unresolved report dispatch question.
 1. **Original sketch:** The senior engineer's 6 circles remain the orientation anchor. Click **Senior-Workshop starten / Открыть мастерскую** for the actual meeting.
 2. **Living Workshop:** Nine customer-grounded business process steps. Click one step for the context inspector. Customer statement, recommendation and open question are kept separate.
@@ -56,6 +58,7 @@ Quality checks:
 ```sh
 npm run lint
 npm run test:roles
+npm run test:questions
 npm run test:sdd
 npm run build
 ```

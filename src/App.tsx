@@ -43,7 +43,7 @@ export default function App() {
 
   // Navigation states synced with URL Hash
   const [currentView, setCurrentView] = useState<
-    'home' | 'workshop' | 'topic' | 'overview' | 'competitors' | 'event-storming' | 'senior-decisions' | 'presentation'
+    'home' | 'workshop' | 'isa-questions' | 'topic' | 'overview' | 'competitors' | 'event-storming' | 'senior-decisions' | 'presentation'
   >('home');
   const [currentTopicId, setCurrentTopicId] = useState<TopicId>('mobile-app');
 
@@ -91,6 +91,8 @@ export default function App() {
       } else {
         setCurrentView('home');
       }
+    } else if (hash === 'workshop/questions' || hash.startsWith('workshop/questions/')) {
+      setCurrentView('isa-questions');
     } else if (hash === 'workshop' || hash.startsWith('workshop/')) {
       setCurrentView('workshop');
     } else if (hash === 'overview') {
@@ -129,6 +131,9 @@ export default function App() {
     } else if (view === 'workshop') {
       window.location.hash = '#/workshop';
       setCurrentView('workshop');
+    } else if (view === 'isa-questions') {
+      window.location.hash = '#/workshop/questions';
+      setCurrentView('isa-questions');
     } else if (view === 'roles') {
       window.location.hash = '#/workshop/roles';
       setCurrentView('workshop');
@@ -225,7 +230,7 @@ export default function App() {
           />
         )}
 
-        {currentView === 'workshop' && (
+        {(currentView === 'workshop' || currentView === 'isa-questions') && (
           <SeniorWorkshop
             databaseState={databaseState}
             language={language}

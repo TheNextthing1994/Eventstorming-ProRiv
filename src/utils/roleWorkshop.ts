@@ -2,8 +2,9 @@ import { ROLE_JOURNEYS, journeyQuestionKey, type JourneyRoleId } from '../data/r
 import { ROLE_INTERACTIONS } from '../data/roleInteractions';
 import type { WorkshopNote, WorkshopNotes } from '../db/indexedDb';
 
-export function readWorkshopRoute(hash: string): { mode: 'process' | 'roles'; roleId?: JourneyRoleId; stepId?: string; interactionId?: string } {
+export function readWorkshopRoute(hash: string): { mode: 'process' | 'roles' | 'questions'; roleId?: JourneyRoleId; stepId?: string; interactionId?: string } {
   const [, roleId, stepId, interactionId] = hash.replace(/^#\/?/, '').split('/');
+  if (roleId === 'questions') return { mode: 'questions' };
   if (roleId === 'roles') return { mode: 'roles', roleId: undefined, stepId: undefined };
   const role = ROLE_JOURNEYS.find(item => item.id === roleId);
   if (role && stepId === 'interaction') {

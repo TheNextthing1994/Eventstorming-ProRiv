@@ -230,6 +230,16 @@ export interface AttachmentItem {
   createdAt: string;
 }
 
+export interface IsaQuestionNote {
+  includeInIsa: boolean;
+  reviewed: boolean;
+  comment: string;
+  proposal: string;
+  updatedAt: string;
+}
+
+export type IsaQuestionNotes = Record<string, IsaQuestionNote>;
+
 export interface DatabaseState {
   topics: Record<TopicId, TopicContent>;
   questions: SeniorQuestion[];
@@ -243,6 +253,8 @@ export interface DatabaseState {
   customImage?: string;
   /** Optional so older JSON backups remain compatible. */
   workshopNotes?: Record<string, { status: 'open' | 'test' | 'decided'; answer: string; owner: string; nextStep: string; updatedAt: string }>;
+  /** Local team preparation; selection never means customer approval. */
+  isaQuestionNotes?: IsaQuestionNotes;
 }
 
 export interface GlobalStats {

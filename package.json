@@ -10,7 +10,8 @@
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "test:sdd": "node --import tsx --test tests/sddHandoff.test.ts",
-    "test:roles": "node --import tsx --test tests/roleJourneys.test.tsx"
+    "test:roles": "node --import tsx --test tests/roleJourneys.test.tsx",
+    "test:questions": "node --import tsx --test tests/isaQuestions.test.tsx"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

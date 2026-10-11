@@ -10,8 +10,10 @@ import {
   Decision,
   AttachmentItem,
   HotspotCoordinates,
-  GlobalStats
+  GlobalStats,
+  IsaQuestionNotes
 } from '../types';
+import { parseIsaQuestionNotes } from '../utils/isaQuestions';
 import { TOPIC_DEFINITIONS, generateInitialQuestions } from './defaultData';
 import {
   SEED_VERSION,
@@ -391,7 +393,7 @@ export async function initializeDatabase(): Promise<DatabaseState> {
 /**
  * Load the complete state
  */
-export async function loadEntireDatabase(): Promise<DatabaseState> {
+export async function loadEntireDatabase(strictIsaNotes = false): Promise<DatabaseState> {
   const [
     rawTopics,
     questions,
@@ -452,7 +454,13 @@ export async function loadEntireDatabase(): Promise<DatabaseState> {
     attachments,
     hotspotSettings: hotspots,
     customImage: customImgSetting?.value,
-    workshopNotes: settingsList.find(item => item.key === 'senior_workshop_notes_v1')?.value || {}
+    workshopNotes: settingsList.find(item => item.key === 'senior_workshop_notes_v1')?.value || {},
+    isaQuestionNotes: await loadIsaQuestionNotes().catch(error => {
+      // A damaged question draft must not block the existing app. The
+      // question screen loads strictly and offers backup recovery instead.
+      if (strictIsaNotes) throw error;
+      return undefined;
+    })
   };
 }
 
@@ -651,7 +659,7 @@ export function calculateGlobalStats(state: DatabaseState): GlobalStats {
  * Export complete state as clean JSON
  */
 export async function exportStateAsJson(): Promise<string> {
-  const state = await loadEntireDatabase();
+  const state = await loadEntireDatabase(true);
   return JSON.stringify(state, null, 2);
 }
 
@@ -797,6 +805,7 @@ export async function importFromJson(jsonString: string): Promise<boolean> {
     if (!data.questions || !data.topics) {
       throw new Error('Ungültiges Datenformat: questions oder topics fehlen');
     }
+    const isaNotes = data.isaQuestionNotes ? parseIsaQuestionNotes(data.isaQuestionNotes) : undefined;
 
     // Clear and restore
     await clearStore('topics');
@@ -826,6 +835,7 @@ export async function importFromJson(jsonString: string): Promise<boolean> {
     if (data.workshopNotes && typeof data.workshopNotes === 'object') {
       await putToStore('settings', { key: 'senior_workshop_notes_v1', value: data.workshopNotes });
     }
+    if (isaNotes) await saveIsaQuestionNotes(isaNotes);
 
     return true;
   } catch (err) {
@@ -860,4 +870,59 @@ export async function loadWorkshopNotes(): Promise<WorkshopNotes> {
 
 export async function saveWorkshopNotes(notes: WorkshopNotes): Promise<void> {
   await putToStore('settings', { key: 'senior_workshop_notes_v1', value: notes });
+}
+
+const ISA_QUESTION_SETTING = 'isa_team_questions_v1';
+const ISA_QUESTION_DRAFT = 'isa_team_questions_draft_v1';
+let isaSaveQueue: Promise<void> = Promise.resolve();
+let isaWriteRevision = 0;
+interface IsaQuestionSnapshot { revision: number; notes: IsaQuestionNotes }
+
+function readIsaSnapshot(input: unknown): IsaQuestionSnapshot {
+  const snapshot = input as IsaQuestionSnapshot;
+  if (snapshot && typeof snapshot.revision === 'number' && Number.isFinite(snapshot.revision) && snapshot.revision >= 0) {
+    return { revision: snapshot.revision, notes: parseIsaQuestionNotes(snapshot.notes) };
+  }
+  return { revision: 0, notes: parseIsaQuestionNotes(input || {}) };
+}
+
+export async function loadIsaQuestionNotes(): Promise<IsaQuestionNotes> {
+  // Written synchronously on every edit, so even leaving during an IDB write
+  // retains the latest draft. Imports go through the same writer.
+  let draft: string | null = null;
+  try { draft = localStorage.getItem(ISA_QUESTION_DRAFT); } catch { /* IDB remains available */ }
+  const draftSnapshot = draft !== null ? readIsaSnapshot(JSON.parse(draft)) : { revision: 0, notes: {} };
+  const items = await getAllFromStore<{ key: string; value: IsaQuestionSnapshot }>('settings');
+  const savedSnapshot = readIsaSnapshot(items.find(item => item.key === ISA_QUESTION_SETTING)?.value || {});
+  const latest = draftSnapshot.revision >= savedSnapshot.revision ? draftSnapshot : savedSnapshot;
+  isaWriteRevision = Math.max(isaWriteRevision, latest.revision);
+  return latest.notes;
+}
+
+export function saveIsaQuestionNotes(notes: IsaQuestionNotes): Promise<void> {
+  const snapshot: IsaQuestionSnapshot = {
+    revision: isaWriteRevision = Math.max(Date.now(), isaWriteRevision + 1),
+    notes: parseIsaQuestionNotes(notes),
+  };
+  let draftSaved = false;
+  try {
+    localStorage.setItem(ISA_QUESTION_DRAFT, JSON.stringify(snapshot));
+    draftSaved = true;
+  } catch { /* Report failure only if neither durable browser store succeeds. */ }
+  const write = isaSaveQueue.catch(() => {}).then(async () => {
+    try {
+      const db = await openDatabase();
+      await new Promise<void>((resolve, reject) => {
+        const tx = db.transaction('settings', 'readwrite');
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error || new Error('Save failed'));
+        tx.onabort = () => reject(tx.error || new Error('Save aborted'));
+        tx.objectStore('settings').put({ key: ISA_QUESTION_SETTING, value: snapshot });
+      });
+    } catch (error) {
+      if (!draftSaved) throw error;
+    }
+  });
+  isaSaveQueue = write;
+  return write;
 }

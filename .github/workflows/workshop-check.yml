@@ -24,6 +24,8 @@ jobs:
         run: npm run test:sdd
       - name: Role workshop tests
         run: npm run test:roles
+      - name: Team questions and Isa template tests
+        run: npm run test:questions
       - name: Production build
         run: npm run build
 

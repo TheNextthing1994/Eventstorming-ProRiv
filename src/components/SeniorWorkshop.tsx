@@ -6,6 +6,7 @@ import { TOPIC_DEFINITIONS } from '../db/defaultData';
 import { loadWorkshopNotes, saveWorkshopNotes, WorkshopNote, WorkshopNotes } from '../db/indexedDb';
 import { WORKSHOP_ROLE_LABELS, WORKSHOP_STEPS, WorkshopStep } from '../data/workshopContent';
 import { RoleJourneyWorkshop } from './RoleJourneyWorkshop';
+import { IsaQuestionsWorkshop } from './IsaQuestionsWorkshop';
 import { changeWorkshopNote, readWorkshopRoute, roleJourneyMarkdown } from '../utils/roleWorkshop';
 import type { JourneyRoleId } from '../data/roleJourneys';
 
@@ -151,32 +152,33 @@ export const SeniorWorkshop: React.FC<SeniorWorkshopProps> = ({
             <div>
               <div className="flex items-center gap-2 text-[11px] font-semibold tracking-wide text-emerald-800 uppercase">
                 <MapPinned className="w-4 h-4" />
-                {t("Senior-Meeting · ProRiv (Isa's Projekt)", "Встреча с сеньором · ProRiv (проект Исы)")}
+                {roleRoute.mode === 'questions' ? t("Teamgespräch · ProRiv (Isa's Projekt)", "Обсуждение команды · ProRiv (проект Исы)") : t("Senior-Meeting · ProRiv (Isa's Projekt)", "Встреча с сеньором · ProRiv (проект Исы)")}
               </div>
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight mt-1">
-                {roleRoute.mode === 'roles' ? t('Rollen und ihre Zusammenarbeit', 'Роли и их взаимодействие') : t('Vom Einsatz bis Tripletex', 'От объекта до Tripletex')}
+                {roleRoute.mode === 'questions' ? t('Fragen für Isa vorbereiten', 'Подготовить вопросы Исе') : roleRoute.mode === 'roles' ? t('Rollen und ihre Zusammenarbeit', 'Роли и их взаимодействие') : t('Vom Einsatz bis Tripletex', 'От объекта до Tripletex')}
               </h1>
               <p className="mt-1 text-sm text-slate-600">
-                {roleRoute.mode === 'roles' ? t('Symbol wählen · Perspektive betreten · Zusammenarbeit ansehen', 'Выбрать символ · войти в перспективу · увидеть взаимодействие') : t('Schritt auswählen · Kundenwunsch verstehen · Lösung prüfen · Entscheidung festhalten', 'Выберите шаг · поймите запрос · оцените решение · зафиксируйте решение')}
+                {roleRoute.mode === 'questions' ? t('Fragen lesen · im Team besprechen · Auswahl und Vorschläge an Isa mitnehmen', 'Прочитать вопросы · обсудить в команде · подготовить подборку и предложения Исе') : roleRoute.mode === 'roles' ? t('Symbol wählen · Perspektive betreten · Zusammenarbeit ansehen', 'Выбрать символ · войти в перспективу · увидеть взаимодействие') : t('Schritt auswählen · Kundenwunsch verstehen · Lösung prüfen · Entscheidung festhalten', 'Выберите шаг · поймите запрос · оцените решение · зафиксируйте решение')}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          {roleRoute.mode !== 'questions' && <div className="flex items-center gap-2">
             <button disabled={!loaded} onClick={() => downloadText('ISA_Senior_Meeting_'+new Date().toISOString().slice(0,10)+'.md', createMarkdown(notes), 'text/markdown')}
               className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold bg-white border border-slate-200 rounded-lg hover:bg-slate-100 disabled:opacity-40">
               <Download className="w-4 h-4" />{t('Meeting-Protokoll', 'Протокол встречи')}
             </button>
-          </div>
+          </div>}
         </header>
 
-        <nav aria-label={t('Workshop-Ansicht', 'Вид мастерской')} className="flex gap-2">
+        <nav aria-label={t('Workshop-Ansicht', 'Вид мастерской')} className="flex flex-wrap gap-2">
+          <button type="button" aria-pressed={roleRoute.mode === 'questions'} onClick={() => onNavigateSection('isa-questions')} className={`rounded-lg px-4 py-2 text-sm font-semibold ${roleRoute.mode === 'questions' ? 'bg-emerald-700 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'}`}>{t('Team-Fragen', 'Вопросы команды')}</button>
           <button type="button" aria-pressed={roleRoute.mode === 'roles'} onClick={() => navigateRole()} className={`rounded-lg px-4 py-2 text-sm font-semibold ${roleRoute.mode === 'roles' ? 'bg-emerald-700 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'}`}>{t('Rollenkarte', 'Карта ролей')}</button>
           <button type="button" aria-pressed={roleRoute.mode === 'process'} onClick={() => openProcessStep(selected.id)} className={`rounded-lg px-4 py-2 text-sm font-semibold ${roleRoute.mode === 'process' ? 'bg-emerald-700 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'}`}>{t('Prozesslandkarte', 'Карта процесса')}</button>
         </nav>
 
-        {!loaded && saveStatus === 'error' && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-950">{t('Gespeicherte Notizen konnten nicht geladen werden. Bearbeiten und Export bleiben gesperrt, damit nichts überschrieben wird.', 'Не удалось загрузить сохранённые заметки. Редактирование и экспорт заблокированы, чтобы ничего не перезаписать.')} <button onClick={() => window.location.reload()} className="ml-2 underline font-semibold">{t('Erneut laden', 'Загрузить заново')}</button></div>}
+        {!loaded && saveStatus === 'error' && roleRoute.mode !== 'questions' && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-950">{t('Gespeicherte Notizen konnten nicht geladen werden. Bearbeiten und Export bleiben gesperrt, damit nichts überschrieben wird.', 'Не удалось загрузить сохранённые заметки. Редактирование и экспорт заблокированы, чтобы ничего не перезаписать.')} <button onClick={() => window.location.reload()} className="ml-2 underline font-semibold">{t('Erneut laden', 'Загрузить заново')}</button></div>}
 
-        {roleRoute.mode === 'roles' ? <RoleJourneyWorkshop
+        {roleRoute.mode === 'questions' ? <IsaQuestionsWorkshop language={language} refreshKey={databaseState} /> : roleRoute.mode === 'roles' ? <RoleJourneyWorkshop
           language={language} roleId={roleRoute.roleId} stepId={roleRoute.stepId} interactionId={roleRoute.interactionId}
           notes={notes} databaseState={databaseState} loaded={loaded} saveStatus={saveStatus}
           onNavigate={navigateRole} onOpenProcess={openProcessStep} onSelectTopic={onSelectTopic}

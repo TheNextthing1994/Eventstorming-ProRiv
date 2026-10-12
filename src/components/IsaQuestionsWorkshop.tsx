@@ -56,21 +56,82 @@ export function IsaQuestionCard({ question, note, language, editable, onUpdate, 
   </article>;
 }
 
-export function IsaQuestionOverview({ questions, notes, language, editable, onOpen, onSelect }: {
+export function IsaQuestionOverview({ questions, notes, language, editable, onOpen, onSelect, onUpdate }: {
   questions: IsaTeamQuestion[];
   notes: IsaQuestionNotes;
   language: Language;
   editable: boolean;
-  onOpen: (id: string) => void;
+  onOpen?: (id: string) => void;
   onSelect: (id: string, include: boolean) => void;
+  onUpdate?: (id: string, change: Partial<IsaQuestionNote>) => void;
 }) {
   const t = (de: string, ru: string) => language === 'ru' ? ru : de;
-  return <ol aria-label={t('Fragen dieses Abschnitts', 'Вопросы этого раздела')} className="space-y-3">{questions.map(question => <li key={question.id} className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 space-y-3">
-    <div className="flex flex-wrap gap-2 justify-between text-xs"><span className="font-semibold text-emerald-800">{isaQuestionLabel(question, language)}</span>{notes[question.id]?.reviewed && <span className="text-slate-500"><Check className="inline h-3.5 w-3.5 mr-1" />{t('Durchgesehen', 'Обсудили')}</span>}</div>
-    <p className="text-sm leading-relaxed font-medium"><Text text={question.text} language={language} /></p>
-    {question.context && <p className="text-xs leading-relaxed text-amber-900 bg-amber-50 rounded-lg p-3"><Text text={question.context.text} language={language} /></p>}
-    <div className="flex flex-wrap justify-between gap-3 items-center"><label className="inline-flex gap-2 items-center text-xs font-semibold text-emerald-900 cursor-pointer"><input type="checkbox" checked={!!notes[question.id]?.includeInIsa} disabled={!editable} onChange={event => onSelect(question.id, event.target.checked)} className="w-4 h-4 accent-emerald-700" />{t('Für Isa übernehmen', 'Включить в вопросы Исе')}</label><button type="button" onClick={() => onOpen(question.id)} className="text-xs rounded-lg border border-slate-200 px-3 py-2 hover:bg-slate-50">{notes[question.id]?.comment || notes[question.id]?.proposal ? t('Notizen ansehen / bearbeiten', 'Посмотреть / изменить записи') : t('Frage öffnen · Kommentar & Vorschlag', 'Открыть · комментарий и предложение')} <ArrowRight className="inline w-3.5 h-3.5 ml-1" /></button></div>
-  </li>)}</ol>;
+  const [openFields, setOpenFields] = useState<Record<string, boolean>>({});
+  const toggleField = (id: string) => setOpenFields(prev => ({ ...prev, [id]: !prev[id] }));
+
+  return <ol aria-label={t('Fragen dieses Abschnitts', 'Вопросы этого раздела')} className="space-y-3">{questions.map(question => {
+    const isOpen = !!openFields[question.id];
+    const note = notes[question.id];
+    return <li key={question.id} id={`question-${question.id}`} className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 space-y-3">
+      <div className="flex flex-wrap gap-2 justify-between text-xs">
+        <span className="font-semibold text-emerald-800">{isaQuestionLabel(question, language)}</span>
+        {note?.reviewed && <span className="text-slate-500 flex items-center gap-1"><Check className="inline h-3.5 w-3.5 text-emerald-700" />{t('Durchgesehen', 'Обсудили')}</span>}
+      </div>
+      <p className="text-sm leading-relaxed font-medium"><Text text={question.text} language={language} /></p>
+      {question.context && <p className="text-xs leading-relaxed text-amber-900 bg-amber-50 rounded-lg p-3"><Text text={question.context.text} language={language} /></p>}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <label className="inline-flex gap-2 items-center text-xs font-semibold text-emerald-900 cursor-pointer shrink-0">
+          <input type="checkbox" checked={!!note?.includeInIsa} disabled={!editable} onChange={event => onSelect(question.id, event.target.checked)} className="w-4 h-4 accent-emerald-700" />
+          {t('Für Isa übernehmen', 'Включить в вопросы Исе')}
+        </label>
+        {isOpen ? (
+          <div className="flex-1 flex items-center gap-2 min-w-[240px]">
+            <input
+              type="text"
+              disabled={!editable}
+              value={note?.proposal ?? note?.comment ?? ''}
+              onChange={event => {
+                const val = event.target.value;
+                onUpdate?.(question.id, { proposal: val, comment: val, reviewed: true });
+              }}
+              onKeyDown={event => { if (event.key === 'Enter') toggleField(question.id); }}
+              placeholder={t('Vorschlag des Teams …', 'Предложение команды …')}
+              className="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-xs bg-white focus:outline-emerald-600 shadow-xs"
+              autoFocus
+            />
+            <button
+              type="button"
+              onClick={() => toggleField(question.id)}
+              className="text-xs rounded-lg border border-slate-200 px-2.5 py-1.5 hover:bg-slate-100 text-slate-700 font-medium shrink-0"
+            >
+              {t('Fertig', 'Готово')}
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              toggleField(question.id);
+              onOpen?.(question.id);
+            }}
+            className="text-xs rounded-lg border border-slate-200 bg-white px-3 py-1.5 hover:bg-slate-50 text-slate-700 font-medium flex items-center gap-1.5 shrink-0 transition-colors"
+          >
+            {note?.proposal || note?.comment
+              ? t('Vorschlag des Teams · Notizen ansehen / bearbeiten', 'Предложение команды · Посмотреть / изменить записи')
+              : t('Vorschlag des Teams', 'Предложение команды')}
+          </button>
+        )}
+      </div>
+      {(note?.proposal || note?.comment) && !isOpen && (
+        <div className="rounded-lg bg-emerald-50/50 border border-emerald-200/70 px-3 py-2 text-xs text-slate-700 flex justify-between items-start gap-2">
+          <p className="leading-relaxed"><strong className="text-emerald-950 mr-1.5">{t('Vorschlag des Teams:', 'Предложение команды:')}</strong>{note.proposal || note.comment}</p>
+          <button type="button" onClick={() => toggleField(question.id)} className="text-[11px] text-emerald-800 hover:underline shrink-0 font-medium">
+            {t('Bearbeiten', 'Изменить')}
+          </button>
+        </div>
+      )}
+    </li>;
+  })}</ol>;
 }
 
 export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Language; refreshKey?: unknown }) {
@@ -82,7 +143,6 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
   const [saveStatus, setSaveStatus] = useState<'loading' | 'saving' | 'saved' | 'error'>('loading');
   const [loadError, setLoadError] = useState(false);
   const [catalog, setCatalog] = useState<IsaQuestionView>('all');
-  const [overview, setOverview] = useState(true);
   const [activeId, setActiveId] = useState('amruddy:team:01');
   const [filter, setFilter] = useState<'all' | 'pending' | 'selected'>('all');
   const [search, setSearch] = useState('');
@@ -159,10 +219,6 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
     if (next) setActiveId(next.id);
   };
 
-  const move = (offset: number) => {
-    const next = visible[currentIndex + offset];
-    if (next) { setActiveId(next.id); setCopyStatus('idle'); }
-  };
   const switchCatalog = (next: IsaQuestionView) => {
     setCatalog(next);
     setFilter('all');
@@ -174,12 +230,11 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
     if (!question) return;
     if (catalog !== 'all' && question.catalog !== catalog) setCatalog('all');
     if (!visible.some(question => question.id === id)) { setSearch(''); setFilter('all'); }
-    setActiveId(id); setOverview(false);
-  };
-  const markAndContinue = () => {
-    if (!current) return;
-    update(current.id, { reviewed: true });
-    move(1);
+    setActiveId(id);
+    setTimeout(() => {
+      const el = document.getElementById(`question-${id}`);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 50);
   };
   const readBackup = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -249,18 +304,34 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
         <div className="min-w-0 space-y-3">
           {current ? <>
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
-              <div className="flex flex-wrap justify-between gap-3 items-center"><p className="text-sm font-semibold">{language === 'ru' ? currentGroup?.title.ru : currentGroup?.title.de}</p><button type="button" onClick={() => setOverview(!overview)} className="text-xs border border-slate-200 bg-white rounded-lg px-3 py-2">{overview ? t('Einzelfrage bearbeiten', 'Открыть отдельный вопрос') : t('Liste dieses Abschnitts', 'Список вопросов раздела')}</button></div>
+              <div className="flex flex-wrap justify-between gap-3 items-center">
+                <p className="text-sm font-semibold">{language === 'ru' ? currentGroup?.title.ru : currentGroup?.title.de}</p>
+                <span className="text-xs text-slate-500 font-medium">
+                  {visible.filter(q => groupId(q) === currentGroup?.id).length} {t('Fragen in diesem Abschnitt', 'вопросов в этом разделе')}
+                </span>
+              </div>
               {catalog === 'all' && stage && <p className="text-xs leading-relaxed text-slate-500"><strong>{t('Ereignisse im Gesprächsmodell: ', 'События в модели обсуждения: ')}</strong><Text text={stage.events} language={language} /></p>}
               <p className="text-xs text-slate-500">{t('Klären: Wer handelt, welche Angaben werden benötigt, was folgt danach und was passiert bei Fehlern?', 'Уточнить: кто действует, какие данные нужны, что происходит дальше и что делать при ошибках?')}</p>
             </div>
-            {overview ? <>
-              <IsaQuestionOverview questions={visible.filter(question => groupId(question) === currentGroup?.id)} notes={notes} language={language} editable={loaded} onOpen={openQuestion} onSelect={(id, includeInIsa) => update(id, { includeInIsa })} />
-              <div className="flex justify-between gap-2"><button type="button" disabled={visibleGroups.indexOf(currentGroup!) <= 0} onClick={() => moveGroup(-1)} className="rounded-xl px-4 py-3 border border-slate-200 bg-white text-sm disabled:opacity-40">{t('Vorheriger Abschnitt', 'Предыдущий раздел')}</button><button type="button" disabled={visibleGroups.indexOf(currentGroup!) >= visibleGroups.length - 1} onClick={() => moveGroup(1)} className="rounded-xl px-4 py-3 border border-slate-200 bg-white text-sm disabled:opacity-40">{t('Nächster Abschnitt', 'Следующий раздел')} <ArrowRight className="inline w-4 h-4 ml-1" /></button></div>
-            </> : <>
-              <p className="px-1 text-xs font-semibold text-slate-500">{currentIndex + 1} / {visible.length}</p>
-              <IsaQuestionCard question={current} note={notes[current.id] || EMPTY_ISA_QUESTION_NOTE} language={language} editable={loaded} onUpdate={change => update(current.id, change)} onOpenQuestion={openQuestion} />
-              <div className="flex flex-wrap justify-between gap-2"><button type="button" disabled={currentIndex <= 0} onClick={() => move(-1)} className="rounded-xl px-4 py-3 border border-slate-200 bg-white text-sm inline-flex items-center gap-2 disabled:opacity-40"><ArrowLeft className="w-4 h-4" />{t('Vorherige', 'Предыдущий')}</button><div className="flex flex-wrap gap-2"><button type="button" disabled={currentIndex >= visible.length - 1} onClick={() => move(1)} className="rounded-xl px-4 py-3 border border-slate-200 bg-white text-sm disabled:opacity-40">{t('Nächste', 'Следующий')} <ArrowRight className="inline w-4 h-4 ml-1" /></button><button type="button" disabled={!loaded} onClick={markAndContinue} className="rounded-xl px-4 py-3 bg-emerald-700 text-white text-sm font-semibold disabled:opacity-40"><Check className="inline w-4 h-4 mr-1.5" />{currentIndex === visible.length - 1 ? t('Als durchgesehen markieren', 'Отметить как обсуждённый') : t('Durchgesehen & weiter', 'Обсудили — дальше')}</button></div></div>
-            </>}
+
+            <IsaQuestionOverview
+              questions={visible.filter(question => groupId(question) === currentGroup?.id)}
+              notes={notes}
+              language={language}
+              editable={loaded}
+              onOpen={openQuestion}
+              onSelect={(id, includeInIsa) => update(id, { includeInIsa })}
+              onUpdate={update}
+            />
+
+            <div className="flex justify-between gap-2">
+              <button type="button" disabled={visibleGroups.indexOf(currentGroup!) <= 0} onClick={() => moveGroup(-1)} className="rounded-xl px-4 py-3 border border-slate-200 bg-white text-sm disabled:opacity-40 hover:bg-slate-50">
+                {t('Vorheriger Abschnitt', 'Предыдущий раздел')}
+              </button>
+              <button type="button" disabled={visibleGroups.indexOf(currentGroup!) >= visibleGroups.length - 1} onClick={() => moveGroup(1)} className="rounded-xl px-4 py-3 border border-slate-200 bg-white text-sm disabled:opacity-40 hover:bg-slate-50">
+                {t('Nächster Abschnitt', 'Следующий раздел')} <ArrowRight className="inline w-4 h-4 ml-1" />
+              </button>
+            </div>
           </> : <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500"><p>{t('Keine Fragen für diese Auswahl.', 'Нет вопросов для этого фильтра.')}</p><button type="button" onClick={() => { setSearch(''); setFilter('all'); }} className="mt-3 text-emerald-800 underline">{t('Alle Fragen anzeigen', 'Показать все вопросы')}</button></div>}
           {reviewed === catalogQuestions.length && <div role="status" className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-950"><strong>{t('Diesen Katalog habt ihr vollständig durchgesehen.', 'Вы обсудили весь этот список.')}</strong><p className="mt-1">{t('Die angehakten Fragen und eure Vorschläge stehen jetzt in der Isa-Vorlage.', 'Отмеченные вопросы и ваши предложения находятся в подборке для Исы.')}</p><button type="button" onClick={() => setPreview(true)} className="mt-2 underline font-semibold">{t('Vorlage ansehen', 'Посмотреть подборку')}</button></div>}
         </div>

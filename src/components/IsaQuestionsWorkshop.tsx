@@ -4,6 +4,8 @@ import { ISA_TEAM_QUESTIONS, type IsaTeamQuestion } from '../data/isaTeamQuestio
 import { ISA_QUESTION_STAGES } from '../data/isaQuestionStages';
 import { ISA_QUESTION_DEPTH_STORAGE_KEY, isaDepthForQuestion, isaQuestionsAtDepth, parseIsaQuestionDepth, type IsaQuestionDepth } from '../data/isaQuestionDepth';
 import { IsaQuestionDepthControl } from './IsaQuestionDepthControl';
+import { IsaStagePlanning } from './IsaStagePlanning';
+import type { IsaQuestionStageId } from '../data/isaQuestionStages';
 import type { IsaQuestionNotes, Language } from '../types';
 import { useIsaQuestionStore } from '../hooks/useIsaQuestionStore';
 import { IsaQuestionCard, IsaQuestionOverview } from './IsaSharedQuestion';
@@ -27,7 +29,7 @@ function download(filename: string, content: string, mime: string) {
 
 export { IsaQuestionCard, IsaQuestionOverview } from './IsaSharedQuestion';
 
-export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Language; refreshKey?: unknown }) {
+export function IsaQuestionsWorkshop({ language, refreshKey, planning = false }: { language: Language; refreshKey?: unknown; planning?: boolean }) {
   const t = (de: string, ru: string) => language === 'ru' ? ru : de;
   const store = useIsaQuestionStore(refreshKey);
   const { notes, notesRef, drafts: proposalDrafts, loaded, loadError, saveStatus, persist, update } = store;
@@ -45,6 +47,14 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
   const [importError, setImportError] = useState(false);
   const [pendingImport, setPendingImport] = useState<IsaQuestionNotes | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const [activeStageId, setActiveStageId] = useState<IsaQuestionStageId>(() => {
+    try { const stored = typeof sessionStorage === 'undefined' ? null : sessionStorage.getItem('isa_stage_planning_last'); return ISA_QUESTION_STAGES.some(stage => stage.id === stored) ? stored as IsaQuestionStageId : 'access'; }
+    catch { return 'access'; }
+  });
+  useEffect(() => {
+    try { sessionStorage.setItem('isa_stage_planning_last', activeStageId); } catch { /* Optional navigation memory. */ }
+  }, [activeStageId]);
+  useEffect(() => { setPreview(false); }, [planning]);
 
   useEffect(() => {
     try { window.localStorage.setItem(ISA_QUESTION_DEPTH_STORAGE_KEY, String(depth)); }
@@ -96,12 +106,14 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
   const openQuestion = (id: string) => {
     const question = ISA_TEAM_QUESTIONS.find(question => question.id === id);
     if (!question) return;
-    if (!depthIds.has(id)) setDepth(isaDepthForQuestion(id));
+    if (planning) setActiveStageId(question.stageId);
+    else if (!depthIds.has(id)) setDepth(isaDepthForQuestion(id));
     if (!visible.some(question => question.id === id)) { setSearch(''); setFilter('all'); }
     setActiveId(id);
     setViewMode('single');
     setTimeout(() => {
-      const el = document.getElementById(`question-${id}`);
+      const el = document.getElementById(`${planning ? 'stage-question-' : 'question-'}${id}`);
+      if (planning && el) { const detail = el.closest('details'); if (detail) detail.open = true; }
       el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 50);
   };
@@ -128,7 +140,11 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
       <button type="button" disabled={!loaded} onClick={() => { setPreview(!preview); setCopyStatus('idle'); }} className="rounded-xl bg-emerald-400 hover:bg-emerald-300 text-emerald-950 px-4 py-3 text-sm font-bold inline-flex gap-2 items-center disabled:opacity-50">{preview ? <ArrowLeft className="w-4 h-4" /> : <FileText className="w-4 h-4" />}{preview ? t('Zurück zu den Fragen', 'Вернуться к вопросам') : t('Isa-Vorlage ansehen', 'Посмотреть вопросы Исе')} {!preview && <span className="rounded-md bg-emerald-950/10 px-2 py-0.5 tabular-nums">{selected.length}</span>}</button>
     </div>
 
-    <IsaQuestionDepthControl value={depth} onChange={setDepth} hiddenSelected={hiddenSelected} language={language} />
+    <nav aria-label={t('Fragen vorbereiten', 'Подготовка вопросов')} className="flex flex-wrap gap-2 text-sm">
+      <a href="#/workshop/questions/etappen" aria-current={planning ? 'page' : undefined} className={`rounded-lg border px-4 py-2 font-semibold ${planning ? 'border-emerald-700 bg-emerald-700 text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>{t('Etappen vorbereiten', 'Подготовить этапы')}</a>
+      <a href="#/workshop/questions" aria-current={!planning ? 'page' : undefined} className={`rounded-lg border px-4 py-2 font-semibold ${!planning ? 'border-emerald-700 bg-emerald-700 text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>{t('Fragenkatalog', 'Каталог вопросов')}</a>
+    </nav>
+    {!planning && <IsaQuestionDepthControl value={depth} onChange={setDepth} hiddenSelected={hiddenSelected} language={language} />}
 
     <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
       <p role="status" aria-live="polite" className={saveStatus === 'error' ? 'text-rose-800' : ''}>{saveMessage}{saveStatus === 'error' && loaded && <button type="button" onClick={() => void persist(notesRef.current)} className="ml-2 underline font-semibold">{t('Erneut speichern', 'Сохранить ещё раз')}</button>}</p>
@@ -153,12 +169,15 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
         : <div className="p-5 sm:p-8 max-w-4xl mx-auto space-y-8"><div><h2 className="text-2xl font-bold">{templateLanguage === 'ru' ? 'Вопросы Исе · ProRiv (проект Исы)' : "Fragen an Isa · ProRiv (Isa's Projekt)"}</h2><p className="mt-2 text-sm text-slate-500">{templateLanguage === 'ru' ? 'Наши предложения — основа для обсуждения.' : 'Unsere Vorschläge dienen als Gesprächsgrundlage.'}</p></div>
           {ISA_QUESTION_STAGES.filter(group => selected.some(question => question.stageId === group.id)).map(group => <section key={group.id} className="space-y-5"><h3 className="text-sm font-bold uppercase tracking-wide text-emerald-800 border-b border-emerald-100 pb-2">{templateLanguage === 'ru' ? group.title.ru : group.title.de}</h3>{selected.filter(question => question.stageId === group.id).map(question => <article key={question.id} className="space-y-3"><h4 className="text-base leading-relaxed font-semibold"><span className="text-slate-400 mr-2">{selected.indexOf(question) + 1}.</span><Text text={question.text} language={templateLanguage} /></h4>{question.context && <div className="rounded-lg bg-amber-50/60 p-3 text-sm leading-relaxed"><p className="font-semibold mb-1">{templateLanguage === 'ru' ? 'Имеющиеся сведения · подтвердить' : 'Vorhandene Grundlage · zu bestätigen'}</p><Text text={question.context.text} language={templateLanguage} /></div>}{notes[question.id].proposal.trim() && <div className="border-l-2 border-emerald-300 pl-4 text-sm"><p className="font-semibold text-emerald-900">{templateLanguage === 'ru' ? 'Наше предложение Исе' : 'Unser Vorschlag an Isa'}</p><p className="mt-1 whitespace-pre-wrap break-words leading-relaxed">{notes[question.id].proposal}</p></div>}{includeComments && notes[question.id].comment.trim() && <div className="text-sm text-slate-600"><p className="font-semibold">{templateLanguage === 'ru' ? 'Комментарий команды' : 'Kommentar des Teams'}</p><p className="mt-1 whitespace-pre-wrap break-words leading-relaxed">{notes[question.id].comment}</p></div>}{notes[question.id].answer?.trim() ? <div className="whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-sm"><p className="font-semibold">{templateLanguage === 'ru' ? 'Записанный ответ / результат' : 'Festgehaltene Antwort / Ergebnis'} · {notes[question.id].isaConfirmed ? (templateLanguage === 'ru' ? 'Подтверждено Исой' : 'Von Isa bestätigt') : (templateLanguage === 'ru' ? 'Ещё не подтверждено' : 'Noch nicht bestätigt')}</p><p className="mt-1">{notes[question.id].answer}</p></div> : <p className="text-xs text-slate-400">{templateLanguage === 'ru' ? 'Ответ Исы: ____________________' : 'Antwort von Isa: ____________________'}</p>}</article>)}</section>)}
         </div>}
-    </div> : <>
+    </div> : planning ? <IsaStagePlanning language={language} activeStageId={activeStageId} onStageChange={setActiveStageId}
+      notes={notes} drafts={proposalDrafts} editable={loaded && saveStatus !== 'saving'}
+      onSelect={(id, includeInIsa) => update(id, { includeInIsa })} onDraftChange={store.changeDraft}
+      onFinish={id => void store.finishDraft(id)} onCancel={store.closeDraft} /> : <>
       <div aria-label={t('Fragenfortschritt', 'Прогресс обсуждения')} className="flex flex-wrap justify-between items-center gap-3 text-xs text-slate-500">
         <p><strong className="text-slate-800 tabular-nums">{reviewed} / {catalogQuestions.length}</strong> {t('durchgesehen', 'обсудили')}</p>
         <p><strong className="text-emerald-800 tabular-nums">{selected.length}</strong> {t('für Isa · gesamter Katalog', 'для Исы · из всех вопросов')}</p>
       </div>
-      <details className="text-xs text-slate-500"><summary className="cursor-pointer font-semibold">{t('Vollständiger Fragenbestand · ', 'Полный список · ') + ISA_TEAM_QUESTIONS.length}</summary><p className="mt-2 leading-relaxed">{t('95 Originalfragen und 62 Ergänzungen bleiben erhalten. Der Bestand dient der Vorbereitung; nicht jede Frage muss erneut an Isa gestellt werden. Bei 100 % werden alle angezeigt. Eure Auswahl und Notizen bleiben erhalten.', '95 исходных вопросов и 62 дополнения сохранены. Это материал для подготовки; не каждый вопрос нужно снова задавать Исе. На уровне 100 % виден весь список. Ваши отметки и записи сохраняются.')}</p><a href="https://github.com/TheNextthing1994/Eventstorming-ProRiv/blob/main/docs/ISA_FRAGENPRUEFUNG_2026-10-12.md" target="_blank" rel="noreferrer" className="mt-2 inline-block font-semibold text-emerald-800 underline">{t('Prüfung aller Fragen ansehen', 'Посмотреть разбор всех вопросов')}</a></details>
+      <details className="text-xs text-slate-500"><summary className="cursor-pointer font-semibold">{t('Vollständiger Fragenbestand · ', 'Полный список · ') + ISA_TEAM_QUESTIONS.length}</summary><p className="mt-2 leading-relaxed">{t('95 Originalfragen und 71 Ergänzungen bleiben erhalten. Der Bestand dient der Vorbereitung; nicht jede Frage muss erneut an Isa gestellt werden. Bei 100 % werden alle angezeigt. Eure Auswahl und Notizen bleiben erhalten.', '95 исходных вопросов и 71 дополнение сохранены. Это материал для подготовки; не каждый вопрос нужно снова задавать Исе. На уровне 100 % виден весь список. Ваши отметки и записи сохраняются.')}</p><a href="https://github.com/TheNextthing1994/Eventstorming-ProRiv/blob/main/docs/ISA_FRAGENPRUEFUNG_2026-10-12.md" target="_blank" rel="noreferrer" className="mt-2 inline-block font-semibold text-emerald-800 underline">{t('Prüfung aller Fragen ansehen', 'Посмотреть разбор всех вопросов')}</a></details>
       <div className="flex flex-wrap gap-2 items-center"><label className="relative flex-1 min-w-[200px]"><span className="sr-only">{t('Fragen durchsuchen', 'Поиск вопросов')}</span><Search className="absolute left-3 top-3 w-4 h-4 text-slate-400" /><input value={search} onChange={event => setSearch(event.target.value)} placeholder={t('Frage oder Stichwort suchen …', 'Поиск вопроса или слова …')} className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl bg-white border border-slate-200" /></label><select aria-label={t('Fragen filtern', 'Фильтр вопросов')} value={filter} onChange={event => setFilter(event.target.value as typeof filter)} className="rounded-xl border border-slate-200 bg-white p-2.5 text-sm"><option value="all">{t('Alle Fragen', 'Все вопросы')}</option><option value="pending">{t('Noch durchgehen', 'Ещё не обсудили')}</option><option value="selected">{t('Für Isa ausgewählt', 'Выбраны для Исы')}</option></select></div>
       <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)] items-start">
         <div className="lg:hidden grid sm:grid-cols-2 gap-2">

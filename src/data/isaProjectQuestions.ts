@@ -5,6 +5,7 @@ import type { LocalizedText } from './roleJourneys';
 const l = (de: string, ru: string): LocalizedText => ({ de, ru });
 const t = (number: number) => `amruddy:team:${String(number).padStart(2, '0')}`;
 const r = (number: number) => `amruddy:roles:${String(number).padStart(2, '0')}`;
+const p = (id: string) => `proriv:project:${id}`;
 const interview = (de: string, ru: string): IsaQuestionContext => ({ kind: 'interview', text: l(de, ru) });
 const evidence = (de: string, ru: string): IsaQuestionContext => ({ kind: 'evidence', text: l(de, ru) });
 
@@ -151,6 +152,24 @@ const entries = [
     l('Darf eine Person zugleich Admin, Vorarbeiter und Arbeiter sein? Welche Rollen darf sie verbinden, und wer vergibt oder entzieht diese Rechte?', 'Может ли один человек быть одновременно администратором, прорабом и рабочим? Какие роли разрешено совмещать и кто выдаёт или отзывает эти права?'), ['admin:profile:worker-rights'], [t(4), r(1), r(9)]),
   q('sent-report-correction', 'corrections', l('Gesendeten oder bestätigten Rapport ändern', 'Изменение отправленного или подтверждённого рапорта'),
     l('Wer darf einen bereits gesendeten oder unterschriebenen Rapport korrigieren? Muss der Kunde die neue Version erneut bestätigen?', 'Кто может исправить уже отправленный или подписанный рапорт? Должен ли клиент повторно подтвердить новую версию?'), ['admin:correction:report-editor'], [t(13), r(23), r(26), r(43)]),
+  q('scope-work-types', 'work', l('Arbeitsarten zum ersten Start', 'Виды работ к первому запуску'),
+    l('Welche Arbeitsarten müssen zum ersten Einsatz vollständig erfasst werden können: Kernbohren, Wandsägen, Bodensägen und Handsägen?', 'Какие виды работ нужно полностью учитывать уже при первом выезде: алмазное бурение, стенорезку, резку пола и ручную резку?'), ['analysis:stage-scope:work'], [t(11), r(18), p('saw-example')]),
+  q('scope-price-engine', 'pricing', l('Preisberechnung der ersten Version', 'Расчёт цен в первой версии'),
+    l('Muss zum ersten Start die gesamte Preisberechnung einschließlich Vertragspreisen, Rabatten und Zuschlägen automatisch funktionieren, oder dürfen Sonderfälle zunächst manuell ergänzt werden?', 'Должен ли к первому запуску автоматически работать весь расчёт, включая договорные цены, скидки и надбавки, или особые случаи сначала можно добавлять вручную?'), ['analysis:stage-scope:pricing'], [t(17), r(47), r(50), p('price-priority')]),
+  q('scope-rapport-channels', 'send', l('Versandkanäle zum ersten Start', 'Каналы отправки к первому запуску'),
+    l('Müssen SMS und E-Mail beide zum ersten Start funktionieren, oder reicht zunächst ein Versandkanal für Rapporte?', 'Должны ли к первому запуску работать и SMS, и электронная почта, или для рапортов сначала достаточно одного канала?'), ['analysis:stage-scope:send'], [r(33), p('delivery-failure')]),
+  q('scope-customer-confirmation', 'customer', l('Bestätigungswege der ersten Version', 'Способы подтверждения в первой версии'),
+    l('Braucht ihr zum ersten Start sowohl Bestätigen und Ablehnen über einen Link als auch die Unterschrift vor Ort, oder zunächst eines dieser Verfahren?', 'Нужны ли к первому запуску и подтверждение либо отклонение по ссылке, и подпись на объекте, или сначала достаточно одного из этих способов?'), ['analysis:stage-scope:customer'], [t(12), t(36), p('signature-required'), p('customer-login')]),
+  q('scope-tripletex-payload', 'tripletex', l('Umfang der ersten Tripletex-Anbindung', 'Объём первой интеграции с Tripletex'),
+    l('Müssen wir zum ersten Start nur Arbeitsstunden nach Tripletex übertragen oder zusätzlich Rapporte und Dokumente?', 'Нужно ли к первому запуску передавать в Tripletex только рабочие часы или также рапорты и документы?'), ['analysis:stage-scope:tripletex'], [t(22), p('tripletex-report-view'), p('tripletex-test-owner')]),
+  q('scope-report-versions', 'corrections', l('Rapportkorrekturen der ersten Version', 'Исправления рапортов в первой версии'),
+    l('Muss die erste Version bereits gesendete oder unterschriebene Rapporte korrigieren und erneut zur Kundenbestätigung verschicken können?', 'Должна ли первая версия позволять исправлять уже отправленные или подписанные рапорты и повторно отправлять их клиенту для подтверждения?'), ['analysis:stage-scope:corrections'], [p('sent-report-correction'), t(13), p('absent-author-correction')]),
+  q('scope-site-closure', 'closure', l('Baustellenabschluss in App oder Tripletex', 'Завершение объекта в приложении или Tripletex'),
+    l('Soll die Baustelle in unserer App abgeschlossen werden, oder übernehmen wir ihren Abschlussstatus aus Tripletex?', 'Нужно ли завершать объект в нашем приложении или получать статус завершения из Tripletex?'), ['analysis:stage-scope:closure'], [t(25), r(10), p('reopen-site')]),
+  q('scope-pilot-rollout', 'launch', l('Pilot oder unternehmensweiter Start', 'Пилот или запуск во всей компании'),
+    l('Starten wir mit einer Mannschaft auf wenigen Baustellen oder sofort im ganzen Unternehmen?', 'Начинаем с одной бригады на нескольких объектах или сразу запускаем приложение во всей компании?'), ['analysis:stage-scope:launch'], [t(26), t(28), p('pilot-acceptance')]),
+  q('scope-first-platforms', 'launch', l('Android und iPhone zum ersten Start', 'Android и iPhone к первому запуску'),
+    l('Müssen Android und iPhone gleichzeitig zum ersten Start bereit sein, oder können wir zunächst mit einer Plattform beginnen?', 'Должны ли Android и iPhone быть готовы одновременно к первому запуску или можно начать с одной платформы?'), ['analysis:stage-scope:launch'], [t(26), p('app-distribution')]),
 ];
 
 export const ISA_PROJECT_QUESTIONS: IsaTeamQuestion[] = entries.map((question, index) => ({ ...question, number: index + 1 }));

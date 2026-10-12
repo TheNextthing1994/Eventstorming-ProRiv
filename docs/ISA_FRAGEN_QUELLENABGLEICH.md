@@ -1,6 +1,6 @@
 # Quellenabgleich der Isa-Fragen · ProRiv (Isa's Projekt)
 
-Stand: 12.10.2026. Ergebnis: 95 unveränderte Originalfragen plus 62 Ergänzungen, geordnet nach 14 Abschnitten. 162 frühere Fragen oder gebündelte Entscheidungspunkte werden auf konkrete Fragen dieses Katalogs abgebildet. Diese Zahl zählt Quellenbezüge, nicht zusätzliche Fragen.
+Stand: 12.10.2026. Ergebnis: 95 unveränderte Originalfragen plus 71 Ergänzungen, geordnet nach 14 Abschnitten. 162 frühere Fragen oder gebündelte Entscheidungspunkte werden auf konkrete Fragen dieses Katalogs abgebildet. Diese Zahl zählt Quellenbezüge, nicht zusätzliche Fragen.
 
 ## Geprüfte Grundlagen
 
@@ -21,6 +21,8 @@ Stand: 12.10.2026. Ergebnis: 95 unveränderte Originalfragen plus 62 Ergänzunge
 | Aktuelle Preisliste und Beleginventar | src/data/prorivPriceSheetEvidence.ts | Mindestwerte, Helfer, Material-, Höhen- und andere Zuschläge |
 | Frühere Rechercheberichte (1)–(4) | libfile_49dd6afb82f4819189413f90c75b3560; libfile_27cf83f020ec8191b108401000104855; libfile_3d5278c1c4fc8191a0190560260b1f91; libfile_f838350978048191bb91fe2aca249b0a | Technische Möglichkeiten und Prüfpunkte; keine neuen Kundenentscheidungen daraus behauptet |
 | Ergänzende Ablaufprüfung | src/data/isaProjectQuestions.ts · analysis:* | Neue Fragen zu Nachtarbeit, Preisgrenzen, Versionsbezug, Synchronisierung und Einführung |
+
+Die neun weiteren `scope-*`-Fragen stammen aus der Etappen-/Aufwandsabgrenzung im Gespräch vom 12.10.2026. Sie verwenden die bestehende Gesprächsgrundlage und konkretisieren den Umfang der ersten Version. Die früheren 162 Quellenbezüge bleiben erhalten. Siehe [ETAPPEN_FRAGEN_ISA.md](ETAPPEN_FRAGEN_ISA.md).
 
 ## Regeln für die Zusammenstellung
 

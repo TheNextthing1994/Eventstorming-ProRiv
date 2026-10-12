@@ -181,7 +181,7 @@ export const SeniorWorkshop: React.FC<SeniorWorkshopProps> = ({
 
         {!loaded && saveStatus === 'error' && roleRoute.mode !== 'questions' && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-950">{t('Gespeicherte Notizen konnten nicht geladen werden. Bearbeiten und Export bleiben gesperrt, damit nichts überschrieben wird.', 'Не удалось загрузить сохранённые заметки. Редактирование и экспорт заблокированы, чтобы ничего не перезаписать.')} <button onClick={() => window.location.reload()} className="ml-2 underline font-semibold">{t('Erneut laden', 'Загрузить заново')}</button></div>}
 
-        {roleRoute.mode === 'questions' ? <IsaQuestionsWorkshop language={language} refreshKey={databaseState} /> : roleRoute.mode === 'roles' ? <RoleJourneyWorkshop
+        {roleRoute.mode === 'questions' ? <IsaQuestionsWorkshop language={language} refreshKey={databaseState} planning={roleRoute.planning} /> : roleRoute.mode === 'roles' ? <RoleJourneyWorkshop
           language={language} roleId={roleRoute.roleId} stepId={roleRoute.stepId} interactionId={roleRoute.interactionId}
           notes={notes} databaseState={databaseState} loaded={loaded} saveStatus={saveStatus}
           onNavigate={navigateRole} onOpenProcess={openProcessStep} onSelectTopic={onSelectTopic}

@@ -2,6 +2,12 @@
 
 Stand: 12.10.2026. Einstieg: **Fragen für Isa / Вопросы Исе**, Route `#/workshop/questions`. Die Rollenkarte steht unter `#/workshop/roles`.
 
+## Etappenfragen für den Arbeitsumfang
+
+Unter **Team-Fragen → Etappen vorbereiten** (`#/workshop/questions/etappen`) könnt ihr die Fragen für Isa je Etappe festlegen. Die 14 Etappen beginnen mit 17 Fragen zum Arbeitsumfang. Jede Frage hat einen Auswahlhaken und ein direkt sichtbares Feld **Teamvorschlag für Isa**. **Fertig** speichert; Buchstaben allein lösen keine Speicherung aus. Weitere vorhandene Fragen sind je Etappe aufklappbar; ausgewählte Detailfragen bleiben sichtbar.
+
+Etappen, Katalog und Rollenkarte teilen dieselben Frage-IDs und gespeicherten Einträge. Die bestehende Isa-Vorlage fasst alle ausgewählten Fragen mit gespeicherten Vorschlägen nach Etappen zusammen. Die Einordnung „Pflicht zum ersten Start“ oder „später“ schreibt ihr in euren Vorschlag. Eine Auswahl ist keine Kundenfreigabe. Anleitung und Liste: [ETAPPEN_FRAGEN_ISA.md](ETAPPEN_FRAGEN_ISA.md).
+
 ## Eine Frage, eine gespeicherte Antwort
 
 Die Fragen in der Rollenkarte und ihren Zusammenarbeitsdetails stehen mit **derselben Formulierung und derselben ID** im Fragenkatalog. Vorschlag, Antwort, Teamkommentar, Fortschritt, Auswahl für Isa und ausdrückliche Bestätigung werden gemeinsam gespeichert. Eine in der Rollenkarte mit **Fertig** gespeicherte Antwort steht nach dem Wechsel auch im Katalog; Änderungen im Katalog erscheinen ebenso in der Rollenkarte.
@@ -31,9 +37,9 @@ Frühere Rollen- und Prozessnotizen werden ebenfalls unter **Vorhandene Notizen 
 
 ## Welche Fragen wirklich sinnvoll sind
 
-Der **Gesamtkatalog enthält 157 Fragen**: 45 Teamfragen und 50 Ich-/Rollenfragen aus dem Original sowie die bisherigen 60 und **zwei gezielte Ergänzungen**. Die Ergänzungen betreffen erlaubte Rollenverbindungen und Korrekturen an bereits gesendeten oder unterschriebenen Rapporten. Die 95 Originalformulierungen bleiben unverändert.
+Der **Gesamtkatalog enthält 166 Fragen**: 45 Teamfragen und 50 Ich-/Rollenfragen aus dem Original sowie 71 Ergänzungen: die bisherigen 60, zwei gezielte Ergänzungen zur Rollenkarte und neun Fragen zur Abgrenzung der ersten Version. Die beiden Rollen-Ergänzungen betreffen erlaubte Rollenverbindungen und Korrekturen an bereits gesendeten oder unterschriebenen Rapporten. Die 95 Originalformulierungen bleiben unverändert.
 
-**157 ist der Bestand zur Vorbereitung, nicht die Zahl neuer Pflichtfragen an Isa.** Manche Originalfragen behandeln dieselbe Entscheidung aus einer anderen Perspektive. Manche Punkte sind bereits belegt, einige brauchen einen konkreten Sonderfall, andere zunächst einen Teamvorschlag. Die Einzelprüfung aller Fragen und der Abgleich der 37 alten Rollen-/Prozessfragen stehen in [ISA_FRAGENPRUEFUNG_2026-10-12.md](ISA_FRAGENPRUEFUNG_2026-10-12.md).
+**166 ist der Bestand zur Vorbereitung, nicht die Zahl neuer Pflichtfragen an Isa.** Manche Originalfragen behandeln dieselbe Entscheidung aus einer anderen Perspektive. Manche Punkte sind bereits belegt, einige brauchen einen konkreten Sonderfall, andere zunächst einen Teamvorschlag. Die Einzelprüfung aller Fragen und der Abgleich der 37 alten Rollen-/Prozessfragen stehen in [ISA_FRAGENPRUEFUNG_2026-10-12.md](ISA_FRAGENPRUEFUNG_2026-10-12.md).
 
 Die Rollenkarte greift insgesamt auf 56 Fragen dieses gemeinsamen Bestands zu. Die Anzahl pro Rolle darf nicht addiert werden: Mehrere Rollen zeigen dieselbe Frage und verwenden dieselbe Antwort. Alte mehrteilige Fragen werden in vorhandene Einzelentscheidungen aufgeteilt; Wiederholungen derselben Frage innerhalb einer Rolle werden zusammengeführt.
 
@@ -47,7 +53,7 @@ Bereits vorhandene Grundlagen:
 
 ## Regler für das Gespräch
 
-**Gesprächsumfang** steht direkt unter dem dunklen Kopfbereich, über Fortschritt und Suche. Standard bleibt **Minimum · 12 Fragen**. Schieber ziehen oder eine der sechs Stufen anklicken. Die Einstellung wird in diesem Browser behalten.
+**Gesprächsumfang** steht direkt unter dem dunklen Kopfbereich, über Fortschritt und Suche. Standard bleibt **Minimum · 12 Fragen**. Eine der sechs Stufen anklicken. Die Einstellung wird in diesem Browser behalten.
 
 | Regler | Paket | Fragen insgesamt |
 | --- | --- | --- |
@@ -56,7 +62,7 @@ Bereits vorhandene Grundlagen:
 | 40 % | Wichtige Ausnahmen und Fehlerfälle | 56 |
 | 60 % | Alltag, Vorbereitung und Übergaben | 94 |
 | 80 % | Vertiefung, weitere Rollen und Einführung | 133 |
-| 100 % | Vollständiger Katalog | 157 |
+| 100 % | Vollständiger Katalog | 166 |
 
 Die Stufen sind kuratierte, aufeinander aufbauende Fragenpakete. Prozentwerte bedeuten Gesprächsumfang; sie sind **keine gemessene Wissensabdeckung**. Das Minimum ist eine Startauswahl für die Vorbereitung, keine automatische Freigabe zur Umsetzung. Nach der Teamprüfung nur diejenigen offenen Fragen für Isa auswählen, die eine konkrete Entscheidung erfordern.
 

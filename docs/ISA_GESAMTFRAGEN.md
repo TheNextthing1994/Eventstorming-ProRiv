@@ -1,6 +1,6 @@
 # Gesamtkatalog der Fragen · ProRiv (Isa's Projekt)
 
-Die 95 Originalfragen bleiben erhalten. 62 Ergänzungen klären zusätzliche Entscheidungen im Ablauf.
+Die 95 Originalfragen bleiben erhalten. 71 Ergänzungen klären zusätzliche Entscheidungen im Ablauf.
 
 Ähnliche Fragen können unterschiedliche Rollen klären. Vorhandene Erkenntnisse dienen als Gesprächsgrundlage; Vorschläge sind noch keine Entscheidungen.
 
@@ -718,13 +718,23 @@ Quelle: Senior-Skizze · Ergänzung aus der Ablaufprüfung
 
 ID: proriv:project:warranty-rework
 
+### 66. Ergänzung 63 · Arbeitsarten zum ersten Start
+
+Welche Arbeitsarten müssen zum ersten Einsatz vollständig erfasst werden können: Kernbohren, Wandsägen, Bodensägen und Handsägen?
+
+Какие виды работ нужно полностью учитывать уже при первом выезде: алмазное бурение, стенорезку, резку пола и ручную резку?
+
+Quelle: Ergänzung aus der Ablaufprüfung
+
+ID: proriv:project:scope-work-types
+
 ## 07 · Preise und Abrechnungsart
 
 Preis berechnet · Sonderpreis festgelegt · Preisstand fixiert
 
 Цена рассчитана · Особая цена установлена · Цены зафиксированы
 
-### 66. Teamfrage 14 · Preise und Mehrwertsteuer
+### 67. Teamfrage 14 · Preise und Mehrwertsteuer
 
 Enthalten die Preise bereits MVA oder wird die Mehrwertsteuer separat hinzugefügt?
 
@@ -738,7 +748,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:14
 
-### 67. Teamfrage 15 · Mehrere Zuschläge
+### 68. Teamfrage 15 · Mehrere Zuschläge
 
 Wie werden mehrere Zuschläge kombiniert und auf welchen Betrag wird jeder Zuschlag angewendet?
 
@@ -748,7 +758,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:15
 
-### 68. Teamfrage 16 · Mindestmengen, Rundung und Anfahrt
+### 69. Teamfrage 16 · Mindestmengen, Rundung und Anfahrt
 
 Wie gelten Mindestmengen, Rundung und Anfahrt? Was zählt als ein Einsatz, wenn eine Mannschaft mehrere Tage arbeitet?
 
@@ -758,7 +768,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:16
 
-### 69. Teamfrage 17 · Sonderpreise und nicht gelistete Arbeit
+### 70. Teamfrage 17 · Sonderpreise und nicht gelistete Arbeit
 
 Wer legt Vertragspreise, Rabatte und Preise für Arbeiten fest, die nicht in der Preisliste stehen?
 
@@ -768,7 +778,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:17
 
-### 70. Teamfrage 34 · Festpreis und Stundenabrechnung
+### 71. Teamfrage 34 · Festpreis und Stundenabrechnung
 
 Gibt es Festpreis- oder Stundenaufträge statt einer Abrechnung nach Mengen? Müssen diese in der ersten Version unterstützt werden?
 
@@ -778,7 +788,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:34
 
-### 71. Rollenfrage 44 · MVA im Listenpreis
+### 72. Rollenfrage 44 · MVA im Listenpreis
 
 Ich nutze einen Preis aus der Liste. Ist MVA bereits enthalten oder wird die Steuer separat hinzugefügt?
 
@@ -792,7 +802,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:44
 
-### 72. Rollenfrage 45 · Maße, Diameter und Rundung
+### 73. Rollenfrage 45 · Maße, Diameter und Rundung
 
 Ich gebe Maße ein. Welche Einheiten werden verwendet, was bedeutet Diameter in den Sägetabellen und wie werden Nachkommastellen gerundet?
 
@@ -806,7 +816,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:45
 
-### 73. Rollenfrage 46 · Mindestmenge pro Loch oder Schnitt
+### 74. Rollenfrage 46 · Mindestmenge pro Loch oder Schnitt
 
 Ich wende die Mindestmenge an. Gelten 15 cm je Bohrloch? Gilt mindestens ein Meter pro Schnitt, Position oder gesamtem Auftrag?
 
@@ -816,7 +826,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:46
 
-### 74. Rollenfrage 47 · Zuschläge anhand eines Zahlenfalls
+### 75. Rollenfrage 47 · Zuschläge anhand eines Zahlenfalls
 
 Eine Arbeit hat mehrere Zuschläge. Wie werden sie kombiniert? Ergeben beispielsweise 1.000 NOK Basis plus zweimal 100 % insgesamt 3.000 oder 4.000 NOK?
 
@@ -826,7 +836,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:47
 
-### 75. Rollenfrage 48 · Was als eine Anfahrt gilt
+### 76. Rollenfrage 48 · Was als eine Anfahrt gilt
 
 Ich berechne die Anfahrt. Was zählt als ein Einsatz, wenn eine Mannschaft arbeitet, mehrere Fahrzeuge kommen oder die Arbeit mehrere Tage dauert?
 
@@ -836,7 +846,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:48
 
-### 76. Rollenfrage 49 · Einheiten und Basis weiterer Zuschläge
+### 77. Rollenfrage 49 · Einheiten und Basis weiterer Zuschläge
 
 Ich ergänze weitere Zuschläge. Was zählt als Einheit bei Etagenwechsel, Abstützung und Pilotbohrung? Auf welchen Preis beziehen sich prozentuale Zuschläge?
 
@@ -846,7 +856,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:49
 
-### 77. Rollenfrage 50 · Vertragspreis und neue Preisliste
+### 78. Rollenfrage 50 · Vertragspreis und neue Preisliste
 
 Ein Kunde hat einen Vertragspreis oder Rabatt. Wer legt ihn fest, wo wird er gespeichert und was geschieht bei einer Preisänderung während des Auftrags?
 
@@ -860,7 +870,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:50
 
-### 78. Ergänzung 24 · Vorrang der Preisregeln
+### 79. Ergänzung 24 · Vorrang der Preisregeln
 
 Wenn Standardpreisliste, Kundenvereinbarung, Projektpreis und manuell vereinbarter Preis voneinander abweichen: Welcher Preis gilt zuerst und welche Rabatte oder Zuschläge kommen danach hinzu?
 
@@ -870,7 +880,7 @@ Quelle: Senior-Entscheidungsfragen · Prozess-Workshop · Event Storming · Livi
 
 ID: proriv:project:price-priority
 
-### 79. Ergänzung 25 · Helferregel ab Ø400
+### 80. Ergänzung 25 · Helferregel ab Ø400
 
 Wie wird die Helferregel ab Ø400 konkret berechnet: automatisch, nach tatsächlichen Helferstunden oder als feste Position? Was gilt, wenn kein Helfer dabei war oder Helferarbeit schon separat im Rapport steht?
 
@@ -884,7 +894,7 @@ Quelle: Aktuelle Preisliste · Living Process Map V0.2
 
 ID: proriv:project:helper-400
 
-### 80. Ergänzung 26 · Wann gilt welcher Zuschlag?
+### 81. Ergänzung 26 · Wann gilt welcher Zuschlag?
 
 Welche Zuschläge gelten automatisch und welche muss der Arbeiter bestätigen: Decke, Granit/Graustein, Massivholz, Trockenbohren, Bewehrung über Ø16, Frost oder Plansägen? Welche Angaben braucht ihr als Nachweis und welche Ausnahmen gibt es?
 
@@ -894,7 +904,7 @@ Quelle: Aktuelle Preisliste · Historischer Event-Storming-Entwurf · Living Pro
 
 ID: proriv:project:surcharge-conditions
 
-### 81. Ergänzung 27 · Arbeitshöhe und Lift/Gerüst
+### 82. Ergänzung 27 · Arbeitshöhe und Lift/Gerüst
 
 Wie berechnet ihr Arbeiten über 300 cm Höhe? Wann gelten Etasjelyft, Lift-/Gerüstnutzung oder Abstützung als eigene Leistung, und welche Positionen dürfen gemeinsam berechnet werden?
 
@@ -904,7 +914,7 @@ Quelle: Aktuelle Preisliste · Vergleich alter und neuerer Rapporte
 
 ID: proriv:project:height-lift
 
-### 82. Ergänzung 28 · Mindestauftragswert
+### 83. Ergänzung 28 · Mindestauftragswert
 
 Worauf gilt der Mindestauftragswert: Auftrag, Anfahrt, Tag oder Rapport? Wird er vor oder nach Rabatten und Zuschlägen geprüft und wie behandelt ihr Festpreisverträge?
 
@@ -914,7 +924,7 @@ Quelle: Aktuelle Preisliste · Living Process Map V0.2
 
 ID: proriv:project:minimum-order
 
-### 83. Ergänzung 29 · Maß fehlt in der Preistabelle
+### 84. Ergänzung 29 · Maß fehlt in der Preistabelle
 
 Ein Durchmesser oder eine Schnitttiefe steht nicht in der Tabelle. Nehmen wir die nächste Stufe, vereinbaren einen Sonderpreis oder stoppen die Berechnung bis zur Klärung?
 
@@ -924,7 +934,7 @@ Quelle: Ergänzung aus der Ablaufprüfung · Prozess-Workshop
 
 ID: proriv:project:missing-matrix-row
 
-### 84. Ergänzung 30 · Rabattbasis und ausgeschlossene Positionen
+### 85. Ergänzung 30 · Rabattbasis und ausgeschlossene Positionen
 
 Gibt es Rabatte als Prozentsatz und als fester Betrag? Gelten sie je Position oder für die Gesamtsumme, und sind Transport, Helfer oder andere Zusatzleistungen davon ausgenommen?
 
@@ -934,7 +944,7 @@ Quelle: Kundengespräch · Living Process Map V0.2
 
 ID: proriv:project:discount-scope
 
-### 85. Ergänzung 31 · RA und AA im Rapport
+### 86. Ergänzung 31 · RA und AA im Rapport
 
 Was zeigt und berechnet ein Rapport bei Regning (RA) und Fastpris (AA) jeweils? Welche Mengen und Preise sieht der Kunde beim Festpreis, und wie werden Zusatzleistungen außerhalb des Festpreises behandelt?
 
@@ -944,13 +954,23 @@ Quelle: Event-Storming-Entscheidungen V2 · Senior-Skizze · Living Process Map 
 
 ID: proriv:project:ra-aa-details
 
+### 87. Ergänzung 64 · Preisberechnung der ersten Version
+
+Muss zum ersten Start die gesamte Preisberechnung einschließlich Vertragspreisen, Rabatten und Zuschlägen automatisch funktionieren, oder dürfen Sonderfälle zunächst manuell ergänzt werden?
+
+Должен ли к первому запуску автоматически работать весь расчёт, включая договорные цены, скидки и надбавки, или особые случаи сначала можно добавлять вручную?
+
+Quelle: Ergänzung aus der Ablaufprüfung
+
+ID: proriv:project:scope-price-engine
+
 ## 08 · Rapport erstellen und versenden
 
 Rapport erstellt · Versand ausgelöst · Zugestellt oder fehlgeschlagen
 
 Рапорт создан · Отправка начата · Доставлено либо ошибка
 
-### 86. Teamfrage 9 · Zeitraum eines Rapports
+### 88. Teamfrage 9 · Zeitraum eines Rapports
 
 Welchen Zeitraum umfasst ein Rapport: eine Schicht, einen Einsatz, eine einzelne Aufgabe oder den gesamten Auftrag?
 
@@ -960,7 +980,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:09
 
-### 87. Teamfrage 38 · Benachrichtigungen
+### 89. Teamfrage 38 · Benachrichtigungen
 
 Welche Ereignisse lösen Nachrichten aus, wer erhält sie und über welchen Kanal: App, E-Mail oder SMS?
 
@@ -970,7 +990,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:38
 
-### 88. Rollenfrage 21 · Umfang und Zeitraum des Rapports
+### 90. Rollenfrage 21 · Umfang und Zeitraum des Rapports
 
 Ich erstelle einen Rapport. Gilt er für eine Schicht, einen Einsatz, eine Aufgabe oder die gesamte Baustelle? Darf er mehrere Tage enthalten?
 
@@ -980,7 +1000,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:21
 
-### 89. Rollenfrage 22 · Rapport zum Kunden schicken
+### 91. Rollenfrage 22 · Rapport zum Kunden schicken
 
 Ich bin bereit, den Rapport zu schicken. Welche Angaben prüfe ich und was mache ich, wenn der erforderliche Kundenvertreter nicht vor Ort ist?
 
@@ -990,7 +1010,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:22
 
-### 90. Ergänzung 32 · Direkter Versand oder Vorarbeiterprüfung?
+### 92. Ergänzung 32 · Direkter Versand oder Vorarbeiterprüfung?
 
 Bleibt es beim direkten Versand durch den Arbeiter? Falls ihr eine Vorarbeiterprüfung wollt: Für welche Rapporte ist sie Pflicht, wer sendet danach und wer übernimmt bei Abwesenheit?
 
@@ -1004,7 +1024,7 @@ Quelle: Admin-Rollen-Workshop · Prozess-Workshop · Vergleich alter und neuerer
 
 ID: proriv:project:rapport-sender-policy
 
-### 91. Ergänzung 33 · Versand mit oder ohne Preis
+### 93. Ergänzung 33 · Versand mit oder ohne Preis
 
 Wer darf Rapporte mit Preisen beziehungsweise ohne Preise versenden? Darf ein Rapport bei noch fehlendem Preis schon an den Kunden gehen, und wie wird der endgültige Preis nachgereicht?
 
@@ -1018,7 +1038,7 @@ Quelle: Admin-Rollen-Workshop · Prozess-Workshop · Vergleich alter und neuerer
 
 ID: proriv:project:send-without-price
 
-### 92. Ergänzung 34 · Fotos noch nicht hochgeladen
+### 94. Ergänzung 34 · Fotos noch nicht hochgeladen
 
 Darf ich den Rapport senden, solange Pflichtfotos noch nicht hochgeladen sind? Muss der Versand warten oder darf der Kunde einen ausdrücklich unvollständigen Stand sehen?
 
@@ -1028,7 +1048,7 @@ Quelle: Prozess-Workshop · Ergänzung aus der Ablaufprüfung
 
 ID: proriv:project:pending-photo-send
 
-### 93. Ergänzung 35 · SMS oder E-Mail kommt nicht an
+### 95. Ergänzung 35 · SMS oder E-Mail kommt nicht an
 
 Was soll der Arbeiter als Versandnachweis sehen? Wenn SMS oder E-Mail nicht ankommt: Wer wird informiert, wer korrigiert die Kontaktdaten und wann wird erneut gesendet?
 
@@ -1038,7 +1058,7 @@ Quelle: Prozess-Workshop · Event-Storming-Entscheidungen V2 · Admin-Rollen-Wor
 
 ID: proriv:project:delivery-failure
 
-### 94. Ergänzung 36 · Rapportnummer und Mehrtagesrapport
+### 96. Ergänzung 36 · Rapportnummer und Mehrtagesrapport
 
 Wer vergibt die Rapportnummer und muss sie zu einem bestehenden Nummernkreis passen? Bleibt die Nummer bei Ergänzungen über mehrere Tage und bei einer Korrektur erhalten?
 
@@ -1048,7 +1068,7 @@ Quelle: Kundengespräch · Ergänzung aus der Ablaufprüfung
 
 ID: proriv:project:rapport-number
 
-### 95. Ergänzung 37 · Frist für den Rapport
+### 97. Ergänzung 37 · Frist für den Rapport
 
 Muss der Rapport vor Verlassen der Baustelle beziehungsweise am selben Tag versendet werden, oder dürft ihr Leistungen gesammelt einreichen? Wer verfolgt fehlende Rapporte?
 
@@ -1058,7 +1078,7 @@ Quelle: Senior-Skizze · Admin-Rollen-Workshop
 
 ID: proriv:project:rapport-deadline
 
-### 96. Ergänzung 38 · Verbindung zwischen Rapport und Stunden
+### 98. Ergänzung 38 · Verbindung zwischen Rapport und Stunden
 
 Muss ein Rapport mit bestimmten Schichten oder Zeiteinträgen verbunden sein? Darf ich ihn ohne aktive Zeiterfassung erstellen, und wie ordnet ihr die persönlichen Stunden einem gemeinsamen Rapport zu?
 
@@ -1068,13 +1088,23 @@ Quelle: Event Storming · Kundengespräch · Prozess-Workshop
 
 ID: proriv:project:time-report-link
 
+### 99. Ergänzung 65 · Versandkanäle zum ersten Start
+
+Müssen SMS und E-Mail beide zum ersten Start funktionieren, oder reicht zunächst ein Versandkanal für Rapporte?
+
+Должны ли к первому запуску работать и SMS, и электронная почта, или для рапортов сначала достаточно одного канала?
+
+Quelle: Ergänzung aus der Ablaufprüfung
+
+ID: proriv:project:scope-rapport-channels
+
 ## 09 · Kundenantwort und Unterschrift
 
 Bestätigt ODER abgelehnt ODER noch keine Antwort
 
 Подтверждено ИЛИ отклонено ИЛИ ответа пока нет
 
-### 97. Teamfrage 12 · Bestätigung durch den Kunden
+### 100. Teamfrage 12 · Bestätigung durch den Kunden
 
 Wie bestätigt der Kunde den Rapport: vor Ort oder aus der Ferne? Wer legt den berechtigten Vertreter fest und wie wird dessen Identität geprüft?
 
@@ -1084,7 +1114,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:12
 
-### 98. Teamfrage 35 · Kunde antwortet nicht
+### 101. Teamfrage 35 · Kunde antwortet nicht
 
 Der Kunde antwortet nicht auf den Rapport. Wann wird erinnert und wer muss persönlich Kontakt aufnehmen?
 
@@ -1098,7 +1128,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:35
 
-### 99. Teamfrage 36 · Bedeutung der Kundenbestätigung
+### 102. Teamfrage 36 · Bedeutung der Kundenbestätigung
 
 Bestätigt der Kunde den Leistungsumfang, den Preis oder beides? Wie soll das auf der Bestätigungsseite formuliert sein?
 
@@ -1108,7 +1138,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:36
 
-### 100. Teamfrage 37 · Dokumente nach der Zustimmung
+### 103. Teamfrage 37 · Dokumente nach der Zustimmung
 
 Welche Dokumente erhalten Kunde und Unternehmen nach der Zustimmung? Gibt es ein Muster des benötigten PDFs?
 
@@ -1118,7 +1148,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:37
 
-### 101. Rollenfrage 33 · Rapport erhalten
+### 104. Rollenfrage 33 · Rapport erhalten
 
 Ich erhalte als Kundenvertreter einen Rapport. Wie ist das am bequemsten: SMS, E-Mail oder auf dem Telefon des Arbeiters vor Ort?
 
@@ -1128,7 +1158,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:33
 
-### 102. Rollenfrage 34 · Leistung und Preis verstehen
+### 105. Rollenfrage 34 · Leistung und Preis verstehen
 
 Ich öffne den Rapport. Welche Angaben brauche ich, um Umfang und Preis zu verstehen: Maße, Fotos, Stunden, Zuschläge und Steuer?
 
@@ -1138,7 +1168,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:34
 
-### 103. Rollenfrage 35 · Identität und Entscheidung bestätigen
+### 106. Rollenfrage 35 · Identität und Entscheidung bestätigen
 
 Ich bestätige den Rapport. Wie bestätige ich meine Identität und wie wird meine Entscheidung festgehalten?
 
@@ -1148,7 +1178,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:35
 
-### 104. Rollenfrage 36 · Eine Position ist strittig
+### 107. Rollenfrage 36 · Eine Position ist strittig
 
 Ich bin mit einer Position nicht einverstanden. Wer kontaktiert mich und organisiert die Korrektur oder einen separaten Rapport für die strittige Arbeit?
 
@@ -1158,7 +1188,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:36
 
-### 105. Rollenfrage 37 · Keine Antwort oder anderer Vertreter
+### 108. Rollenfrage 37 · Keine Antwort oder anderer Vertreter
 
 Ich antworte länger nicht oder vertrete den Kunden nicht mehr. Wer wird benachrichtigt und wie wird ein anderer Vertreter bestimmt?
 
@@ -1168,7 +1198,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:37
 
-### 106. Ergänzung 39 · Kundenkonto oder Link
+### 109. Ergänzung 39 · Kundenkonto oder Link
 
 Soll der Kunde den Rapport ohne App-Installation und ohne Konto über einen Link öffnen können, oder brauchen bestimmte Kunden ein eigenes Konto?
 
@@ -1182,7 +1212,7 @@ Quelle: Historischer Event-Storming-Entwurf · Kundengespräch
 
 ID: proriv:project:customer-login
 
-### 107. Ergänzung 40 · Frist und Widerruf des Kundenlinks
+### 110. Ergänzung 40 · Frist und Widerruf des Kundenlinks
 
 Wie lange darf ein Kundenlink gültig sein? Was passiert beim Weiterleiten, Wechsel des Ansprechpartners oder einer neuen Rapportversion mit dem alten Link?
 
@@ -1192,7 +1222,7 @@ Quelle: Event Storming · Event-Storming-Entscheidungen V2 · Kundengespräch
 
 ID: proriv:project:customer-link-validity
 
-### 108. Ergänzung 41 · Wann braucht ihr eine Unterschrift?
+### 111. Ergänzung 41 · Wann braucht ihr eine Unterschrift?
 
 Wann reicht ein Bestätigen-Knopf und wann braucht ihr eine Unterschrift? Ist die Bestätigung für jeden Rapport, nur für bestimmte Aufträge oder erst für die Rechnungsstellung erforderlich?
 
@@ -1202,7 +1232,7 @@ Quelle: Senior-Entscheidungsfragen · Event-Storming-Entscheidungen V2 · Event 
 
 ID: proriv:project:signature-required
 
-### 109. Ergänzung 42 · Einzelne Positionen bestätigen
+### 112. Ergänzung 42 · Einzelne Positionen bestätigen
 
 Darf der Kunde einzelne Positionen bestätigen und andere ablehnen? Was geschieht dann mit dem unstrittigen Teil: eigener Rapport, eigene Rechnung oder warten, bis alles geklärt ist?
 
@@ -1212,7 +1242,7 @@ Quelle: Event Storming · Kundengespräch
 
 ID: proriv:project:partial-acceptance
 
-### 110. Ergänzung 43 · Antwort nach Lohn- oder Rechnungsabschluss
+### 113. Ergänzung 43 · Antwort nach Lohn- oder Rechnungsabschluss
 
 Der Kunde antwortet erst nach dem Lohnabschluss oder nach Rechnungsstellung. Wer klärt den Fall und was darf noch an Rapport, Rechnung und Stunden geändert werden?
 
@@ -1222,7 +1252,7 @@ Quelle: Kundengespräch · Living Process Map V0.2
 
 ID: proriv:project:late-customer-response
 
-### 111. Ergänzung 44 · Welche Schritte warten auf den Kunden?
+### 114. Ergänzung 44 · Welche Schritte warten auf den Kunden?
 
 Welche Schritte müssen auf die Kundenbestätigung warten: Stundenübertragung, Stundenprüfung, Lohnabschluss oder Rechnungsstellung? Was gilt bei Ablehnung, fehlender Unterschrift und keiner Antwort?
 
@@ -1236,13 +1266,23 @@ Quelle: Admin-Rollen-Workshop · Senior-Entscheidungsfragen · Offene Projektpun
 
 ID: proriv:project:customer-gates
 
+### 115. Ergänzung 66 · Bestätigungswege der ersten Version
+
+Braucht ihr zum ersten Start sowohl Bestätigen und Ablehnen über einen Link als auch die Unterschrift vor Ort, oder zunächst eines dieser Verfahren?
+
+Нужны ли к первому запуску и подтверждение либо отклонение по ссылке, и подпись на объекте, или сначала достаточно одного из этих способов?
+
+Quelle: Ergänzung aus der Ablaufprüfung
+
+ID: proriv:project:scope-customer-confirmation
+
 ## 10 · Tripletex, Stundenprüfung und Buchhaltung
 
 Stunden übertragen · Übertragung fehlgeschlagen · Stunden geprüft
 
 Часы переданы · Ошибка передачи · Часы проверены
 
-### 112. Teamfrage 22 · Ergebnis in Tripletex
+### 116. Teamfrage 22 · Ergebnis in Tripletex
 
 Was soll nach der Freigabe in Tripletex erscheinen: welche Datensätze, Beträge, Stunden und Dokumente?
 
@@ -1252,7 +1292,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:22
 
-### 113. Teamfrage 23 · Zeitpunkt der Stundenübertragung
+### 117. Teamfrage 23 · Zeitpunkt der Stundenübertragung
 
 Wann werden Stunden übertragen: nach Prüfung der Tagestabelle oder zusammen mit dem kaufmännischen Rapport?
 
@@ -1262,7 +1302,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:23
 
-### 114. Teamfrage 24 · Übertragungsfehler und Korrekturen
+### 118. Teamfrage 24 · Übertragungsfehler und Korrekturen
 
 Wer verantwortet Übertragungsfehler und Korrekturen bereits übertragener Daten, auch nach der Rechnungsstellung?
 
@@ -1272,7 +1312,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:24
 
-### 115. Rollenfrage 25 · Bestätigten Rapport prüfen
+### 119. Rollenfrage 25 · Bestätigten Rapport prüfen
 
 Ich erhalte einen vom Kunden bestätigten Rapport. Was muss ich vor einer Freigabe konkret prüfen?
 
@@ -1286,7 +1326,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:25
 
-### 116. Rollenfrage 39 · Freigegebener Rapport in Tripletex
+### 120. Rollenfrage 39 · Freigegebener Rapport in Tripletex
 
 Ein freigegebener Rapport kommt in Tripletex an. Was muss dort konkret erscheinen, damit eine Rechnung vorbereitet werden kann?
 
@@ -1296,7 +1336,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:39
 
-### 117. Rollenfrage 40 · Arbeitsstunden übergeben
+### 121. Rollenfrage 40 · Arbeitsstunden übergeben
 
 Ich übertrage Arbeitsstunden. Wann geschieht das: täglich, nach Prüfung der Tabelle oder zusammen mit dem Rapport?
 
@@ -1306,7 +1346,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:40
 
-### 118. Rollenfrage 41 · Rechnung und weiterer Zugriff
+### 122. Rollenfrage 41 · Rechnung und weiterer Zugriff
 
 Die Daten wurden übertragen. Wer prüft sie weiter und stellt die Rechnung? Benötigt diese Person Zugriff auf unsere App?
 
@@ -1316,7 +1356,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:41
 
-### 119. Rollenfrage 42 · Übertragung fehlgeschlagen
+### 123. Rollenfrage 42 · Übertragung fehlgeschlagen
 
 Die Übertragung ist fehlgeschlagen. Wer erhält eine Nachricht, wer behebt die Ursache und wer prüft die erneute Übertragung?
 
@@ -1326,7 +1366,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:42
 
-### 120. Rollenfrage 43 · Fehler nach der Übertragung
+### 124. Rollenfrage 43 · Fehler nach der Übertragung
 
 Nach der Übertragung wird ein Fehler entdeckt. Wie korrigiere ich ihn vor Rechnungsstellung und was tue ich bei einer bereits ausgestellten Rechnung?
 
@@ -1336,7 +1376,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:43
 
-### 121. Ergänzung 45 · Wo werden Stunden geprüft?
+### 125. Ergänzung 45 · Wo werden Stunden geprüft?
 
 Bleiben Stundenprüfung und Genehmigung durch den Vorarbeiter in Tripletex? Welche anschließende Prüfung macht die Buchhaltung und braucht ihr einen weiteren Freigabeschritt in unserer App?
 
@@ -1350,7 +1390,7 @@ Quelle: Admin-Rollen-Workshop · Event Storming · Kundengespräch · Living Pro
 
 ID: proriv:project:hours-approval-location
 
-### 122. Ergänzung 46 · App-Zugang des Vorarbeiters
+### 126. Ergänzung 46 · App-Zugang des Vorarbeiters
 
 Wofür braucht der Vorarbeiter unsere App zusätzlich zu Tripletex: Rapporte und Fotos ansehen, Mannschaft planen, Ausnahmen klären oder andere Aufgaben? Was braucht er für mehrere Baustellen gleichzeitig?
 
@@ -1360,7 +1400,7 @@ Quelle: Prozess-Workshop · Kundengespräch · Senior-Skizze
 
 ID: proriv:project:foreman-app-purpose
 
-### 123. Ergänzung 47 · Aktivitäten und Lohnkategorien
+### 127. Ergänzung 47 · Aktivitäten und Lohnkategorien
 
 Welche Tripletex-Aktivitäten und Lohnkategorien benötigt ihr für Arbeit, Fahrt, Warten, Vorbereitung und Überstunden? Wer zeigt uns die tatsächlich verwendeten Einträge und die Zuordnung zu Mitarbeitern und Projekten?
 
@@ -1370,7 +1410,7 @@ Quelle: Senior-Entscheidungsfragen · Event-Storming-Entscheidungen V2 · Histor
 
 ID: proriv:project:tripletex-activities
 
-### 124. Ergänzung 48 · Rapport bei der Stundenprüfung sehen
+### 128. Ergänzung 48 · Rapport bei der Stundenprüfung sehen
 
 Zeigt uns an einem echten Beispiel: Wo muss der Vorarbeiter beim Prüfen der Stunden Leistungen, Fotos und Kundenantwort sehen? Reicht ein Link oder braucht ihr PDF beziehungsweise Anhänge in Tripletex?
 
@@ -1384,7 +1424,7 @@ Quelle: Prozess-Workshop · Offene Projektpunkte · Event-Storming-Entscheidunge
 
 ID: proriv:project:tripletex-report-view
 
-### 125. Ergänzung 49 · Rückmeldungen aus Tripletex
+### 129. Ergänzung 49 · Rückmeldungen aus Tripletex
 
 Welche Rückmeldungen sollen in unserer App erscheinen: Stunden empfangen, geprüft, korrigiert oder abgelehnt? Wer muss Änderungen oder Kommentare aus Tripletex sehen und darauf reagieren?
 
@@ -1394,7 +1434,7 @@ Quelle: Prozess-Workshop · Event Storming · Kundengespräch
 
 ID: proriv:project:tripletex-feedback
 
-### 126. Ergänzung 50 · Gemeinsamer Tripletex-Test
+### 130. Ergänzung 50 · Gemeinsamer Tripletex-Test
 
 Wer kann die Verbindung zu eurem Tripletex-Konto freigeben und mit uns einen Test durchführen? Welche Mitarbeiter-, Projekt- und Aktivitätsdaten dürfen wir dafür verwenden?
 
@@ -1404,13 +1444,23 @@ Quelle: Admin-Rollen-Workshop · Senior-Skizze · Event-Storming-Entscheidungen 
 
 ID: proriv:project:tripletex-test-owner
 
+### 131. Ergänzung 67 · Umfang der ersten Tripletex-Anbindung
+
+Müssen wir zum ersten Start nur Arbeitsstunden nach Tripletex übertragen oder zusätzlich Rapporte und Dokumente?
+
+Нужно ли к первому запуску передавать в Tripletex только рабочие часы или также рапорты и документы?
+
+Quelle: Ergänzung aus der Ablaufprüfung
+
+ID: proriv:project:scope-tripletex-payload
+
 ## 11 · Fehler, Änderungen und Stornierung
 
 Korrektur angefragt · Neue Version erstellt · Auftrag pausiert oder storniert
 
 Исправление запрошено · Создана новая версия · Заказ приостановлен или отменён
 
-### 127. Teamfrage 13 · Zurückgegebene Rapporte
+### 132. Teamfrage 13 · Zurückgegebene Rapporte
 
 Wenn Kunde oder Vorarbeiter einen Rapport zurückgeben: Wer korrigiert ihn, wie erhält diese Person die Hinweise und wer überwacht die Frist?
 
@@ -1424,7 +1474,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:13
 
-### 128. Teamfrage 32 · Auftrag pausiert oder storniert
+### 133. Teamfrage 32 · Auftrag pausiert oder storniert
 
 Ein Auftrag wird nach Arbeitsbeginn pausiert oder storniert. Wie dokumentieren wir bereits erbrachte Leistung, Zeit und Kosten?
 
@@ -1434,7 +1484,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:32
 
-### 129. Teamfrage 33 · Nachträgliche Erfassung und Korrektur
+### 134. Teamfrage 33 · Nachträgliche Erfassung und Korrektur
 
 Dürfen Arbeiten und Korrekturen rückwirkend erfasst werden? Ab welchem Zeitpunkt ist eine zusätzliche Erlaubnis erforderlich?
 
@@ -1444,7 +1494,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:33
 
-### 130. Teamfrage 39 · Änderungsverlauf
+### 135. Teamfrage 39 · Änderungsverlauf
 
 Wer sieht den Änderungsverlauf: wer etwas geändert hat, was geändert wurde und warum?
 
@@ -1454,7 +1504,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:39
 
-### 131. Rollenfrage 16 · Schichtende oder Baustelle falsch
+### 136. Rollenfrage 16 · Schichtende oder Baustelle falsch
 
 Ich habe das Schichtende vergessen oder die falsche Baustelle gewählt. Wie melde ich den Fehler und wer prüft die Korrektur?
 
@@ -1464,7 +1514,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:16
 
-### 132. Rollenfrage 23 · Rapport kommt zurück
+### 137. Rollenfrage 23 · Rapport kommt zurück
 
 Mein Rapport wurde zurückgegeben. Wo sehe ich die Hinweise, was korrigiere ich und bis wann?
 
@@ -1474,7 +1524,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:23
 
-### 133. Rollenfrage 26 · Fehler zurückgeben und nachprüfen
+### 138. Rollenfrage 26 · Fehler zurückgeben und nachprüfen
 
 Ich finde einen Fehler. Wem gebe ich den Rapport zurück, wer korrigiert ihn und wie sehe ich danach die Änderungen?
 
@@ -1488,7 +1538,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:26
 
-### 134. Ergänzung 51 · Ersteller ist nicht erreichbar
+### 139. Ergänzung 51 · Ersteller ist nicht erreichbar
 
 Ein Rapport muss korrigiert werden, aber sein Ersteller ist krank, im Urlaub oder ausgeschieden. Wer darf ihn bearbeiten und wer informiert den Kunden über die neue Version?
 
@@ -1498,7 +1548,7 @@ Quelle: Event Storming · Admin-Rollen-Workshop
 
 ID: proriv:project:absent-author-correction
 
-### 135. Ergänzung 62 · Gesendeten oder bestätigten Rapport ändern
+### 140. Ergänzung 62 · Gesendeten oder bestätigten Rapport ändern
 
 Wer darf einen bereits gesendeten oder unterschriebenen Rapport korrigieren? Muss der Kunde die neue Version erneut bestätigen?
 
@@ -1508,13 +1558,23 @@ Quelle: Admin-Rollen-Workshop
 
 ID: proriv:project:sent-report-correction
 
+### 141. Ergänzung 68 · Rapportkorrekturen der ersten Version
+
+Muss die erste Version bereits gesendete oder unterschriebene Rapporte korrigieren und erneut zur Kundenbestätigung verschicken können?
+
+Должна ли первая версия позволять исправлять уже отправленные или подписанные рапорты и повторно отправлять их клиенту для подтверждения?
+
+Quelle: Ergänzung aus der Ablaufprüfung
+
+ID: proriv:project:scope-report-versions
+
 ## 12 · Abschluss und Archiv
 
 Baustelle abgeschlossen · Archiviert · Für Nacharbeit wieder geöffnet
 
 Объект завершён · Архивирован · Вновь открыт для доработки
 
-### 136. Teamfrage 25 · Rechnung und Baustellenabschluss
+### 142. Teamfrage 25 · Rechnung und Baustellenabschluss
 
 Wer stellt danach die Rechnung und wer entscheidet, dass die Baustelle geschlossen werden darf?
 
@@ -1524,7 +1584,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:25
 
-### 137. Teamfrage 42 · Aufbewahrung der Daten
+### 143. Teamfrage 42 · Aufbewahrung der Daten
 
 Wie lange werden Rapporte, Fotos, Stunden und Geodaten aufbewahrt? Wer legt diese Fristen auf Kundenseite fest?
 
@@ -1534,7 +1594,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:42
 
-### 138. Rollenfrage 10 · Baustelle schließen
+### 144. Rollenfrage 10 · Baustelle schließen
 
 Ich schließe eine Baustelle. Wer meldet die abgeschlossene Arbeit und was muss zuvor geprüft werden?
 
@@ -1544,7 +1604,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:10
 
-### 139. Ergänzung 52 · Archivierte Baustelle wieder öffnen
+### 145. Ergänzung 52 · Archivierte Baustelle wieder öffnen
 
 Wer darf eine abgeschlossene Baustelle für Nacharbeit wieder öffnen? Arbeitet ihr mit dem alten Auftrag und Preisstand oder mit einem neuen Auftrag, und wer sieht die archivierten Unterlagen?
 
@@ -1554,13 +1614,23 @@ Quelle: Admin-Rollen-Workshop · Senior-Skizze
 
 ID: proriv:project:reopen-site
 
+### 146. Ergänzung 69 · Baustellenabschluss in App oder Tripletex
+
+Soll die Baustelle in unserer App abgeschlossen werden, oder übernehmen wir ihren Abschlussstatus aus Tripletex?
+
+Нужно ли завершать объект в нашем приложении или получать статус завершения из Tripletex?
+
+Quelle: Ergänzung aus der Ablaufprüfung
+
+ID: proriv:project:scope-site-closure
+
 ## 13 · Ohne Netz und Synchronisierung
 
 Lokal gespeichert · Verbindung zurück · Konflikt geklärt
 
 Сохранено на устройстве · Связь восстановлена · Конфликт разрешён
 
-### 140. Teamfrage 21 · Arbeiten ohne Internet
+### 147. Teamfrage 21 · Arbeiten ohne Internet
 
 Was muss ohne Internet möglich sein: Zeiten erfassen, Mengen eingeben, fotografieren und einen Rapport vorbereiten?
 
@@ -1570,7 +1640,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:21
 
-### 141. Rollenfrage 14 · Offline arbeiten und Synchronisierung
+### 148. Rollenfrage 14 · Offline arbeiten und Synchronisierung
 
 Auf der Baustelle gibt es kein Internet. Was muss ich ohne Netz erledigen können und wie erkenne ich die spätere Übertragung?
 
@@ -1580,7 +1650,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:roles:14
 
-### 142. Ergänzung 53 · Wie lange ohne Netz?
+### 149. Ergänzung 53 · Wie lange ohne Netz?
 
 Wie lange arbeitet eine Mannschaft typischerweise vollständig ohne Internet: Minuten, eine Schicht oder mehrere Tage? Wie viele Rapporte und Fotos müssen in dieser Zeit auf dem Gerät bleiben können?
 
@@ -1590,7 +1660,7 @@ Quelle: Senior-Skizze · Historischer Event-Storming-Entwurf
 
 ID: proriv:project:offline-duration
 
-### 143. Ergänzung 54 · Neue Baustelle oder geänderte Rechte ohne Netz
+### 150. Ergänzung 54 · Neue Baustelle oder geänderte Rechte ohne Netz
 
 Was muss vor einem Einsatz ohne Netz bereits geladen sein: Zugang, Baustelle, Aufgaben und Preise? Was soll passieren, wenn ich offline eine neue Baustelle brauche oder mein Einsatz beziehungsweise Zugang inzwischen geändert wurde?
 
@@ -1600,7 +1670,7 @@ Quelle: Ergänzung aus der Ablaufprüfung · Admin-Rollen-Workshop
 
 ID: proriv:project:offline-new-assignment
 
-### 144. Ergänzung 55 · Zwei Personen ändern denselben Stand
+### 151. Ergänzung 55 · Zwei Personen ändern denselben Stand
 
 Arbeiter und Vorarbeiter ändern denselben Rapport oder dieselbe Zeitbuchung, während eines der Geräte offline ist. Wer entscheidet über den richtigen Stand und wie sollen beide Änderungen zur Klärung sichtbar bleiben?
 
@@ -1616,7 +1686,7 @@ Pilot gestartet · Fehler gemeldet · Ergebnis abgenommen
 
 Пилот запущен · Ошибка сообщена · Результат принят
 
-### 145. Teamfrage 26 · Geräte und Größenordnung
+### 152. Teamfrage 26 · Geräte und Größenordnung
 
 Welche Geräte nutzen die Mitarbeiter: Android, iPhone oder Computer? Wie viele Arbeiter und gleichzeitig aktive Baustellen gibt es ungefähr?
 
@@ -1626,7 +1696,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:26
 
-### 146. Teamfrage 27 · Umfang der ersten Version
+### 153. Teamfrage 27 · Umfang der ersten Version
 
 Welche Funktionen müssen zum ersten Start vorhanden sein und welche können später hinzukommen?
 
@@ -1636,7 +1706,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:27
 
-### 147. Teamfrage 28 · Ein vollständiger Beispielauftrag
+### 154. Teamfrage 28 · Ein vollständiger Beispielauftrag
 
 Welchen echten Auftrag sollen wir vollständig durch die Anwendung führen, damit der Kunde sagen kann: Ja, genau so brauchen wir es?
 
@@ -1646,7 +1716,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:28
 
-### 148. Teamfrage 40 · Eigene oder gemeinsame Telefone
+### 155. Teamfrage 40 · Eigene oder gemeinsame Telefone
 
 Nutzen Mitarbeiter private oder Firmenhandys? Teilen sich mehrere Personen manchmal ein Gerät?
 
@@ -1656,7 +1726,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:40
 
-### 149. Teamfrage 41 · Übernahme laufender Aufträge
+### 156. Teamfrage 41 · Übernahme laufender Aufträge
 
 Müssen zum Start laufende Aufträge übernommen werden? Ab welchem Zeitpunkt wird die Arbeit im neuen System geführt?
 
@@ -1666,7 +1736,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:41
 
-### 150. Teamfrage 43 · Wer entscheidet bei Widersprüchen?
+### 157. Teamfrage 43 · Wer entscheidet bei Widersprüchen?
 
 Wer entscheidet auf Kundenseite verbindlich über Ablauf, Preise und Tripletex, wenn verschiedene Mitarbeiter widersprüchliche Antworten geben?
 
@@ -1676,7 +1746,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:43
 
-### 151. Teamfrage 44 · Betriebskosten und Konten
+### 158. Teamfrage 44 · Betriebskosten und Konten
 
 Wer stellt und bezahlt Hosting, SMS und die erforderlichen Konten?
 
@@ -1686,7 +1756,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:44
 
-### 152. Teamfrage 45 · Hilfe nach dem Start
+### 159. Teamfrage 45 · Hilfe nach dem Start
 
 Wer unterstützt nach dem Start die Mitarbeiter, bearbeitet Anfragen und meldet Fehler an die Entwickler?
 
@@ -1696,7 +1766,7 @@ Quelle: Fragen Amruddy · Original
 
 ID: amruddy:team:45
 
-### 153. Ergänzung 56 · Sollzeiten nur als Hinweis?
+### 160. Ergänzung 56 · Sollzeiten nur als Hinweis?
 
 Braucht ihr überhaupt Soll- oder Referenzzeiten je Leistung, um Abweichungen zu sehen? Wenn ja: Wer liefert sie, welche Abweichung löst eine Rückfrage aus und wer klärt den Fall?
 
@@ -1710,7 +1780,7 @@ Quelle: Historischer Event-Storming-Entwurf · Ergänzung aus der Ablaufprüfung
 
 ID: proriv:project:reference-times
 
-### 154. Ergänzung 57 · Wann ist der Pilot erfolgreich?
+### 161. Ergänzung 57 · Wann ist der Pilot erfolgreich?
 
 Woran beurteilen wir den Pilot konkret: Zeit zum Erfassen, korrekte Preise, keine verlorenen Daten, richtige Tripletex-Stunden und verständliche Kundenbestätigung? Wer nimmt das Ergebnis ab und welche Fehler stoppen den Start?
 
@@ -1720,7 +1790,7 @@ Quelle: Historischer Event-Storming-Entwurf · Ergänzung aus der Ablaufprüfung
 
 ID: proriv:project:pilot-acceptance
 
-### 155. Ergänzung 58 · Ausfall und Wiederherstellung
+### 162. Ergänzung 58 · Ausfall und Wiederherstellung
 
 Wie arbeitet die Mannschaft bei einem längeren App-Ausfall weiter und wer wird kontaktiert? Welche Ausfallzeit und welcher Datenverlust sind akzeptabel, und wer prüft die Wiederherstellung?
 
@@ -1730,7 +1800,7 @@ Quelle: Offene Projektpunkte · Event-Storming-Entscheidungen V2 · Ergänzung a
 
 ID: proriv:project:outage-recovery
 
-### 156. Ergänzung 59 · Installation und Updates
+### 163. Ergänzung 59 · Installation und Updates
 
 Wie sollen die Mitarbeiter die App auf Android und iPhone erhalten und aktualisieren? Wer hilft bei Installation, Berechtigungen und dem ersten echten Einsatz, und welche Geräte stellt ihr für den Test bereit?
 
@@ -1740,7 +1810,7 @@ Quelle: Ergänzung aus der Ablaufprüfung · Senior-Skizze
 
 ID: proriv:project:app-distribution
 
-### 157. Ergänzung 60 · Sprachen für Mitarbeiter und Kunden
+### 164. Ergänzung 60 · Sprachen für Mitarbeiter und Kunden
 
 Welche Sprachen brauchen Mitarbeiter in der App und Kunden im Rapport beziehungsweise auf der Bestätigungsseite? Müssen norwegische Leistungsnamen zusätzlich erklärt werden?
 
@@ -1749,3 +1819,23 @@ Welche Sprachen brauchen Mitarbeiter in der App und Kunden im Rapport beziehungs
 Quelle: Ergänzung aus der Ablaufprüfung · Admin-Rollen-Workshop
 
 ID: proriv:project:working-languages
+
+### 165. Ergänzung 70 · Pilot oder unternehmensweiter Start
+
+Starten wir mit einer Mannschaft auf wenigen Baustellen oder sofort im ganzen Unternehmen?
+
+Начинаем с одной бригады на нескольких объектах или сразу запускаем приложение во всей компании?
+
+Quelle: Ergänzung aus der Ablaufprüfung
+
+ID: proriv:project:scope-pilot-rollout
+
+### 166. Ergänzung 71 · Android und iPhone zum ersten Start
+
+Müssen Android und iPhone gleichzeitig zum ersten Start bereit sein, oder können wir zunächst mit einer Plattform beginnen?
+
+Должны ли Android и iPhone быть готовы одновременно к первому запуску или можно начать с одной платформы?
+
+Quelle: Ergänzung aus der Ablaufprüfung
+
+ID: proriv:project:scope-first-platforms

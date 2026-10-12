@@ -20,6 +20,8 @@ import { draftFields, type IsaQuestionDrafts } from '../src/hooks/useIsaQuestion
 import { IsaQuestionAnswerFields } from '../src/components/IsaSharedQuestion';
 import { legacyEntriesForQuestion, reuseQuestionEntry, isaNoteAsWorkshopNote } from '../src/utils/isaRoleQuestions';
 import { catalogQuestionsForRoleSource } from '../src/data/roleQuestionLinks';
+import { ISA_STAGE_PLANS, ISA_STAGE_PLANNING_QUESTION_IDS, questionsForStagePlan, additionalQuestionsForStagePlan, selectedStageQuestions } from '../src/data/isaStagePlanning';
+import { IsaStagePlanning, IsaStageQuestion } from '../src/components/IsaStagePlanning';
 
 const first = ISA_TEAM_QUESTIONS[0];
 const second = ISA_TEAM_QUESTIONS[1];
@@ -42,7 +44,7 @@ function overviewElement<P>(tree: React.ReactNode, match: (element: TestElement)
 
 test('interview depth adds curated questions cumulatively and restores every source question at 100 percent', () => {
   assert.deepEqual(ISA_QUESTION_DEPTH_PACKETS.map(packet => packet.value), [0, 20, 40, 60, 80, 100]);
-  assert.deepEqual(ISA_QUESTION_DEPTH_PACKETS.map(packet => packet.questionIds.length), [12, 33, 56, 94, 133, 157]);
+  assert.deepEqual(ISA_QUESTION_DEPTH_PACKETS.map(packet => packet.questionIds.length), [12, 33, 56, 94, 133, 166]);
   let previous = new Set<string>();
   for (const packet of ISA_QUESTION_DEPTH_PACKETS) {
     const entries = isaQuestionsAtDepth(packet.value);
@@ -131,11 +133,11 @@ test('every uploaded question survives verbatim, including both numbering sequen
 
 test('the overall list contains every original and addition once and assigns every question to a process stage', () => {
   const all = isaQuestionsForView('all');
-  assert.equal(all.length, 157);
+  assert.equal(all.length, 166);
   assert.equal(new Set(all.map(question => question.id)).size, all.length);
   assert.equal(isaQuestionsForView('team').length, 45);
   assert.equal(isaQuestionsForView('roles').length, 50);
-  assert.equal(isaQuestionsForView('project').length, 62);
+  assert.equal(isaQuestionsForView('project').length, 71);
   assert.equal(isaGroupsForView('all').length, 14);
   for (const stage of ISA_QUESTION_STAGES) assert.ok(all.some(question => isaQuestionGroupId(question, 'all') === stage.id));
   for (const question of all) {
@@ -371,6 +373,110 @@ test('question view allows switching between topic section overview and single q
   assert.ok(htmlCard.includes('Unser Vorschlag an Isa'));
 });
 
+test('each of the 14 stages has scope questions from the same catalog and exposes all remaining questions without duplicates', () => {
+  assert.equal(ISA_STAGE_PLANS.length, 14);
+  assert.equal(ISA_STAGE_PLANNING_QUESTION_IDS.length, 17);
+  assert.equal(new Set(ISA_STAGE_PLANNING_QUESTION_IDS).size, 17);
+  const catalog = new Set<string>();
+  for (const stage of ISA_STAGE_PLANS) {
+    const primary = questionsForStagePlan(stage.id);
+    const additional = additionalQuestionsForStagePlan(stage.id);
+    assert.ok(primary.length);
+    for (const q of [...primary, ...additional]) {
+      assert.equal(q.stageId, stage.id);
+      assert.equal(q, ISA_TEAM_QUESTIONS.find(original => original.id === q.id), 'Both views use the same object and exact wording');
+      assert.ok(!catalog.has(q.id), 'A question is displayed once across stages');
+      catalog.add(q.id);
+    }
+  }
+  assert.equal(catalog.size, ISA_TEAM_QUESTIONS.length);
+  assert.deepEqual(readWorkshopRoute('#/workshop/questions/etappen'), { mode: 'questions', planning: true });
+  assert.deepEqual(readWorkshopRoute('#/workshop/questions'), { mode: 'questions' });
+});
+
+test('stage preparation offers a proposal line for every question, preserves selected detail questions and keeps the catalog design', () => {
+  const q = additionalQuestionsForStagePlan('pricing')[0];
+  const notes = changeIsaQuestionNote({}, q.id, { includeInIsa: true, proposal: 'Keep this existing selected detail' });
+  for (const language of ['de', 'ru', 'bilingual'] as const) {
+    const html = renderToStaticMarkup(<IsaStagePlanning language={language} activeStageId="pricing" onStageChange={() => {}} notes={notes} drafts={{}} editable onSelect={() => {}} onDraftChange={() => {}} onFinish={() => {}} onCancel={() => {}} />);
+    assert.ok(html.includes('Keep this existing selected detail'));
+    assert.ok(html.includes(language === 'ru' ? 'Другие выбранные вопросы' : 'Weitere ausgewählte Fragen'));
+    assert.ok(html.includes(language === 'ru' ? 'Предложение команды Исе' : 'Teamvorschlag für Isa'));
+    assert.equal((html.match(/<textarea/g) || []).length, questionsForStagePlan('pricing').length + additionalQuestionsForStagePlan('pricing').length);
+    assert.equal((html.match(/type="checkbox"/g) || []).length, questionsForStagePlan('pricing').length + additionalQuestionsForStagePlan('pricing').length);
+    assert.equal((html.match(/aria-current="step"/g) || []).length, 1);
+  }
+  const page = renderToStaticMarkup(<IsaQuestionsWorkshop language="de" planning />);
+  assert.ok(page.includes('href="#/workshop/questions/etappen"'));
+  assert.ok(page.includes('href="#/workshop/questions"'));
+  assert.ok(page.includes('17 Fragen zum Arbeitsumfang'));
+  assert.ok(!page.includes('id="isa-question-depth"'), 'The 17 scope questions are independent of the full-catalog filter');
+  assert.ok(page.includes('Isa-Vorlage ansehen'));
+  assert.ok(page.includes('Sicherung herunterladen'));
+});
+
+test('stage proposals stay drafts across stages and save only on Finish while retaining catalog selection, answers and comments', () => {
+  const q = questionsForStagePlan('pricing')[0];
+  let notes = changeIsaQuestionNote({}, q.id, { proposal: 'Previous proposal', answer: 'Existing result', comment: 'Private team note', isaConfirmed: true });
+  let drafts: IsaQuestionDrafts = {};
+  let writes = 0;
+  const callbacks = {
+    onSelect: (id: string, includeInIsa: boolean) => { writes++; notes = changeIsaQuestionNote(notes, id, { includeInIsa }); },
+    onDraftChange: (id: string, change: Partial<typeof EMPTY_ISA_QUESTION_NOTE>) => { drafts[id] = { ...(drafts[id] || notes[id] || EMPTY_ISA_QUESTION_NOTE), ...change }; },
+    onFinish: (id: string) => { writes++; notes = changeIsaQuestionNote(notes, id, draftFields(drafts[id])); delete drafts[id]; },
+    onCancel: (id: string) => { delete drafts[id]; }
+  };
+  const row = () => IsaStageQuestion({ question: q, note: notes[q.id], draft: drafts[q.id], language: 'de', editable: true, ...callbacks });
+  for (const value of ['N', 'Ne', 'Zum Start Standardpreise; Sonderfälle manuell']) {
+    const input = overviewElement<React.TextareaHTMLAttributes<HTMLTextAreaElement>>(row(), element => element.type === 'textarea');
+    input.props.onChange!({ target: { value } } as React.ChangeEvent<HTMLTextAreaElement>);
+    assert.equal(writes, 0);
+    assert.equal(notes[q.id].proposal, 'Previous proposal');
+  }
+  const checkbox = overviewElement<React.InputHTMLAttributes<HTMLInputElement>>(row(), element => element.type === 'input');
+  checkbox.props.onChange!({ target: { checked: true } } as React.ChangeEvent<HTMLInputElement>);
+  assert.equal(writes, 1);
+  assert.equal(selectedStageQuestions('pricing', notes)[0].id, q.id);
+  assert.ok(!isaTemplateMarkdown(notes, 'de').includes('Zum Start Standardpreise'));
+  assert.ok(!isaQuestionsBackup(notes).includes('Zum Start Standardpreise'));
+  const other = renderToStaticMarkup(<IsaStagePlanning language="de" activeStageId="work" onStageChange={() => {}} notes={notes} drafts={drafts} editable {...callbacks} />);
+  assert.ok(!other.includes('Zum Start Standardpreise'));
+  const resumed = overviewElement<React.TextareaHTMLAttributes<HTMLTextAreaElement>>(row(), element => element.type === 'textarea');
+  assert.equal(resumed.props.value, 'Zum Start Standardpreise; Sonderfälle manuell');
+  const finish = overviewElement<React.ButtonHTMLAttributes<HTMLButtonElement>>(row(), element => element.type === 'button' && element.props.children === 'Fertig');
+  finish.props.onClick!({} as React.MouseEvent<HTMLButtonElement>);
+  assert.equal(writes, 2);
+  assert.equal(notes[q.id].proposal, 'Zum Start Standardpreise; Sonderfälle manuell');
+  assert.equal(notes[q.id].comment, 'Private team note');
+  assert.equal(notes[q.id].answer, 'Existing result');
+  assert.equal(notes[q.id].isaConfirmed, true, 'Editing a proposal does not alter the recorded confirmed answer');
+  assert.equal(notes[q.id].includeInIsa, true);
+  assert.equal(drafts[q.id], undefined);
+  const inCatalog = renderToStaticMarkup(<IsaQuestionCard question={q} note={notes[q.id]} language="de" editable onUpdate={() => {}} />);
+  assert.ok(inCatalog.includes('Zum Start Standardpreise'));
+  callbacks.onSelect(q.id, false);
+  assert.equal(selectedStageQuestions('pricing', notes).length, 0);
+  assert.equal(notes[q.id].proposal, 'Zum Start Standardpreise; Sonderfälle manuell');
+  assert.deepEqual(parseIsaQuestionsBackup(isaQuestionsBackup(notes)), notes);
+});
+
+test('the Isa template includes selected stage questions and existing questions once, ordered by stage and with saved proposals', () => {
+  const launch = questionsForStagePlan('launch')[0];
+  const work = questionsForStagePlan('work')[0];
+  const invitation = questionsForStagePlan('access')[0];
+  const untouched = questionsForStagePlan('customer')[0];
+  let notes: IsaQuestionNotes = {};
+  for (const q of [launch, work, invitation]) notes = changeIsaQuestionNote(notes, q.id, { includeInIsa: true, proposal: 'Saved proposal for ' + q.id, comment: 'Private comment' });
+  for (const language of ['de', 'ru', 'bilingual'] as const) {
+    const template = isaTemplateMarkdown(notes, language);
+    for (const q of [launch, work, invitation]) assert.equal(template.split(language === 'ru' ? q.text.ru : q.text.de).length - 1, 1);
+    assert.ok(!template.includes(language === 'ru' ? untouched.text.ru : untouched.text.de));
+    assert.ok(!template.includes('Private comment'));
+    assert.ok(template.indexOf(invitation.text[language === 'ru' ? 'ru' : 'de']) < template.indexOf(work.text[language === 'ru' ? 'ru' : 'de']));
+    assert.ok(template.indexOf(work.text[language === 'ru' ? 'ru' : 'de']) < template.indexOf(launch.text[language === 'ru' ? 'ru' : 'de']));
+  }
+});
+
 test('autosave survives interrupted writes, storage failures, rapid edits and JSON export', async () => {
   const stores = new Map<string, Map<string, unknown>>();
   const storage = new Map<string, string>();
@@ -433,7 +539,15 @@ test('autosave survives interrupted writes, storage failures, rapid edits and JS
     assert.equal(backInRole.isaConfirmed, false);
     assert.equal((await loadIsaQuestionNotes())[sharedQuestion.id].comment, 'Private role comment');
     assert.equal(isaTemplateMarkdown(await loadIsaQuestionNotes(), 'de').split(sharedQuestion.text.de).length - 1, 1);
-    let notes = fromCatalog;
+    const scopeQuestion = questionsForStagePlan('work')[0];
+    const fromStagePlan = changeIsaQuestionNote(fromCatalog, scopeQuestion.id, { includeInIsa: true, proposal: 'Zum Start Bohren und Wandsägen', comment: 'Internal estimate' });
+    await saveIsaQuestionNotes(fromStagePlan);
+    const restoredStage = await loadIsaQuestionNotes();
+    assert.equal(selectedStageQuestions('work', restoredStage)[0].id, scopeQuestion.id);
+    const restoredCatalog = renderToStaticMarkup(<IsaQuestionCard question={scopeQuestion} note={restoredStage[scopeQuestion.id]} language="de" editable onUpdate={() => {}} />);
+    assert.ok(restoredCatalog.includes('Zum Start Bohren und Wandsägen'));
+    assert.deepEqual(parseIsaQuestionsBackup(isaQuestionsBackup(restoredStage)), restoredStage);
+    let notes = fromStagePlan;
     const writes: Promise<void>[] = [];
     for (const proposal of ['A', 'AB', 'ABC']) {
       notes = changeIsaQuestionNote(notes, first.id, { proposal });

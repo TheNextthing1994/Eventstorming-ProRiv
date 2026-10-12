@@ -4,13 +4,17 @@ Stand: 12.10.2026. Prüfung des vorhandenen Repository-Stands und seiner Gesprä
 
 ## Ergebnis für das Teamgespräch
 
-**Der Katalog ist ein Bestand zur Vorbereitung, kein Auftrag, Isa 157 neue Fragen zu stellen.** 95 Originalfragen bleiben wortgleich erhalten. Die bisherigen 60 Ergänzungen bleiben erhalten. Nur zwei bisher fehlende Entscheidungen aus der Rollenkarte wurden ergänzt: erlaubte Rollenverbindungen und Korrektur eines bereits gesendeten oder unterschriebenen Rapports.
+**Der Katalog ist ein Bestand zur Vorbereitung, kein Auftrag, Isa 166 neue Fragen zu stellen.** 95 Originalfragen bleiben wortgleich erhalten. Die bisherigen 60 Ergänzungen bleiben erhalten. Zwei zuvor fehlende Entscheidungen aus der Rollenkarte wurden ergänzt: erlaubte Rollenverbindungen und Korrektur eines bereits gesendeten oder unterschriebenen Rapports.
 
 Viele Ich-Fragen prüfen dieselbe Entscheidung im Ablauf einer Rolle. Sie sind für einen Durchlauf nützlich, müssen aber nicht als zweites Interview gestellt werden. Beispielsweise gehören Team 8/Rolle 6, Team 9/Rolle 21, Team 10/Rolle 17, Team 15/Rolle 47 und Team 23/Rolle 40 jeweils in dieselbe Besprechung. Gleich klingende Fragen bleiben nur dann getrennt zu klären, wenn sie wirklich verschiedene Entscheidungen betreffen.
 
 **Nicht jede alte Formulierung ist als offene Kundenfrage geeignet.** Preise ohne MVA und Stundenprüfung in Tripletex sind vorhandene Grundlagen. Eine Pflichtfreigabe jedes Rapports durch den Vorarbeiter ist dagegen nicht bestätigt; mehrere Originalfragen setzen sie trotzdem voraus. GPS-Detailwerte, abstrakte Dashboard-Wünsche, Installationswege und Integrationsfelder sollen überwiegend mit konkreten Teamvorschlägen bzw. echten Beispielen geklärt werden. Mitternachtseinsätze, Teilannahme, Referenzzeiten und weitere Sonderfälle werden nur bei bestätigtem Bedarf verfolgt.
 
-Für das nächste Treffen zuerst die zwölf Fragen der Minimum-Stufe und die vorhandenen Belege im Team durchgehen. Danach nur die fehlenden Entscheidungen aus den höheren Stufen auswählen. Der Regler ordnet Gesprächsumfang; er misst weder Wissensabdeckung noch die Qualität der Antworten. Die Stufen bleiben kumulativ: 12 / 33 / 56 / 94 / 133 / 157.
+Für das nächste Treffen zuerst die zwölf Fragen der Minimum-Stufe und die vorhandenen Belege im Team durchgehen. Danach nur die fehlenden Entscheidungen aus den höheren Stufen auswählen. Der Regler ordnet Gesprächsumfang; er misst weder Wissensabdeckung noch die Qualität der Antworten. Die Stufen bleiben kumulativ: 12 / 33 / 56 / 94 / 133 / 166.
+
+## Ergänzung: Fragen zum Arbeitsumfang
+
+Auf Wunsch vom 12.10.2026 werden die Etappen ausdrücklich zur Abgrenzung der ersten Version vorbereitet. Die Ansicht zeigt 17 Einstiegsfragen: acht vorhandene Einträge und neun neue `scope-*`-Fragen. Diese neun klären den Umfang zum ersten Start (Arbeitsarten, Preisautomatik, Versand, Bestätigung, Tripletex-Ausgabe, Korrekturen, Abschluss, Pilot und Plattformen). Ihre verwandten Detailfragen bleiben eigenständig; keine Antwort und keine Kundenbestätigung wird pauschal übernommen. Die Einzelprüfung unten umfasst nun alle 166 Einträge. Anleitung: [ETAPPEN_FRAGEN_ISA.md](ETAPPEN_FRAGEN_ISA.md).
 
 ## Was zusammengeführt wurde
 
@@ -164,6 +168,7 @@ Verwandte Originalfragen bleiben eigenständige gespeicherte Einträge, weil ihr
 | Ergänzung 21<br>`proriv:project:other-attachments` | Braucht ein Rapport neben Fotos auch Pläne, PDFs, Videos oder andere Dateien? Welche Fotoformate und welche Qualität müssen erhalten bleiben? | **Falls relevant.** Fotos sind im Ablauf vorhanden; Videos/PDFs/weitere Formate nur bei konkret benötigtem Rapportbeleg. |
 | Ergänzung 22<br>`proriv:project:saw-example` | Können wir zusätzlich zum vorhandenen Bohr-Rapport einen echten ausgefüllten Säge-Rapport durchgehen: Maße, Positionen, Fotos, Zuschläge und Ergebnis? | **Klären.** Sägebeispiel fehlt gegenüber dem vorhandenen Bohrbeispiel. Ein Beispiel klärt mehrere Maße-, Pflichtfeld- und Preisfragen zugleich. |
 | Ergänzung 23<br>`proriv:project:warranty-rework` | Wie dokumentiert ihr Nacharbeit, fehlgeschlagene Arbeiten und Gewährleistungsfälle? Welche Mengen und Zeiten werden dem Kunden berechnet und welche nur intern erfasst? | **Falls relevant.** Bei vorkommender Nacharbeit/Gewährleistung intern versus berechenbar festlegen; keine neue Gewährleistungsverwaltung voraussetzen. |
+| Ergänzung 63<br>`proriv:project:scope-work-types` | Welche Arbeitsarten müssen zum ersten Einsatz vollständig erfasst werden können: Kernbohren, Wandsägen, Bodensägen und Handsägen? | **Klären.** Erste Version abgrenzen. Benötigte Arbeitsarten festlegen; Pflichtfelder je Arbeitsart werden an den vorhandenen Rapporten geprüft. |
 
 ### 07 · Preise und Abrechnungsart
 
@@ -189,6 +194,7 @@ Verwandte Originalfragen bleiben eigenständige gespeicherte Einträge, weil ihr
 | Ergänzung 29<br>`proriv:project:missing-matrix-row` | Ein Durchmesser oder eine Schnitttiefe steht nicht in der Tabelle. Nehmen wir die nächste Stufe, vereinbaren einen Sonderpreis oder stoppen die Berechnung bis zur Klärung? | **Klären.** Verhalten bei nicht gelistetem Maß entscheiden. Nächste Tabellenstufe ist ein Vorschlag, keine gesicherte Preisregel. |
 | Ergänzung 30<br>`proriv:project:discount-scope` | Gibt es Rabatte als Prozentsatz und als fester Betrag? Gelten sie je Position oder für die Gesamtsumme, und sind Transport, Helfer oder andere Zusatzleistungen davon ausgenommen? | **Falls relevant.** Nur tatsächlich vergebene Rabatte und ausgenommene Zusatzpositionen abbilden; mit Team 17 / Rolle 50 bündeln. |
 | Ergänzung 31<br>`proriv:project:ra-aa-details` | Was zeigt und berechnet ein Rapport bei Regning (RA) und Fastpris (AA) jeweils? Welche Mengen und Preise sieht der Kunde beim Festpreis, und wie werden Zusatzleistungen außerhalb des Festpreises behandelt? | **Klären.** Begriffe sind in bisherigen Rapporten vorhanden. Darstellung und Zusatzleistung am RA-/AA-Beispiel bestätigen, keine weitere Abrechnungsart erfinden. |
+| Ergänzung 64<br>`proriv:project:scope-price-engine` | Muss zum ersten Start die gesamte Preisberechnung einschließlich Vertragspreisen, Rabatten und Zuschlägen automatisch funktionieren, oder dürfen Sonderfälle zunächst manuell ergänzt werden? | **Klären.** Erste Version abgrenzen. Automatisierte Regeln von zunächst manuell bearbeiteten Sonderfällen trennen; bestehende Preisregeln dadurch nicht umschreiben. |
 
 ### 08 · Rapport erstellen und versenden
 
@@ -205,6 +211,7 @@ Verwandte Originalfragen bleiben eigenständige gespeicherte Einträge, weil ihr
 | Ergänzung 36<br>`proriv:project:rapport-number` | Wer vergibt die Rapportnummer und muss sie zu einem bestehenden Nummernkreis passen? Bleibt die Nummer bei Ergänzungen über mehrere Tage und bei einer Korrektur erhalten? | **Klären.** Bestehenden Nummernkreis und Versionsbezug anhand der Rapporte prüfen; Nummer und unveränderliche interne ID sind verschieden. |
 | Ergänzung 37<br>`proriv:project:rapport-deadline` | Muss der Rapport vor Verlassen der Baustelle beziehungsweise am selben Tag versendet werden, oder dürft ihr Leistungen gesammelt einreichen? Wer verfolgt fehlende Rapporte? | **Klären.** Betriebliche Einreichungsfrist und Nachverfolgung fehlender Rapporte bestimmen; Zeitraum aus Team 9 reicht dafür nicht. |
 | Ergänzung 38<br>`proriv:project:time-report-link` | Muss ein Rapport mit bestimmten Schichten oder Zeiteinträgen verbunden sein? Darf ich ihn ohne aktive Zeiterfassung erstellen, und wie ordnet ihr die persönlichen Stunden einem gemeinsamen Rapport zu? | **Klären.** Beziehung gemeinsamer Rapport/persönliche Stunden entscheiden; nicht voraussetzen, dass nur eine aktive Schicht einen Rapport erlaubt. |
+| Ergänzung 65<br>`proriv:project:scope-rapport-channels` | Müssen SMS und E-Mail beide zum ersten Start funktionieren, oder reicht zunächst ein Versandkanal für Rapporte? | **Klären.** Erste Version abgrenzen. Einen oder beide Versandkanäle festlegen; Kontakt- und Zustellfehler sind die nachgelagerten Detailfragen. |
 
 ### 09 · Kundenantwort und Unterschrift
 
@@ -225,6 +232,7 @@ Verwandte Originalfragen bleiben eigenständige gespeicherte Einträge, weil ihr
 | Ergänzung 42<br>`proriv:project:partial-acceptance` | Darf der Kunde einzelne Positionen bestätigen und andere ablehnen? Was geschieht dann mit dem unstrittigen Teil: eigener Rapport, eigene Rechnung oder warten, bis alles geklärt ist? | **Falls relevant.** Nur wenn Teilannahmen tatsächlich vorkommen/gebraucht werden; mit Ablehnung aus Rolle 36 klären. |
 | Ergänzung 43<br>`proriv:project:late-customer-response` | Der Kunde antwortet erst nach dem Lohnabschluss oder nach Rechnungsstellung. Wer klärt den Fall und was darf noch an Rapport, Rechnung und Stunden geändert werden? | **Falls relevant.** Realer Fall nach Lohnabschluss/Rechnung: zulässige Korrektur und zuständige Person klären, keine rückwirkende automatische Neuberechnung voraussetzen. |
 | Ergänzung 44<br>`proriv:project:customer-gates` | Welche Schritte müssen auf die Kundenbestätigung warten: Stundenübertragung, Stundenprüfung, Lohnabschluss oder Rechnungsstellung? Was gilt bei Ablehnung, fehlender Unterschrift und keiner Antwort? | **Klären.** Zentrale Abhängigkeiten der Kundenantwort für Stunden, Lohn und Rechnung festlegen. Technische Übertragung und Zustimmung sind verschiedene Zustände. |
+| Ergänzung 66<br>`proriv:project:scope-customer-confirmation` | Braucht ihr zum ersten Start sowohl Bestätigen und Ablehnen über einen Link als auch die Unterschrift vor Ort, oder zunächst eines dieser Verfahren? | **Klären.** Erste Version abgrenzen. Benötigte Bestätigungswege wählen; Bedeutung und Berechtigung der Bestätigung bleiben eigene Entscheidungen. |
 
 ### 10 · Tripletex, Stundenprüfung und Buchhaltung
 
@@ -245,6 +253,7 @@ Verwandte Originalfragen bleiben eigenständige gespeicherte Einträge, weil ihr
 | Ergänzung 48<br>`proriv:project:tripletex-report-view` | Zeigt uns an einem echten Beispiel: Wo muss der Vorarbeiter beim Prüfen der Stunden Leistungen, Fotos und Kundenantwort sehen? Reicht ein Link oder braucht ihr PDF beziehungsweise Anhänge in Tripletex? | **Klären.** Gewünschte Ansicht anhand eines Stunden-/Rapportbeispiels prüfen. Link/PDF/Anhänge als praktikable Lösungen vergleichen. |
 | Ergänzung 49<br>`proriv:project:tripletex-feedback` | Welche Rückmeldungen sollen in unserer App erscheinen: Stunden empfangen, geprüft, korrigiert oder abgelehnt? Wer muss Änderungen oder Kommentare aus Tripletex sehen und darauf reagieren? | **Teamvorschlag.** Benötigte Rückmeldungen aus echtem Arbeitsablauf ableiten; anschließend technische Verfügbarkeit verifizieren, keine unbestätigte Rückkanal-API versprechen. |
 | Ergänzung 50<br>`proriv:project:tripletex-test-owner` | Wer kann die Verbindung zu eurem Tripletex-Konto freigeben und mit uns einen Test durchführen? Welche Mitarbeiter-, Projekt- und Aktivitätsdaten dürfen wir dafür verwenden? | **Klären.** Kontoverantwortlichen und realistische Testdaten benennen. Technische Zugangskonfiguration bereitet das Team vor. |
+| Ergänzung 67<br>`proriv:project:scope-tripletex-payload` | Müssen wir zum ersten Start nur Arbeitsstunden nach Tripletex übertragen oder zusätzlich Rapporte und Dokumente? | **Klären.** Erste Version abgrenzen. Stundenübergabe versus zusätzliche Rapport-/Dokumentübergabe festlegen. Gewünschter Umfang ist noch kein Nachweis der API-Machbarkeit. |
 
 ### 11 · Fehler, Änderungen und Stornierung
 
@@ -259,6 +268,7 @@ Verwandte Originalfragen bleiben eigenständige gespeicherte Einträge, weil ihr
 | Rollenfrage 26<br>`amruddy:roles:26` | Ich finde einen Fehler. Wem gebe ich den Rapport zurück, wer korrigiert ihn und wie sehe ich danach die Änderungen? | **Bündeln.** Korrekturweg aus Team 13 / sent-report-correction praktisch prüfen. Keine unbestätigte Vorarbeiterfreigabe hinzufügen. |
 | Ergänzung 51<br>`proriv:project:absent-author-correction` | Ein Rapport muss korrigiert werden, aber sein Ersteller ist krank, im Urlaub oder ausgeschieden. Wer darf ihn bearbeiten und wer informiert den Kunden über die neue Version? | **Falls relevant.** Vertretung bei ausfallendem Ersteller konkret festlegen. Mit Team 5 / Korrekturrechten bündeln, Originalautor erhalten. |
 | Ergänzung 62<br>`proriv:project:sent-report-correction` | Wer darf einen bereits gesendeten oder unterschriebenen Rapport korrigieren? Muss der Kunde die neue Version erneut bestätigen? | **Klären.** Neue Lücke aus alter Rollenfrage: Änderungsrecht nach Versand/Unterschrift und erneute Kundenbestätigung. Rückgabe eines Entwurfs ist ein anderer Vorgang. |
+| Ergänzung 68<br>`proriv:project:scope-report-versions` | Muss die erste Version bereits gesendete oder unterschriebene Rapporte korrigieren und erneut zur Kundenbestätigung verschicken können? | **Klären.** Erste Version abgrenzen. Versions- und erneuten Bestätigungsablauf zum Start verlangen oder gezielt später planen. Rechte und Bestätigungsregel bleiben Detailfragen. |
 
 ### 12 · Abschluss und Archiv
 
@@ -268,6 +278,7 @@ Verwandte Originalfragen bleiben eigenständige gespeicherte Einträge, weil ihr
 | Teamfrage 42<br>`amruddy:team:42` | Wie lange werden Rapporte, Fotos, Stunden und Geodaten aufbewahrt? Wer legt diese Fristen auf Kundenseite fest? | **Klären.** Kundenseitige Zuständigkeit und vorhandene Aufbewahrungsregeln erheben. Rechtliche Fristen nicht aus einer Teamantwort ableiten. |
 | Rollenfrage 10<br>`amruddy:roles:10` | Ich schließe eine Baustelle. Wer meldet die abgeschlossene Arbeit und was muss zuvor geprüft werden? | **Bündeln.** Mit Team 25 Abschlusskriterien bestimmen. Rechnung und Baustellenabschluss sind nicht automatisch dasselbe Ereignis. |
 | Ergänzung 52<br>`proriv:project:reopen-site` | Wer darf eine abgeschlossene Baustelle für Nacharbeit wieder öffnen? Arbeitet ihr mit dem alten Auftrag und Preisstand oder mit einem neuen Auftrag, und wer sieht die archivierten Unterlagen? | **Falls relevant.** Bei Nacharbeit auf abgeschlossener Baustelle alten/neuen Auftrag und Preisstand klären; mit Team 25 / Rolle 10 verbinden. |
+| Ergänzung 69<br>`proriv:project:scope-site-closure` | Soll die Baustelle in unserer App abgeschlossen werden, oder übernehmen wir ihren Abschlussstatus aus Tripletex? | **Klären.** Erste Version abgrenzen. Führendes System für Abschlussstatus festlegen; technische Übernahme aus Tripletex muss das Team prüfen. |
 
 ### 13 · Ohne Netz und Synchronisierung
 
@@ -296,6 +307,8 @@ Verwandte Originalfragen bleiben eigenständige gespeicherte Einträge, weil ihr
 | Ergänzung 58<br>`proriv:project:outage-recovery` | Wie arbeitet die Mannschaft bei einem längeren App-Ausfall weiter und wer wird kontaktiert? Welche Ausfallzeit und welcher Datenverlust sind akzeptabel, und wer prüft die Wiederherstellung? | **Teamvorschlag.** Praktischen Ersatzablauf mit Team 45 abstimmen; Wiederherstellung und Sicherungsstrategie technisch vorschlagen und prüfen. |
 | Ergänzung 59<br>`proriv:project:app-distribution` | Wie sollen die Mitarbeiter die App auf Android und iPhone erhalten und aktualisieren? Wer hilft bei Installation, Berechtigungen und dem ersten echten Einsatz, und welche Geräte stellt ihr für den Test bereit? | **Teamvorschlag.** Aus tatsächlichen Geräten einen Installations-/Einführungsweg vorbereiten und testen. Keine Plattform-/Storewahl ohne konkrete Notwendigkeit vom Kunden fordern. |
 | Ergänzung 60<br>`proriv:project:working-languages` | Welche Sprachen brauchen Mitarbeiter in der App und Kunden im Rapport beziehungsweise auf der Bestätigungsseite? Müssen norwegische Leistungsnamen zusätzlich erklärt werden? | **Klären.** Benötigte Mitarbeiter- und Kundensprachen erheben; vollständige Übersetzung aller historischen Felder nicht automatisch voraussetzen. |
+| Ergänzung 70<br>`proriv:project:scope-pilot-rollout` | Starten wir mit einer Mannschaft auf wenigen Baustellen oder sofort im ganzen Unternehmen? | **Klären.** Erste Version abgrenzen. Pilot mit kleiner Mannschaft oder unternehmensweiter Start bestimmt Einführung und Testumfang. |
+| Ergänzung 71<br>`proriv:project:scope-first-platforms` | Müssen Android und iPhone gleichzeitig zum ersten Start bereit sein, oder können wir zunächst mit einer Plattform beginnen? | **Klären.** Erste Version abgrenzen. Gleichzeitiger Android-/iPhone-Start oder eine erste Plattform bestimmt Geräte- und Testumfang. |
 
 ## Nachvollziehbare Grundlagen
 

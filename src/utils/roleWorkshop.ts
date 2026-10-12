@@ -4,9 +4,9 @@ import type { WorkshopNote, WorkshopNotes } from '../db/indexedDb';
 import type { IsaQuestionNotes } from '../types';
 import { isaQuestionsForView } from './isaQuestions';
 
-export function readWorkshopRoute(hash: string): { mode: 'process' | 'roles' | 'questions'; roleId?: JourneyRoleId; stepId?: string; interactionId?: string } {
+export function readWorkshopRoute(hash: string): { mode: 'process' | 'roles' | 'questions'; roleId?: JourneyRoleId; stepId?: string; interactionId?: string; planning?: boolean } {
   const [, roleId, stepId, interactionId] = hash.replace(/^#\/?/, '').split('/');
-  if (roleId === 'questions') return { mode: 'questions' };
+  if (roleId === 'questions') return { mode: 'questions', ...(stepId === 'etappen' ? { planning: true } : {}) };
   if (roleId === 'roles') return { mode: 'roles', roleId: undefined, stepId: undefined };
   const role = ROLE_JOURNEYS.find(item => item.id === roleId);
   if (role && stepId === 'interaction') {

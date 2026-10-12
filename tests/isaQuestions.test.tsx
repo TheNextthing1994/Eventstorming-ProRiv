@@ -6,6 +6,9 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { ISA_TEAM_QUESTIONS, ISA_QUESTION_GROUPS, ISA_QUESTION_SOURCE } from '../src/data/isaTeamQuestions';
 import { IsaQuestionCard, IsaQuestionOverview } from '../src/components/IsaQuestionsWorkshop';
+import { IsaQuestionsWorkshop } from '../src/components/IsaQuestionsWorkshop';
+import { IsaQuestionDepthControl } from '../src/components/IsaQuestionDepthControl';
+import { ISA_QUESTION_DEPTH_PACKETS, isaDepthForQuestion, isaQuestionsAtDepth, parseIsaQuestionDepth } from '../src/data/isaQuestionDepth';
 import { ISA_QUESTION_STAGES } from '../src/data/isaQuestionStages';
 import { ISA_PROJECT_SOURCE_COVERAGE } from '../src/data/isaQuestionCoverage';
 import { DOMAIN_EVENTS_LIST } from '../src/db/knowledgeSeed';
@@ -15,6 +18,70 @@ import { loadIsaQuestionNotes, saveIsaQuestionNotes, exportStateAsJson, loadEnti
 
 const first = ISA_TEAM_QUESTIONS[0];
 const second = ISA_TEAM_QUESTIONS[1];
+
+test('interview depth adds curated questions cumulatively and restores every source question at 100 percent', () => {
+  assert.deepEqual(ISA_QUESTION_DEPTH_PACKETS.map(packet => packet.value), [0, 20, 40, 60, 80, 100]);
+  assert.deepEqual(ISA_QUESTION_DEPTH_PACKETS.map(packet => packet.questionIds.length), [12, 32, 54, 92, 131, 155]);
+  let previous = new Set<string>();
+  for (const packet of ISA_QUESTION_DEPTH_PACKETS) {
+    const entries = isaQuestionsAtDepth(packet.value);
+    assert.equal(entries.length, new Set(entries.map(question => question.id)).size);
+    const current = new Set(entries.map(question => question.id));
+    for (const id of previous) assert.ok(current.has(id), `${packet.value} lost ${id}`);
+    assert.ok(current.size > previous.size);
+    previous = current;
+  }
+  assert.deepEqual(new Set(isaQuestionsAtDepth(100).map(question => question.id)), new Set(ISA_TEAM_QUESTIONS.map(question => question.id)));
+  const minimum = new Set(isaQuestionsAtDepth(0).map(question => question.id));
+  for (const id of ['proriv:project:presence-method', 'proriv:project:rapport-sender-policy', 'proriv:project:customer-gates', 'amruddy:team:21']) assert.ok(minimum.has(id));
+  assert.ok(!minimum.has('amruddy:team:14'), 'Already evidenced MVA question does not consume the minimal meeting');
+});
+
+test('changing interview scope leaves checked questions, private comments and Isa export untouched', () => {
+  const tax = ISA_TEAM_QUESTIONS.find(question => question.id === 'amruddy:roles:44')!;
+  const core = isaQuestionsAtDepth(0)[0];
+  let notes = changeIsaQuestionNote({}, tax.id, { includeInIsa: true, comment: 'Interne Notiz bleibt erhalten', proposal: 'Gespeicherter Vorschlag' });
+  notes = changeIsaQuestionNote(notes, core.id, { includeInIsa: true });
+  const before = isaQuestionsBackup(notes);
+  for (const packet of ISA_QUESTION_DEPTH_PACKETS) {
+    for (const view of ['all', 'team', 'roles', 'project'] as const) {
+      const entries = isaQuestionsAtDepth(packet.value, view);
+      assert.ok(entries.every(question => view === 'all' || question.catalog === view));
+    }
+    assert.equal(isaTemplateMarkdown(notes, 'ru'), isaTemplateMarkdown(parseIsaQuestionsBackup(before), 'ru'));
+  }
+  assert.ok(!isaQuestionsAtDepth(0).includes(tax));
+  assert.ok(isaTemplateMarkdown(notes, 'ru').includes(tax.text.ru));
+  assert.equal(notes[tax.id].comment, 'Interne Notiz bleibt erhalten');
+  assert.equal(notes[tax.id].includeInIsa, true);
+  assert.equal(isaDepthForQuestion(tax.id), 100);
+});
+
+test('stored depth accepts only the six supported values and old or malformed preferences use the minimum', () => {
+  for (const value of [0, 20, 40, 60, 80, 100]) assert.equal(parseIsaQuestionDepth(String(value)), value);
+  for (const value of [null, undefined, '', 'bad', '15', 101, -20, {}, NaN]) assert.equal(parseIsaQuestionDepth(value), 0);
+  const invitation = 'proriv:project:invitation-channel';
+  const value = isaDepthForQuestion(invitation);
+  assert.ok(isaQuestionsAtDepth(value).some(question => question.id === invitation));
+  assert.ok(!isaQuestionsAtDepth(0).some(question => question.id === invitation));
+});
+
+test('the depth slider is at the top of the questions page with six accessible steps and actual counts', () => {
+  for (const language of ['de', 'ru'] as const) {
+    const html = renderToStaticMarkup(<IsaQuestionDepthControl value={20} onChange={() => {}} hiddenSelected={2} language={language} />);
+    for (const attribute of ['type="range"', 'min="0"', 'max="100"', 'step="20"', 'value="20"']) assert.ok(html.includes(attribute));
+    assert.equal((html.match(/aria-pressed=/g) || []).length, 6);
+    assert.ok(html.includes('32'));
+    assert.ok(html.includes(language === 'de' ? 'Gesprächsumfang' : 'Объём обсуждения'));
+    assert.ok(html.includes(language === 'de' ? 'gemessene Wissensabdeckung' : 'измеренный охват знаний'));
+    assert.ok(html.includes(language === 'de' ? 'bleiben in eurer Isa-Vorlage' : 'остаются в вашей подборке'));
+  }
+  const page = renderToStaticMarkup(<IsaQuestionsWorkshop language="de" />);
+  assert.ok(page.includes('id="isa-question-depth"'));
+  assert.ok(page.indexOf('id="isa-question-depth"') < page.indexOf('aria-label="Fragenkatalog"'));
+  assert.ok(page.indexOf('id="isa-question-depth"') < page.indexOf('placeholder="Frage oder Stichwort'));
+  assert.ok(page.includes('Minimum'));
+});
 
 test('every uploaded question survives verbatim, including both numbering sequences and valid topic groups', () => {
   const source = readFileSync(ISA_QUESTION_SOURCE.path);

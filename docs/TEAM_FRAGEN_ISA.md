@@ -1,6 +1,27 @@
 # Team-Fragen und Isa-Vorlage · ProRiv (Isa's Projekt)
 
-Stand: 11.10.2026. Einstieg: **Fragen für Isa / Вопросы Исе**, Route `#/workshop/questions`.
+Stand: 12.10.2026. Einstieg: **Fragen für Isa / Вопросы Исе**, Route `#/workshop/questions`.
+
+## Regler für das Gespräch
+
+**Gesprächsumfang** steht direkt unter dem dunklen Kopfbereich und über Katalogfiltern und Suche. Standard ist **Minimum · 12 Fragen**. Den Schieber ziehen oder eine der sechs Stufen anklicken. Die Einstellung wird in diesem Browser behalten.
+
+| Regler | Paket | Fragen insgesamt |
+| --- | --- | --- |
+| Minimum | Offene Entscheidungen mit dem größten Einfluss auf den Ablauf | 12 |
+| 20 % | Kernablauf, Zuständigkeiten und Abrechnungsregeln | 32 |
+| 40 % | Wichtige Ausnahmen und Fehlerfälle | 54 |
+| 60 % | Alltag, Vorbereitung und Übergaben | 92 |
+| 80 % | Vertiefung, weitere Rollen und Einführung | 131 |
+| 100 % | Vollständiger Katalog | 155 |
+
+Die Stufen sind kuratierte, aufeinander aufbauende Fragenpakete. Prozentwerte bedeuten Gesprächstiefe; sie behaupten keine gemessene Wissensabdeckung und sind keine Quote aus 155 Fragen. Das Minimum ist eine Startauswahl für das Gespräch, keine automatische Freigabe zur Umsetzung.
+
+Die kleinste Stufe fragt nach Rechten, Stammdatenführung, Ankunftsnachweis, Pausen, Pflichtfeldern, Preispriorität, kombinierten Zuschlägen, Rapportversand, Abhängigkeiten von der Kundenantwort, Tripletex-Ausgabe, Offline-Funktionen und dem Umfang der ersten Version. Bereits belegte MVA-Fragen werden erst in der vollständigen Ansicht gezeigt.
+
+Der Regler verändert ausschließlich die Anzeige. Ausgeblendete Haken, Teamkommentare und Vorschläge bleiben gespeichert. Die Isa-Vorlage enthält weiterhin **alle angehakten Fragen**, auch außerhalb der aktuellen Stufe; in diesem Fall zeigt der Regler einen Hinweis. Katalogfilter und Suche gelten innerhalb des gewählten Pakets. **100 %** zeigt den gesamten Bestand.
+
+Umsetzung: `src/data/isaQuestionDepth.ts`, `src/components/IsaQuestionDepthControl.tsx` und die bestehende Fragenansicht. Die Browserpräferenz `isa_question_depth_v1` ist von den Frage-/Notizdaten getrennt.
 
 ## Für das Teamgespräch
 

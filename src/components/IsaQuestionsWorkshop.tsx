@@ -2,9 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, CheckCheck, ClipboardList, Copy, Download, FileText, Search, Upload } from 'lucide-react';
 import { ISA_TEAM_QUESTIONS, type IsaQuestionView, type IsaTeamQuestion } from '../data/isaTeamQuestions';
 import { ISA_QUESTION_STAGES } from '../data/isaQuestionStages';
+import { ISA_QUESTION_DEPTH_STORAGE_KEY, isaDepthForQuestion, isaQuestionsAtDepth, parseIsaQuestionDepth, type IsaQuestionDepth } from '../data/isaQuestionDepth';
+import { IsaQuestionDepthControl } from './IsaQuestionDepthControl';
 import type { IsaQuestionNote, IsaQuestionNotes, Language } from '../types';
 import { loadIsaQuestionNotes, saveIsaQuestionNotes } from '../db/indexedDb';
-import { changeIsaQuestionNote, EMPTY_ISA_QUESTION_NOTE, isaCatalogMarkdown, isaGroupsForView, isaQuestionGroupId, isaQuestionLabel, isaQuestionSources, isaQuestionsForView, isaQuestionsBackup, isaTemplateMarkdown, parseIsaQuestionsBackup, relatedIsaQuestions, selectedIsaQuestions } from '../utils/isaQuestions';
+import { changeIsaQuestionNote, EMPTY_ISA_QUESTION_NOTE, isaCatalogMarkdown, isaGroupsForView, isaQuestionGroupId, isaQuestionLabel, isaQuestionSources, isaQuestionsBackup, isaTemplateMarkdown, parseIsaQuestionsBackup, relatedIsaQuestions, selectedIsaQuestions } from '../utils/isaQuestions';
 
 function Text({ text, language }: { text: { de: string; ru: string }; language: Language }) {
   return <>{language === 'ru' ? text.ru : text.de}{language === 'bilingual' && <span lang="ru" className="mt-3 block font-normal text-slate-500">{text.ru}</span>}</>;
@@ -89,10 +91,10 @@ export function IsaQuestionOverview({ questions, notes, language, editable, onOp
             <input
               type="text"
               disabled={!editable}
-              value={note?.proposal ?? note?.comment ?? ''}
+              value={note?.proposal ?? ''}
               onChange={event => {
                 const val = event.target.value;
-                onUpdate?.(question.id, { proposal: val, comment: val, reviewed: true });
+                onUpdate?.(question.id, { proposal: val, reviewed: true });
               }}
               onKeyDown={event => { if (event.key === 'Enter') toggleField(question.id); }}
               placeholder={t('Vorschlag des Teams …', 'Предложение команды …')}
@@ -143,6 +145,10 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
   const [saveStatus, setSaveStatus] = useState<'loading' | 'saving' | 'saved' | 'error'>('loading');
   const [loadError, setLoadError] = useState(false);
   const [catalog, setCatalog] = useState<IsaQuestionView>('all');
+  const [depth, setDepth] = useState<IsaQuestionDepth>(() => {
+    try { return typeof window === 'undefined' ? 0 : parseIsaQuestionDepth(window.localStorage.getItem(ISA_QUESTION_DEPTH_STORAGE_KEY)); }
+    catch { return 0; }
+  });
   const [activeId, setActiveId] = useState('amruddy:team:01');
   const [filter, setFilter] = useState<'all' | 'pending' | 'selected'>('all');
   const [search, setSearch] = useState('');
@@ -153,6 +159,11 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
   const [importError, setImportError] = useState(false);
   const [pendingImport, setPendingImport] = useState<IsaQuestionNotes | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    try { window.localStorage.setItem(ISA_QUESTION_DEPTH_STORAGE_KEY, String(depth)); }
+    catch { /* Interview filtering works even when preference storage is unavailable. */ }
+  }, [depth]);
 
   useEffect(() => {
     let alive = true;
@@ -197,10 +208,12 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
     if (loaded) void persist(changeIsaQuestionNote(notesRef.current, id, change));
   };
 
-  const catalogQuestions = isaQuestionsForView(catalog);
-  const groups = isaGroupsForView(catalog);
+  const catalogQuestions = isaQuestionsAtDepth(depth, catalog);
   const groupId = (question: IsaTeamQuestion) => isaQuestionGroupId(question, catalog);
+  const groups = isaGroupsForView(catalog).filter(group => catalogQuestions.some(question => groupId(question) === group.id));
   const selected = selectedIsaQuestions(notes);
+  const depthIds = new Set(isaQuestionsAtDepth(depth).map(question => question.id));
+  const hiddenSelected = selected.filter(question => !depthIds.has(question.id)).length;
   const reviewed = catalogQuestions.filter(question => notes[question.id]?.reviewed).length;
   const query = search.trim().toLocaleLowerCase();
   const visible = catalogQuestions.filter(question => (
@@ -223,11 +236,13 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
     setCatalog(next);
     setFilter('all');
     setSearch('');
-    setActiveId(isaQuestionsForView(next)[0].id);
+    const first = isaQuestionsAtDepth(depth, next)[0];
+    if (first) setActiveId(first.id);
   };
   const openQuestion = (id: string) => {
     const question = ISA_TEAM_QUESTIONS.find(question => question.id === id);
     if (!question) return;
+    if (!depthIds.has(id)) setDepth(isaDepthForQuestion(id));
     if (catalog !== 'all' && question.catalog !== catalog) setCatalog('all');
     if (!visible.some(question => question.id === id)) { setSearch(''); setFilter('all'); }
     setActiveId(id);
@@ -259,6 +274,8 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
       <button type="button" disabled={!loaded} onClick={() => { setPreview(!preview); setCopyStatus('idle'); }} className="rounded-xl bg-emerald-400 hover:bg-emerald-300 text-emerald-950 px-4 py-3 text-sm font-bold inline-flex gap-2 items-center disabled:opacity-50">{preview ? <ArrowLeft className="w-4 h-4" /> : <FileText className="w-4 h-4" />}{preview ? t('Zurück zu den Fragen', 'Вернуться к вопросам') : t('Isa-Vorlage ansehen', 'Посмотреть вопросы Исе')} {!preview && <span className="rounded-md bg-emerald-950/10 px-2 py-0.5 tabular-nums">{selected.length}</span>}</button>
     </div>
 
+    <IsaQuestionDepthControl value={depth} onChange={setDepth} hiddenSelected={hiddenSelected} language={language} />
+
     <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
       <p role="status" aria-live="polite" className={saveStatus === 'error' ? 'text-rose-800' : ''}>{saveMessage}{saveStatus === 'error' && loaded && <button type="button" onClick={() => void persist(notesRef.current)} className="ml-2 underline font-semibold">{t('Erneut speichern', 'Сохранить ещё раз')}</button>}</p>
       <span>{t('Für ein anderes Gerät oder fürs Team: Sicherung herunterladen und dort laden.', 'Для другого устройства или команды: скачайте копию и загрузите её там.')}</span>
@@ -280,11 +297,11 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
     </div> : <>
       <div className="flex flex-wrap justify-between items-start gap-3">
         <div className="inline-flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1" role="group" aria-label={t('Fragenkatalog', 'Список вопросов')}>
-          {(['all', 'team', 'roles', 'project'] as const).map(item => <button key={item} type="button" aria-pressed={catalog === item} onClick={() => switchCatalog(item)} className={`px-3 py-2 rounded-lg text-sm font-semibold ${catalog === item ? 'bg-emerald-700 text-white' : 'text-slate-500 hover:bg-slate-50'}`}>{item === 'all' ? t('Gesamtkatalog', 'Все вопросы') : item === 'team' ? t('Original · Teamfragen', 'Оригинал · основные') : item === 'roles' ? t('Original · Ich-Perspektiven', 'Оригинал · от первого лица') : t('Ergänzende Projektfragen', 'Дополнения по проекту')} · {isaQuestionsForView(item).length}</button>)}
+          {(['all', 'team', 'roles', 'project'] as const).map(item => <button key={item} type="button" aria-pressed={catalog === item} onClick={() => switchCatalog(item)} className={`px-3 py-2 rounded-lg text-sm font-semibold ${catalog === item ? 'bg-emerald-700 text-white' : 'text-slate-500 hover:bg-slate-50'}`}>{item === 'all' ? depth === 100 ? t('Gesamtkatalog', 'Все вопросы') : t('Gesprächsauswahl', 'Выборка для обсуждения') : item === 'team' ? t('Original · Teamfragen', 'Оригинал · основные') : item === 'roles' ? t('Original · Ich-Perspektiven', 'Оригинал · от первого лица') : t('Ergänzende Projektfragen', 'Дополнения по проекту')} · {isaQuestionsAtDepth(depth, item).length}</button>)}
         </div>
         <div className="text-right text-xs text-slate-500 pt-1"><p><strong className="text-slate-800 tabular-nums">{reviewed} / {catalogQuestions.length}</strong> {t('durchgesehen', 'обсудили')}</p><p className="mt-1"><strong className="text-emerald-800 tabular-nums">{selected.length}</strong> {t('für Isa · gesamter Katalog', 'для Исы · из всех вопросов')}</p></div>
       </div>
-      <p className="text-sm leading-relaxed text-slate-500">{t('95 Originalfragen bleiben erhalten. ', '95 исходных вопросов сохранены. ')}{isaQuestionsForView('project').length} {t('Ergänzungen klären weitere Entscheidungen aus dem bisherigen Projekt. Im Gesamtkatalog stehen alle Fragen nach Arbeitsschritten. Verwandte Fragen zeigen andere Perspektiven.', 'дополнений уточняют другие решения проекта. Все вопросы сгруппированы по этапам работы. Связанные вопросы раскрывают другие точки зрения.')}</p>
+      <details className="text-xs text-slate-500"><summary className="cursor-pointer font-semibold">{t('Vollständiger Fragenbestand · 155 Fragen', 'Полный список · 155 вопросов')}</summary><p className="mt-2 leading-relaxed">{t('95 Originalfragen und 60 Ergänzungen bleiben erhalten. Bei 100 % werden alle angezeigt. Die Gesprächsstufe blendet nur Fragen aus; eure Auswahl und Notizen werden nicht verändert.', '95 исходных вопросов и 60 дополнений сохранены. На уровне 100 % видны все вопросы. Уровень обсуждения только скрывает вопросы; ваши отметки и записи не меняются.')}</p></details>
       <div className="flex flex-wrap gap-2 items-center"><label className="relative flex-1 min-w-[200px]"><span className="sr-only">{t('Fragen durchsuchen', 'Поиск вопросов')}</span><Search className="absolute left-3 top-3 w-4 h-4 text-slate-400" /><input value={search} onChange={event => setSearch(event.target.value)} placeholder={t('Frage oder Stichwort suchen …', 'Поиск вопроса или слова …')} className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl bg-white border border-slate-200" /></label><select aria-label={t('Fragen filtern', 'Фильтр вопросов')} value={filter} onChange={event => setFilter(event.target.value as typeof filter)} className="rounded-xl border border-slate-200 bg-white p-2.5 text-sm"><option value="all">{t('Alle Fragen', 'Все вопросы')}</option><option value="pending">{t('Noch durchgehen', 'Ещё не обсудили')}</option><option value="selected">{t('Für Isa ausgewählt', 'Выбраны для Исы')}</option></select></div>
       <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)] items-start">
         <div className="lg:hidden grid sm:grid-cols-2 gap-2">
@@ -332,8 +349,8 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
                 {t('Nächster Abschnitt', 'Следующий раздел')} <ArrowRight className="inline w-4 h-4 ml-1" />
               </button>
             </div>
-          </> : <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500"><p>{t('Keine Fragen für diese Auswahl.', 'Нет вопросов для этого фильтра.')}</p><button type="button" onClick={() => { setSearch(''); setFilter('all'); }} className="mt-3 text-emerald-800 underline">{t('Alle Fragen anzeigen', 'Показать все вопросы')}</button></div>}
-          {reviewed === catalogQuestions.length && <div role="status" className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-950"><strong>{t('Diesen Katalog habt ihr vollständig durchgesehen.', 'Вы обсудили весь этот список.')}</strong><p className="mt-1">{t('Die angehakten Fragen und eure Vorschläge stehen jetzt in der Isa-Vorlage.', 'Отмеченные вопросы и ваши предложения находятся в подборке для Исы.')}</p><button type="button" onClick={() => setPreview(true)} className="mt-2 underline font-semibold">{t('Vorlage ansehen', 'Посмотреть подборку')}</button></div>}
+          </> : <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500"><p>{t('Keine Fragen für diese Auswahl.', 'Нет вопросов для этого фильтра.')}</p><button type="button" onClick={() => { setSearch(''); setFilter('all'); }} className="mt-3 text-emerald-800 underline">{t('Filter zurücksetzen', 'Сбросить фильтры')}</button>{depth !== 100 && <button type="button" onClick={() => { setDepth(100); setCatalog('all'); setSearch(''); setFilter('all'); }} className="mt-3 ml-4 text-emerald-800 underline">{t('Vollständigen Katalog öffnen', 'Открыть полный каталог')}</button>}</div>}
+          {catalogQuestions.length > 0 && reviewed === catalogQuestions.length && <div role="status" className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-950"><strong>{depth === 100 ? t('Diesen Katalog habt ihr vollständig durchgesehen.', 'Вы обсудили весь этот список.') : t('Diese Gesprächsauswahl habt ihr vollständig durchgesehen.', 'Вы обсудили всю эту подборку.')}</strong><p className="mt-1">{t('Die angehakten Fragen und eure Vorschläge stehen jetzt in der Isa-Vorlage.', 'Отмеченные вопросы и ваши предложения находятся в подборке для Исы.')}</p><button type="button" onClick={() => setPreview(true)} className="mt-2 underline font-semibold">{t('Vorlage ansehen', 'Посмотреть подборку')}</button></div>}
         </div>
       </div>
     </>}

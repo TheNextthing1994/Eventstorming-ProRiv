@@ -1,59 +1,120 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%" fill="none">
   <defs>
+    <!-- Background Gradient (Teal / Emerald) -->
     <linearGradient id="foreman-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#064e3b" />
-      <stop offset="50%" stop-color="#047857" />
-      <stop offset="100%" stop-color="#059669" />
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="45%" stop-color="#047857" />
+      <stop offset="100%" stop-color="#064e3b" />
     </linearGradient>
-    <linearGradient id="plan-blue" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0284c7" />
-      <stop offset="100%" stop-color="#0369a1" />
+
+    <!-- Clip path to keep torso within circle -->
+    <clipPath id="foreman-clip">
+      <circle cx="60" cy="60" r="54" />
+    </clipPath>
+
+    <!-- Skin Tones -->
+    <radialGradient id="skin-face" cx="48%" cy="46%" r="52%">
+      <stop offset="0%" stop-color="#fbd5c0" />
+      <stop offset="50%" stop-color="#f1ba9a" />
+      <stop offset="100%" stop-color="#d97757" />
+    </radialGradient>
+    <linearGradient id="skin-neck" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f1ba9a" />
+      <stop offset="100%" stop-color="#c45e3d" />
     </linearGradient>
-    <linearGradient id="foreman-shield" x1="0%" y1="0%" x2="100%" y2="100%">
+
+    <!-- White Safety Helmet Gradients -->
+    <linearGradient id="helmet-white" x1="20%" y1="0%" x2="80%" y2="100%">
       <stop offset="0%" stop-color="#ffffff" />
-      <stop offset="100%" stop-color="#f1f5f9" />
+      <stop offset="55%" stop-color="#f1f5f9" />
+      <stop offset="100%" stop-color="#cbd5e1" />
+    </linearGradient>
+    <linearGradient id="helmet-ridge" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="40%" stop-color="#f8fafc" />
+      <stop offset="100%" stop-color="#94a3b8" />
+    </linearGradient>
+
+    <!-- High-Vis Vest Gradient -->
+    <linearGradient id="vest-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a3e635" />
+      <stop offset="50%" stop-color="#84cc16" />
+      <stop offset="100%" stop-color="#65a30d" />
+    </linearGradient>
+
+    <!-- Badge Teal Gradient -->
+    <linearGradient id="badge-teal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="50%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#047857" />
     </linearGradient>
   </defs>
 
-  <!-- Background Badge -->
-  <circle cx="60" cy="60" r="54" fill="url(#foreman-bg)" stroke="#34d399" stroke-width="2.5" />
-  <circle cx="60" cy="60" r="48" stroke="#059669" stroke-width="1" stroke-dasharray="3 3" opacity="0.8" />
+  <!-- Outer Circle Background -->
+  <circle cx="60" cy="60" r="56" fill="url(#foreman-bg)" stroke="#2dd4bf" stroke-width="3.5" />
+  <!-- Dotted Inner Ring -->
+  <circle cx="60" cy="60" r="51" fill="none" stroke="#a7f3d0" stroke-width="0.8" stroke-dasharray="2.5 2" opacity="0.75" />
 
-  <!-- Rolled Blueprint / Architectural Site Plan -->
-  <g transform="rotate(-25 60 60)">
-    <rect x="22" y="55" width="76" height="11" rx="4" fill="url(#plan-blue)" stroke="#38bdf8" stroke-width="1.2" />
-    <ellipse cx="23" cy="60.5" rx="3" ry="5.5" fill="#bae6fd" stroke="#0284c7" stroke-width="1" />
-    <path d="M35 58 H85 M40 63 H75" stroke="#bae6fd" stroke-width="1" stroke-dasharray="2 2" opacity="0.8" />
+  <!-- Avatar Character (Clipped) -->
+  <g clip-path="url(#foreman-clip)">
+    <!-- Base Torso / Dark Polo Base -->
+    <path d="M16 120 C16 92 25 78 40 73 L80 73 C95 78 104 92 104 120 Z" fill="#1e293b" />
+
+    <!-- High-Vis Safety Vest -->
+    <path d="M26 120 C27 88 36 76 45 72 L75 72 C84 76 93 88 94 120 Z" fill="url(#vest-grad)" />
+
+    <!-- Silver Reflective Stripes -->
+    <!-- Left vertical band -->
+    <rect x="33" y="73" width="8" height="47" fill="#f8fafc" opacity="0.92" />
+    <!-- Right vertical band -->
+    <rect x="79" y="73" width="8" height="47" fill="#f8fafc" opacity="0.92" />
+    <!-- Lower horizontal band -->
+    <rect x="25" y="103" width="70" height="7" fill="#f8fafc" opacity="0.92" />
+
+    <!-- Neck & Dark Polo Shirt Collar -->
+    <path d="M48 50 H72 V74 C72 78 68 83 60 83 C52 83 48 78 48 74 Z" fill="url(#skin-neck)" />
+    <!-- Navy Polo V-Neck & Collar -->
+    <path d="M46 70 L60 84 L74 70 L69 68 L60 77 L51 68 Z" fill="#0f172a" />
+    <path d="M45 68 L53 78 L51 86 L43 73 Z" fill="#1e293b" />
+    <path d="M75 68 L67 78 L69 86 L77 73 Z" fill="#334155" />
+    <line x1="60" y1="84" x2="60" y2="120" stroke="#0f172a" stroke-width="1.8" />
+
+    <!-- Ears -->
+    <ellipse cx="43" cy="51" rx="3.2" ry="5.5" fill="#f1ba9a" stroke="#d97757" stroke-width="0.6" />
+    <ellipse cx="77" cy="51" rx="3.2" ry="5.5" fill="#f1ba9a" stroke="#d97757" stroke-width="0.6" />
+
+    <!-- Dark Hair under helmet -->
+    <path d="M41 44 C41 53 44 57 46 57 C48 57 47 48 45 44 Z" fill="#1e293b" />
+    <path d="M79 44 C79 53 76 57 74 57 C72 57 73 48 75 44 Z" fill="#1e293b" />
+
+    <!-- Faceless 3D Head -->
+    <path d="M44 43 C44 56 48 67 60 67 C72 67 76 56 76 43 C76 38 72 35 60 35 C48 35 44 38 44 43 Z" fill="url(#skin-face)" />
+
+    <!-- 3D White Safety Helmet -->
+    <!-- Dome -->
+    <path d="M38 39 C38 21 47 15 60 15 C73 15 82 21 82 39 Z" fill="url(#helmet-white)" />
+    <!-- Helmet Central Crest / Raised Ridge -->
+    <path d="M56.5 15 C57.5 14 62.5 14 63.5 15 L64.5 39 C64.5 40 63.5 41 60 41 C56.5 41 55.5 40 55.5 39 Z" fill="url(#helmet-ridge)" />
+    <!-- Front Brim -->
+    <path d="M35 39 C35 36.5 42 35.5 60 35.5 C78 35.5 85 36.5 85 39 C85 41.5 78 42.5 60 42.5 C42 42.5 35 41.5 35 39 Z" fill="#f8fafc" stroke="#cbd5e1" stroke-width="0.8" />
   </g>
 
-  <!-- Supervisor White Hard Hat (Bauleiter / Vorarbeiter Helm) -->
-  <g transform="translate(0, -6)">
-    <path d="M38 46 C38 31 47 22 60 22 C73 22 82 31 82 46 Z"
-          fill="url(#foreman-shield)" stroke="#cbd5e1" stroke-width="2" stroke-linejoin="round" />
-    <path d="M57 22 H63 V42 H57 Z" fill="#10b981" />
-    <circle cx="60" cy="30" r="3" fill="#047857" stroke="#ffffff" stroke-width="0.8" />
-    <path d="M43 42 C43 35 48 29 55 26" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
-    <path d="M32 46 C32 43 38 42 46 42 H74 C82 42 88 43 88 46 C88 49 82 51 74 51 H46 C38 51 32 49 32 46 Z"
-          fill="#e2e8f0" stroke="#94a3b8" stroke-width="2" />
-  </g>
+  <!-- Overlapping Bottom-Right Checklist Badge -->
+  <!-- Shadow -->
+  <circle cx="91.5" cy="91.5" r="23" fill="#000000" opacity="0.25" />
+  <!-- Thick White Rim -->
+  <circle cx="90" cy="90" r="23" fill="#ffffff" />
+  <!-- Inner Teal Circle -->
+  <circle cx="90" cy="90" r="19.5" fill="url(#badge-teal)" />
 
-  <!-- Supervisor Clipboard (Abnahme / Bauprotokoll / Stundenprüfung) -->
-  <g transform="translate(4, 0)">
-    <rect x="42" y="52" width="40" height="48" rx="4" fill="#f8fafc" stroke="#334155" stroke-width="2" />
-    <rect x="52" y="48" width="20" height="8" rx="2" fill="#94a3b8" stroke="#475569" stroke-width="1.5" />
-    <circle cx="62" cy="52" r="2" fill="#334155" />
-    
-    <!-- Document Content / Checklist lines -->
-    <line x1="49" y1="62" x2="75" y2="62" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" />
-    <line x1="49" y1="70" x2="68" y2="70" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" />
-    <line x1="49" y1="78" x2="72" y2="78" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" />
-    
-    <!-- Verified Green Checkmarks -->
-    <path d="M48 62 L50 64 L54 60" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M48 70 L50 72 L54 68" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    
-    <!-- Acceptance & Approval Seal (Abnahme-Siegel) -->
-    <circle cx="72" cy="88" r="14" fill="#047857" stroke="#ffffff" stroke-width="2" />
-    <path d="M66 88 L70 92 L78 84" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- White Clipboard with Green Checkmark -->
+  <g transform="translate(90 90)">
+    <!-- Clipboard Board -->
+    <rect x="-10" y="-10" width="20" height="23" rx="3.2" fill="#ffffff" />
+    <!-- Top Clip -->
+    <rect x="-3.5" y="-12.5" width="7" height="4" rx="1.5" fill="#cbd5e1" />
+    <rect x="-2" y="-13.5" width="4" height="2" rx="0.8" fill="#94a3b8" />
+    <!-- Checklist Green Checkmark -->
+    <path d="M-5.5 1.5 L-1.5 5.5 L6 -3" fill="none" stroke="#16a34a" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
   </g>
 </svg>

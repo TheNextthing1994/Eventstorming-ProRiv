@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%" fill="none">
+  <defs>
+    <!-- Background Gradient (Royal Purple / Indigo) -->
+    <linearGradient id="admin-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="45%" stop-color="#3730a3" />
+      <stop offset="100%" stop-color="#1e1b4b" />
+    </linearGradient>
+
+    <!-- Clip path to keep torso within circle -->
+    <clipPath id="admin-clip">
+      <circle cx="60" cy="60" r="54" />
+    </clipPath>
+
+    <!-- Skin Tones -->
+    <radialGradient id="admin-face" cx="48%" cy="46%" r="52%">
+      <stop offset="0%" stop-color="#fbd5c0" />
+      <stop offset="50%" stop-color="#f1ba9a" />
+      <stop offset="100%" stop-color="#d97757" />
+    </radialGradient>
+    <linearGradient id="admin-neck" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f1ba9a" />
+      <stop offset="100%" stop-color="#c45e3d" />
+    </linearGradient>
+
+    <!-- Hair Gradient -->
+    <linearGradient id="hair-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#334155" />
+      <stop offset="40%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+
+    <!-- Suit Jacket Dark Navy Gradient -->
+    <linearGradient id="suit-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#334155" />
+      <stop offset="40%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+
+    <!-- Golden Key Gradient -->
+    <linearGradient id="key-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="45%" stop-color="#facc15" />
+      <stop offset="85%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+
+    <!-- Badge Purple Gradient -->
+    <linearGradient id="badge-admin" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="50%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#3730a3" />
+    </linearGradient>
+  </defs>
+
+  <!-- Outer Circle Background -->
+  <circle cx="60" cy="60" r="56" fill="url(#admin-bg)" stroke="#818cf8" stroke-width="3.5" />
+  <!-- Dotted Inner Ring -->
+  <circle cx="60" cy="60" r="51" fill="none" stroke="#c7d2fe" stroke-width="0.8" stroke-dasharray="2.5 2" opacity="0.75" />
+
+  <!-- Avatar Character (Clipped) -->
+  <g clip-path="url(#admin-clip)">
+    <!-- Base Torso / Navy Suit Jacket -->
+    <path d="M16 120 C16 92 25 78 40 73 L80 73 C95 78 104 92 104 120 Z" fill="url(#suit-grad)" />
+
+    <!-- Neck -->
+    <path d="M48 50 H72 V74 C72 78 68 83 60 83 C52 83 48 78 48 74 Z" fill="url(#admin-neck)" />
+
+    <!-- White Collared Shirt -->
+    <polygon points="60,86 46,69 55,67 60,78 65,67 74,69" fill="#ffffff" />
+    <polygon points="46,69 55,67 52,78" fill="#f8fafc" />
+    <polygon points="74,69 65,67 68,78" fill="#e2e8f0" />
+
+    <!-- Navy Necktie -->
+    <!-- Knot -->
+    <polygon points="57,75 63,75 64,80 60,83 56,80" fill="#1e3a8a" />
+    <!-- Tie Blade -->
+    <polygon points="57.5,81 62.5,81 65.5,110 60,117 54.5,110" fill="#172554" />
+    <!-- Tie Highlight Line -->
+    <path d="M60 83 L60 117" stroke="#1e40af" stroke-width="0.8" opacity="0.7" />
+
+    <!-- Suit Jacket Lapels & Front -->
+    <!-- Left Lapel -->
+    <path d="M38 73 L53 87 L46 120 H26 Z" fill="#1e293b" />
+    <path d="M38 73 L53 87" stroke="#475569" stroke-width="0.8" />
+    <!-- Right Lapel -->
+    <path d="M82 73 L67 87 L74 120 H94 Z" fill="#0f172a" />
+    <path d="M82 73 L67 87" stroke="#334155" stroke-width="0.8" />
+
+    <!-- Ears -->
+    <ellipse cx="43" cy="51" rx="3.2" ry="5.5" fill="#f1ba9a" stroke="#d97757" stroke-width="0.6" />
+    <ellipse cx="77" cy="51" rx="3.2" ry="5.5" fill="#f1ba9a" stroke="#d97757" stroke-width="0.6" />
+
+    <!-- Faceless 3D Head -->
+    <path d="M44 43 C44 56 48 67 60 67 C72 67 76 56 76 43 C76 38 72 35 60 35 C48 35 44 38 44 43 Z" fill="url(#admin-face)" />
+
+    <!-- Styled Dark Hair -->
+    <path d="M39 44 C38 30 43 22 60 22 C74 22 81 29 81 44 C81 47 78 45 75 42 C70 38 63 41 57 41 C50 41 44 38 39 44 Z" fill="url(#hair-grad)" />
+    <!-- Hair Volume & Soft Side Highlight -->
+    <path d="M42 35 C45 28 53 25 62 25 C69 25 76 28 78 34" fill="none" stroke="#475569" stroke-width="1.2" opacity="0.6" stroke-linecap="round" />
+  </g>
+
+  <!-- Overlapping Bottom-Right Master Key Badge -->
+  <!-- Shadow -->
+  <circle cx="91.5" cy="91.5" r="23" fill="#000000" opacity="0.25" />
+  <!-- Thick White Rim -->
+  <circle cx="90" cy="90" r="23" fill="#ffffff" />
+  <!-- Inner Purple Circle -->
+  <circle cx="90" cy="90" r="19.5" fill="url(#badge-admin)" />
+
+  <!-- Golden Key (Tilted diagonally ~40°) -->
+  <g transform="translate(90 90) rotate(42)">
+    <!-- Key Head (Circle with center hole) -->
+    <circle cx="-5" cy="0" r="6.5" fill="url(#key-gold)" />
+    <circle cx="-5" cy="0" r="2.8" fill="url(#badge-admin)" />
+
+    <!-- Key Shaft -->
+    <rect x="0" y="-1.8" width="13.5" height="3.6" rx="1.2" fill="url(#key-gold)" />
+
+    <!-- Key Teeth / Bit prongs -->
+    <rect x="7" y="1" width="2.4" height="4.5" rx="0.6" fill="url(#key-gold)" />
+    <rect x="10.5" y="1" width="2.4" height="3.2" rx="0.6" fill="url(#key-gold)" />
+  </g>
+</svg>

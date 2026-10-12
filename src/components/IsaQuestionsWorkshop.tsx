@@ -262,12 +262,15 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
     if (next) setActiveId(next.id);
   };
 
+  const [viewMode, setViewMode] = useState<'single' | 'topic'>('topic');
+
   const openQuestion = (id: string) => {
     const question = ISA_TEAM_QUESTIONS.find(question => question.id === id);
     if (!question) return;
     if (!depthIds.has(id)) setDepth(isaDepthForQuestion(id));
     if (!visible.some(question => question.id === id)) { setSearch(''); setFilter('all'); }
     setActiveId(id);
+    setViewMode('single');
     setTimeout(() => {
       const el = document.getElementById(`question-${id}`);
       el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -330,7 +333,7 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
       <div className="flex flex-wrap gap-2 items-center"><label className="relative flex-1 min-w-[200px]"><span className="sr-only">{t('Fragen durchsuchen', 'Поиск вопросов')}</span><Search className="absolute left-3 top-3 w-4 h-4 text-slate-400" /><input value={search} onChange={event => setSearch(event.target.value)} placeholder={t('Frage oder Stichwort suchen …', 'Поиск вопроса или слова …')} className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl bg-white border border-slate-200" /></label><select aria-label={t('Fragen filtern', 'Фильтр вопросов')} value={filter} onChange={event => setFilter(event.target.value as typeof filter)} className="rounded-xl border border-slate-200 bg-white p-2.5 text-sm"><option value="all">{t('Alle Fragen', 'Все вопросы')}</option><option value="pending">{t('Noch durchgehen', 'Ещё не обсудили')}</option><option value="selected">{t('Für Isa ausgewählt', 'Выбраны для Исы')}</option></select></div>
       <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)] items-start">
         <div className="lg:hidden grid sm:grid-cols-2 gap-2">
-          <label className="text-xs font-semibold text-slate-500">{t('Thema', 'Тема')}<select value={current ? groupId(current) : ''} onChange={event => { const next = visible.find(question => groupId(question) === event.target.value); if (next) setActiveId(next.id); }} className="mt-1 rounded-xl w-full border border-slate-200 bg-white p-3 text-sm text-slate-800">{groups.filter(group => visible.some(question => groupId(question) === group.id)).map(group => <option key={group.id} value={group.id}>{language === 'ru' ? group.title.ru : group.title.de}</option>)}</select></label>
+          <label className="text-xs font-semibold text-slate-500">{t('Thema', 'Тема')}<select value={current ? groupId(current) : ''} onChange={event => { const next = visible.find(question => groupId(question) === event.target.value); if (next) { setActiveId(next.id); setViewMode('topic'); } }} className="mt-1 rounded-xl w-full border border-slate-200 bg-white p-3 text-sm text-slate-800">{groups.filter(group => visible.some(question => groupId(question) === group.id)).map(group => <option key={group.id} value={group.id}>{language === 'ru' ? group.title.ru : group.title.de}</option>)}</select></label>
           <label className="text-xs font-semibold text-slate-500">{t('Frage direkt wählen', 'Выбрать вопрос')}<select value={current?.id || ''} onChange={event => openQuestion(event.target.value)} className="mt-1 rounded-xl w-full border border-slate-200 bg-white p-3 text-sm text-slate-800">{visible.filter(question => current && groupId(question) === groupId(current)).map(question => <option key={question.id} value={question.id}>{isaQuestionLabel(question, language)} · {language === 'ru' ? question.title.ru : question.title.de}</option>)}</select></label>
         </div>
         <aside aria-label={t('Themen und Fragen', 'Темы и вопросы')} className="hidden lg:block rounded-2xl border border-slate-200 bg-white p-3 lg:sticky lg:top-4">
@@ -340,7 +343,7 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
             const groupQuestions = catalogQuestions.filter(question => groupId(question) === group.id);
             const done = groupQuestions.filter(question => notes[question.id]?.reviewed).length;
             const active = group.id === currentGroup?.id;
-            return <div key={group.id}><button type="button" disabled={!matches.length} aria-pressed={active} onClick={() => setActiveId(matches[0].id)} className={`w-full text-left rounded-xl px-3 py-2.5 flex justify-between gap-3 text-sm disabled:opacity-35 ${active ? 'bg-emerald-50 text-emerald-900 font-semibold' : 'text-slate-600 hover:bg-slate-50'}`}><span>{language === 'ru' ? group.title.ru : group.title.de}</span><span className="shrink-0 text-[11px] text-slate-400 tabular-nums">{done}/{groupQuestions.length}</span></button>{active && <div className="mt-1 mb-2 space-y-1 border-l border-emerald-100 ml-3 pl-2 max-h-[300px] overflow-y-auto">{matches.map(question => <button type="button" key={question.id} aria-current={question.id === current.id ? 'step' : undefined} onClick={() => openQuestion(question.id)} className={`w-full flex items-start gap-2 text-left rounded-lg p-2 text-xs leading-relaxed ${question.id === current.id ? 'bg-slate-100 text-slate-900 font-semibold' : 'text-slate-500 hover:bg-slate-50'}`}><span className="shrink-0 mt-0.5 text-slate-400 tabular-nums">{question.catalog === 'roles' ? 'R' : question.catalog === 'team' ? 'T' : '+'}{question.number}</span><span className="flex-1 line-clamp-2">{language === 'ru' ? question.title.ru : question.title.de}</span>{notes[question.id]?.includeInIsa ? <CheckCheck aria-label={t('Für Isa ausgewählt', 'Выбрано для Исы')} className="w-3.5 h-3.5 shrink-0 mt-1 text-emerald-700" /> : notes[question.id]?.reviewed && <Check aria-label={t('Durchgesehen', 'Обсудили')} className="w-3.5 h-3.5 shrink-0 mt-1 text-slate-400" />}</button>)}</div>}</div>;
+            return <div key={group.id}><button type="button" disabled={!matches.length} aria-pressed={active} onClick={() => { setActiveId(matches[0].id); setViewMode('topic'); }} className={`w-full text-left rounded-xl px-3 py-2.5 flex justify-between gap-3 text-sm disabled:opacity-35 ${active ? 'bg-emerald-50 text-emerald-900 font-semibold' : 'text-slate-600 hover:bg-slate-50'}`}><span>{language === 'ru' ? group.title.ru : group.title.de}</span><span className="shrink-0 text-[11px] text-slate-400 tabular-nums">{done}/{groupQuestions.length}</span></button>{active && <div className="mt-1 mb-2 space-y-1 border-l border-emerald-100 ml-3 pl-2 max-h-[300px] overflow-y-auto">{matches.map(question => <button type="button" key={question.id} aria-current={question.id === current.id ? 'step' : undefined} onClick={() => openQuestion(question.id)} className={`w-full flex items-start gap-2 text-left rounded-lg p-2 text-xs leading-relaxed ${question.id === current.id ? 'bg-slate-100 text-slate-900 font-semibold' : 'text-slate-500 hover:bg-slate-50'}`}><span className="shrink-0 mt-0.5 text-slate-400 tabular-nums">{question.catalog === 'roles' ? 'R' : question.catalog === 'team' ? 'T' : '+'}{question.number}</span><span className="flex-1 line-clamp-2">{language === 'ru' ? question.title.ru : question.title.de}</span>{notes[question.id]?.includeInIsa ? <CheckCheck aria-label={t('Für Isa ausgewählt', 'Выбрано для Исы')} className="w-3.5 h-3.5 shrink-0 mt-1 text-emerald-700" /> : notes[question.id]?.reviewed && <Check aria-label={t('Durchgesehen', 'Обсудили')} className="w-3.5 h-3.5 shrink-0 mt-1 text-slate-400" />}</button>)}</div>}</div>;
           })}</div>
         </aside>
         <div className="min-w-0 space-y-3">
@@ -348,32 +351,99 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
               <div className="flex flex-wrap justify-between gap-3 items-center">
                 <p className="text-sm font-semibold">{language === 'ru' ? currentGroup?.title.ru : currentGroup?.title.de}</p>
-                <span className="text-xs text-slate-500 font-medium">
-                  {visible.filter(q => groupId(q) === currentGroup?.id).length} {t('Fragen in diesem Abschnitt', 'вопросов в этом разделе')}
-                </span>
+                <div className="flex items-center gap-2">
+                  {viewMode === 'single' ? (
+                    <button
+                      type="button"
+                      onClick={() => setViewMode('topic')}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700"
+                    >
+                      ← {t('Alle Fragen dieses Themas anzeigen', 'Показать все вопросы этой темы')} ({visible.filter(q => groupId(q) === currentGroup?.id).length})
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-500 font-medium">
+                        {visible.filter(q => groupId(q) === currentGroup?.id).length} {t('Fragen in diesem Abschnitt', 'вопросов в этом разделе')}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setViewMode('single')}
+                        className="text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700"
+                      >
+                        {t('Nur ausgewählte Frage anzeigen', 'Показать только выбранный вопрос')}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
               {stage && <p className="text-xs leading-relaxed text-slate-500"><strong>{t('Ereignisse im Gesprächsmodell: ', 'События в модели обсуждения: ')}</strong><Text text={stage.events} language={language} /></p>}
               <p className="text-xs text-slate-500">{t('Klären: Wer handelt, welche Angaben werden benötigt, was folgt danach und was passiert bei Fehlern?', 'Уточнить: кто действует, какие данные нужны, что происходит дальше и что делать при ошибках?')}</p>
             </div>
 
-            <IsaQuestionOverview
-              questions={visible.filter(question => groupId(question) === currentGroup?.id)}
-              notes={notes}
-              proposalDrafts={proposalDrafts}
-              language={language}
-              editable={loaded}
-              onOpen={openQuestion}
-              onSelect={(id, includeInIsa) => update(id, { includeInIsa })}
-              onUpdate={update}
-              onDraftChange={changeProposalDraft}
-              onDraftClose={closeProposalDraft}
-            />
+            {viewMode === 'single' ? (
+              <div className="space-y-3">
+                <IsaQuestionCard
+                  question={current}
+                  note={notes[current.id] || EMPTY_ISA_QUESTION_NOTE}
+                  language={language}
+                  editable={loaded}
+                  onUpdate={change => update(current.id, change)}
+                  onOpenQuestion={openQuestion}
+                />
+                <div className="flex justify-between items-center pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('topic')}
+                    className="text-xs rounded-xl px-4 py-2.5 border border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    ← {t('Zurück zur Themen-Übersicht', 'Назад к списку вопросов темы')}
+                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      disabled={currentIndex <= 0}
+                      onClick={() => {
+                        const prev = visible[currentIndex - 1];
+                        if (prev) openQuestion(prev.id);
+                      }}
+                      className="text-xs rounded-xl px-3 py-2 border border-slate-200 bg-white disabled:opacity-40 hover:bg-slate-50"
+                    >
+                      ← {t('Vorherige Frage', 'Предыдущий вопрос')}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={currentIndex >= visible.length - 1}
+                      onClick={() => {
+                        const next = visible[currentIndex + 1];
+                        if (next) openQuestion(next.id);
+                      }}
+                      className="text-xs rounded-xl px-3 py-2 border border-slate-200 bg-white disabled:opacity-40 hover:bg-slate-50"
+                    >
+                      {t('Nächste Frage', 'Следующий вопрос')} →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <IsaQuestionOverview
+                questions={visible.filter(question => groupId(question) === currentGroup?.id)}
+                notes={notes}
+                proposalDrafts={proposalDrafts}
+                language={language}
+                editable={loaded}
+                onOpen={openQuestion}
+                onSelect={(id, includeInIsa) => update(id, { includeInIsa })}
+                onUpdate={update}
+                onDraftChange={changeProposalDraft}
+                onDraftClose={closeProposalDraft}
+              />
+            )}
 
             <div className="flex justify-between gap-2">
-              <button type="button" disabled={visibleGroups.indexOf(currentGroup!) <= 0} onClick={() => moveGroup(-1)} className="rounded-xl px-4 py-3 border border-slate-200 bg-white text-sm disabled:opacity-40 hover:bg-slate-50">
+              <button type="button" disabled={visibleGroups.indexOf(currentGroup!) <= 0} onClick={() => { moveGroup(-1); setViewMode('topic'); }} className="rounded-xl px-4 py-3 border border-slate-200 bg-white text-sm disabled:opacity-40 hover:bg-slate-50">
                 {t('Vorheriger Abschnitt', 'Предыдущий раздел')}
               </button>
-              <button type="button" disabled={visibleGroups.indexOf(currentGroup!) >= visibleGroups.length - 1} onClick={() => moveGroup(1)} className="rounded-xl px-4 py-3 border border-slate-200 bg-white text-sm disabled:opacity-40 hover:bg-slate-50">
+              <button type="button" disabled={visibleGroups.indexOf(currentGroup!) >= visibleGroups.length - 1} onClick={() => { moveGroup(1); setViewMode('topic'); }} className="rounded-xl px-4 py-3 border border-slate-200 bg-white text-sm disabled:opacity-40 hover:bg-slate-50">
                 {t('Nächster Abschnitt', 'Следующий раздел')} <ArrowRight className="inline w-4 h-4 ml-1" />
               </button>
             </div>

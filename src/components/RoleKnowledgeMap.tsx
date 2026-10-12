@@ -31,31 +31,212 @@ function Copy({ text, language }: { text: LocalizedText; language: Language }) {
   return <>{language === 'ru' ? text.ru : text.de}{language === 'bilingual' && <span lang="ru" className="mt-1 block text-[0.9em] font-normal opacity-70">{text.ru}</span>}</>;
 }
 
-// Purpose-built vector portraits: helmet and vest, helmet and clipboard,
-// office person and key. Role identity uses blue; knowledge uses traffic lights.
+// Dedicated SVG emblems for each ProRiv role:
+// - Admin: ProRiv_Admin_exakt.svg (Executive governance shield, administrator profile, master access key)
+// - Worker: ProRiv_Arbeiter_exakt.svg (Crossed tools, safety hard hat, shift time-tracker)
+// - Foreman: ProRiv_Vorarbeiter_exakt.svg (Architectural blueprint, supervisor helmet, verified checklist)
+export const ROLE_SVG_MAP: Record<JourneyRoleId, { file: string; title: string }> = {
+  admin: { file: '/ProRiv_Admin_exakt.svg', title: 'Admin' },
+  worker: { file: '/ProRiv_Arbeiter_exakt.svg', title: 'Arbeiter' },
+  foreman: { file: '/ProRiv_Vorarbeiter_exakt.svg', title: 'Vorarbeiter' }
+};
+
 export function RolePortrait({ roleId, className = '' }: { roleId: JourneyRoleId; className?: string }) {
-  return <svg viewBox="0 0 112 112" aria-hidden="true" className={className} fill="none">
-    <path d="M56 5 99 29v49L56 104 13 78V29Z" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="1.5" />
-    <g stroke="#1e3a5f" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
-      {roleId !== 'admin' ? <>
-        <path d="M35 38a21 21 0 0 1 42 0" fill="#f8b842" />
-        <path d="M50 18v18m12-18v18M31 39h50v7H31Z" fill="#f8b842" />
-        <path d="M39 47v8a17 17 0 0 0 34 0v-8" fill="#fff" />
-        <path d="M27 94V83c0-12 13-18 29-18s29 6 29 18v11" fill="#3b6b93" />
-        <path d="m43 68 13 17 13-17M43 70v23m26-23v23" stroke="#f8b842" strokeWidth="5" />
-        {roleId === 'worker'
-          ? <><path d="M32 83h14m20 0h14" stroke="#fff" strokeWidth="3" /><path d="m37 95 6-12m-8-2 13 6" stroke="#1e3a5f" /></>
-          : <><rect x="64" y="66" width="27" height="32" rx="4" fill="#fff" /><path d="M72 64h11v6H72Z" fill="#f8b842" /><path d="m70 81 3 3 5-6m-8 13h14" stroke="#1e3a5f" strokeWidth="2.5" /></>}
-      </> : <>
-        <path d="M38 37c0-12 7-18 18-18s18 6 18 18v15a18 18 0 0 1-36 0Z" fill="#fff" />
-        <path d="M38 40V29c2-8 12-12 21-10 9 1 15 8 15 20L60 30l-22 10Z" fill="#315a83" />
-        <path d="M27 94V83c0-13 13-19 29-19s29 6 29 19v11" fill="#3b6b93" />
-        <path d="m44 67 12 15 12-15" fill="#fff" /><path d="m56 82-4 12h8Z" fill="#f8b842" />
-        <path d="M88 73a8 8 0 1 0-11 7L66 91v6h7v-5h5v-5l5-5a8 8 0 0 0 5-9Z" fill="#f8b842" />
-        <circle cx="83" cy="74" r="2" fill="#fff" strokeWidth="1.5" />
-      </>}
-    </g>
-  </svg>;
+  const [loadError, setLoadError] = useState(false);
+  const asset = ROLE_SVG_MAP[roleId];
+
+  if (!loadError) {
+    return (
+      <img
+        src={asset.file}
+        alt={asset.title}
+        data-role={roleId}
+        data-asset={asset.file}
+        width={120}
+        height={120}
+        loading="eager"
+        onError={() => setLoadError(true)}
+        className={`pointer-events-none select-none inline-block object-contain ${className}`}
+      />
+    );
+  }
+
+  if (roleId === 'admin') {
+    return (
+      <svg viewBox="0 0 120 120" aria-label="Admin" data-asset="/ProRiv_Admin_exakt.svg" className={className} fill="none">
+        <defs>
+          <linearGradient id="admin-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#0f172a" />
+            <stop offset="50%" stopColor="#1e1b4b" />
+            <stop offset="100%" stopColor="#312e81" />
+          </linearGradient>
+          <linearGradient id="admin-shield" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#312e81" />
+            <stop offset="100%" stopColor="#1e1b4b" />
+          </linearGradient>
+          <linearGradient id="admin-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#fde047" />
+            <stop offset="100%" stopColor="#f59e0b" />
+          </linearGradient>
+        </defs>
+
+        {/* Background Badge */}
+        <circle cx="60" cy="60" r="54" fill="url(#admin-bg)" stroke="#818cf8" strokeWidth="2.5" />
+        <circle cx="60" cy="60" r="48" stroke="#4338ca" strokeWidth="1" strokeDasharray="3 3" opacity="0.7" />
+
+        {/* Corporate Governance & Security Shield */}
+        <path d="M60 20 L86 32 C86 54 75 72 60 80 C45 72 34 54 34 32 Z"
+              fill="url(#admin-shield)" stroke="#818cf8" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M60 25 L81 35 C81 53 71 68 60 74 C49 68 39 53 39 35 Z"
+              fill="#1e1b4b" stroke="#4f46e5" strokeWidth="1" strokeLinejoin="round" opacity="0.6" />
+
+        {/* Executive / Administrator Figure Inside Shield */}
+        <circle cx="60" cy="40" r="9" fill="#f8fafc" stroke="#c7d2fe" strokeWidth="1.5" />
+        <path d="M47 62 C47 53 53 48 60 48 C67 48 73 53 73 62 Z" fill="#e0e7ff" />
+        <path d="M58 52 L62 52 L63 60 L60 65 L57 60 Z" fill="#4f46e5" />
+        <path d="M55 49 L60 55 L65 49" stroke="#cbd5e1" strokeWidth="1.2" fill="none" />
+
+        {/* Digital Hub / System Access Key & Management Badge at bottom */}
+        <circle cx="60" cy="88" r="17" fill="#1e1b4b" stroke="#818cf8" strokeWidth="2" />
+        
+        {/* Golden Master Access Key (Tripletex & System Setup) */}
+        <circle cx="54" cy="88" r="5.5" stroke="url(#admin-gold)" strokeWidth="2.2" fill="#0f172a" />
+        <circle cx="54" cy="88" r="2.2" fill="url(#admin-gold)" />
+        <path d="M59.5 88 H73 M66.5 88 V92 M70.5 88 V92" stroke="url(#admin-gold)" strokeWidth="2.4" strokeLinecap="round" />
+
+        {/* Authority Triple-Node atop shield */}
+        <circle cx="60" cy="18" r="3" fill="url(#admin-gold)" stroke="#b45309" strokeWidth="0.8" />
+        <circle cx="48" cy="22" r="2.2" fill="url(#admin-gold)" />
+        <circle cx="72" cy="22" r="2.2" fill="url(#admin-gold)" />
+      </svg>
+    );
+  }
+
+  if (roleId === 'worker') {
+    return (
+      <svg viewBox="0 0 120 120" aria-label="Arbeiter" data-asset="/ProRiv_Arbeiter_exakt.svg" className={className} fill="none">
+        <defs>
+          <linearGradient id="worker-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#431407" />
+            <stop offset="50%" stopColor="#9a3412" />
+            <stop offset="100%" stopColor="#ea580c" />
+          </linearGradient>
+          <linearGradient id="helmet-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#fef08a" />
+            <stop offset="50%" stopColor="#facc15" />
+            <stop offset="100%" stopColor="#eab308" />
+          </linearGradient>
+          <linearGradient id="tool-steel" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#f8fafc" />
+            <stop offset="100%" stopColor="#94a3b8" />
+          </linearGradient>
+        </defs>
+
+        {/* Background Badge */}
+        <circle cx="60" cy="60" r="54" fill="url(#worker-bg)" stroke="#fb923c" strokeWidth="2.5" />
+        <circle cx="60" cy="60" r="48" stroke="#c2410c" strokeWidth="1" strokeDasharray="3 3" opacity="0.8" />
+
+        {/* Crossed Craftsman Tools in Background (Wrench & Hammer) */}
+        {/* Tool 1: Wrench (Schraubenschlüssel) diagonal */}
+        <g transform="rotate(45 60 60)">
+          <rect x="56" y="24" width="8" height="72" rx="4" fill="url(#tool-steel)" stroke="#475569" strokeWidth="1" />
+          <path d="M53 28 C53 23 57 19 60 19 C63 19 67 23 67 28 H64 C64 26 62 25 60 25 C58 25 56 26 56 28 Z" fill="#64748b" />
+          <circle cx="60" cy="88" r="4" fill="#64748b" />
+        </g>
+
+        {/* Tool 2: Hammer (Zimmermannshammer) diagonal */}
+        <g transform="rotate(-45 60 60)">
+          <rect x="56" y="26" width="8" height="68" rx="3" fill="#78350f" stroke="#451a03" strokeWidth="1" />
+          <path d="M46 25 H74 V35 H46 Z" fill="url(#tool-steel)" stroke="#334155" strokeWidth="1" />
+          <path d="M44 26 H46 V34 H44 Z" fill="#64748b" />
+          <path d="M74 27 C78 27 82 25 84 22 C82 28 80 33 74 33 Z" fill="url(#tool-steel)" stroke="#334155" strokeWidth="0.8" />
+        </g>
+
+        {/* Construction Safety Hard Hat (Schutzhelm) */}
+        <path d="M36 58 C36 41 46 32 60 32 C74 32 84 41 84 58 Z"
+              fill="url(#helmet-gold)" stroke="#ca8a04" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M57 32 H63 V54 H57 Z" fill="#fef08a" opacity="0.9" />
+        <path d="M42 54 C42 45 48 38 56 35" stroke="#fef9c3" strokeWidth="2" strokeLinecap="round" />
+        <path d="M30 58 C30 55 36 54 44 54 H76 C84 54 90 55 90 58 C90 61 84 63 76 63 H44 C36 63 30 61 30 58 Z"
+              fill="#eab308" stroke="#a16207" strokeWidth="2" />
+        <circle cx="60" cy="58" r="2.5" fill="#713f12" />
+
+        {/* Time Tracking / Stempeluhr Badge at bottom (Zeiterfassung & Schichtstempel) */}
+        <circle cx="60" cy="88" r="16" fill="#1e293b" stroke="#fb923c" strokeWidth="2" />
+        <circle cx="60" cy="88" r="13" fill="#0f172a" />
+        <line x1="60" y1="77" x2="60" y2="79" stroke="#fde047" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="60" y1="97" x2="60" y2="99" stroke="#fde047" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="49" y1="88" x2="51" y2="88" stroke="#fde047" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="69" y1="88" x2="71" y2="88" stroke="#fde047" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="60" y1="88" x2="60" y2="81" stroke="#f8fafc" strokeWidth="2" strokeLinecap="round" />
+        <line x1="60" y1="88" x2="67" y2="92" stroke="#fb923c" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="60" cy="88" r="1.8" fill="#fbbf24" />
+      </svg>
+    );
+  }
+
+  // foreman
+  return (
+    <svg viewBox="0 0 120 120" aria-label="Vorarbeiter" data-asset="/ProRiv_Vorarbeiter_exakt.svg" className={className} fill="none">
+      <defs>
+        <linearGradient id="foreman-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#064e3b" />
+          <stop offset="50%" stopColor="#047857" />
+          <stop offset="100%" stopColor="#059669" />
+        </linearGradient>
+        <linearGradient id="plan-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#0284c7" />
+          <stop offset="100%" stopColor="#0369a1" />
+        </linearGradient>
+        <linearGradient id="foreman-shield" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="100%" stopColor="#f1f5f9" />
+        </linearGradient>
+      </defs>
+
+      {/* Background Badge */}
+      <circle cx="60" cy="60" r="54" fill="url(#foreman-bg)" stroke="#34d399" strokeWidth="2.5" />
+      <circle cx="60" cy="60" r="48" stroke="#059669" strokeWidth="1" strokeDasharray="3 3" opacity="0.8" />
+
+      {/* Rolled Blueprint / Architectural Site Plan */}
+      <g transform="rotate(-25 60 60)">
+        <rect x="22" y="55" width="76" height="11" rx="4" fill="url(#plan-blue)" stroke="#38bdf8" strokeWidth="1.2" />
+        <ellipse cx="23" cy="60.5" rx="3" ry="5.5" fill="#bae6fd" stroke="#0284c7" strokeWidth="1" />
+        <path d="M35 58 H85 M40 63 H75" stroke="#bae6fd" strokeWidth="1" strokeDasharray="2 2" opacity="0.8" />
+      </g>
+
+      {/* Supervisor White Hard Hat (Bauleiter / Vorarbeiter Helm) */}
+      <g transform="translate(0, -6)">
+        <path d="M38 46 C38 31 47 22 60 22 C73 22 82 31 82 46 Z"
+              fill="url(#foreman-shield)" stroke="#cbd5e1" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M57 22 H63 V42 H57 Z" fill="#10b981" />
+        <circle cx="60" cy="30" r="3" fill="#047857" stroke="#ffffff" strokeWidth="0.8" />
+        <path d="M43 42 C43 35 48 29 55 26" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+        <path d="M32 46 C32 43 38 42 46 42 H74 C82 42 88 43 88 46 C88 49 82 51 74 51 H46 C38 51 32 49 32 46 Z"
+              fill="#e2e8f0" stroke="#94a3b8" strokeWidth="2" />
+      </g>
+
+      {/* Supervisor Clipboard (Abnahme / Bauprotokoll / Stundenprüfung) */}
+      <g transform="translate(4, 0)">
+        <rect x="42" y="52" width="40" height="48" rx="4" fill="#f8fafc" stroke="#334155" strokeWidth="2" />
+        <rect x="52" y="48" width="20" height="8" rx="2" fill="#94a3b8" stroke="#475569" strokeWidth="1.5" />
+        <circle cx="62" cy="52" r="2" fill="#334155" />
+        
+        {/* Document Content / Checklist lines */}
+        <line x1="49" y1="62" x2="75" y2="62" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" />
+        <line x1="49" y1="70" x2="68" y2="70" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" />
+        <line x1="49" y1="78" x2="72" y2="78" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" />
+        
+        {/* Verified Green Checkmarks */}
+        <path d="M48 62 L50 64 L54 60" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M48 70 L50 72 L54 68" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        
+        {/* Acceptance & Approval Seal (Abnahme-Siegel) */}
+        <circle cx="72" cy="88" r="14" fill="#047857" stroke="#ffffff" strokeWidth="2" />
+        <path d="M66 88 L70 92 L78 84" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      </g>
+    </svg>
+  );
 }
 
 function KnowledgeBadge({ state, language, confirmed = false }: { state: RoleKnowledgeState; language: Language; confirmed?: boolean }) {

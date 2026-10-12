@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%" fill="none">
+  <defs>
+    <linearGradient id="foreman-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b" />
+      <stop offset="50%" stop-color="#047857" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="plan-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0369a1" />
+    </linearGradient>
+    <linearGradient id="foreman-shield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f1f5f9" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Badge -->
+  <circle cx="60" cy="60" r="54" fill="url(#foreman-bg)" stroke="#34d399" stroke-width="2.5" />
+  <circle cx="60" cy="60" r="48" stroke="#059669" stroke-width="1" stroke-dasharray="3 3" opacity="0.8" />
+
+  <!-- Rolled Blueprint / Architectural Site Plan -->
+  <g transform="rotate(-25 60 60)">
+    <rect x="22" y="55" width="76" height="11" rx="4" fill="url(#plan-blue)" stroke="#38bdf8" stroke-width="1.2" />
+    <ellipse cx="23" cy="60.5" rx="3" ry="5.5" fill="#bae6fd" stroke="#0284c7" stroke-width="1" />
+    <path d="M35 58 H85 M40 63 H75" stroke="#bae6fd" stroke-width="1" stroke-dasharray="2 2" opacity="0.8" />
+  </g>
+
+  <!-- Supervisor White Hard Hat (Bauleiter / Vorarbeiter Helm) -->
+  <g transform="translate(0, -6)">
+    <path d="M38 46 C38 31 47 22 60 22 C73 22 82 31 82 46 Z"
+          fill="url(#foreman-shield)" stroke="#cbd5e1" stroke-width="2" stroke-linejoin="round" />
+    <path d="M57 22 H63 V42 H57 Z" fill="#10b981" />
+    <circle cx="60" cy="30" r="3" fill="#047857" stroke="#ffffff" stroke-width="0.8" />
+    <path d="M43 42 C43 35 48 29 55 26" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+    <path d="M32 46 C32 43 38 42 46 42 H74 C82 42 88 43 88 46 C88 49 82 51 74 51 H46 C38 51 32 49 32 46 Z"
+          fill="#e2e8f0" stroke="#94a3b8" stroke-width="2" />
+  </g>
+
+  <!-- Supervisor Clipboard (Abnahme / Bauprotokoll / Stundenprüfung) -->
+  <g transform="translate(4, 0)">
+    <rect x="42" y="52" width="40" height="48" rx="4" fill="#f8fafc" stroke="#334155" stroke-width="2" />
+    <rect x="52" y="48" width="20" height="8" rx="2" fill="#94a3b8" stroke="#475569" stroke-width="1.5" />
+    <circle cx="62" cy="52" r="2" fill="#334155" />
+    
+    <!-- Document Content / Checklist lines -->
+    <line x1="49" y1="62" x2="75" y2="62" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" />
+    <line x1="49" y1="70" x2="68" y2="70" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" />
+    <line x1="49" y1="78" x2="72" y2="78" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" />
+    
+    <!-- Verified Green Checkmarks -->
+    <path d="M48 62 L50 64 L54 60" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M48 70 L50 72 L54 68" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    
+    <!-- Acceptance & Approval Seal (Abnahme-Siegel) -->
+    <circle cx="72" cy="88" r="14" fill="#047857" stroke="#ffffff" stroke-width="2" />
+    <path d="M66 88 L70 92 L78 84" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+</svg>

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%" fill="none">
+  <defs>
+    <linearGradient id="worker-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#431407" />
+      <stop offset="50%" stop-color="#9a3412" />
+      <stop offset="100%" stop-color="#ea580c" />
+    </linearGradient>
+    <linearGradient id="helmet-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#facc15" />
+      <stop offset="100%" stop-color="#eab308" />
+    </linearGradient>
+    <linearGradient id="tool-steel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc" />
+      <stop offset="100%" stop-color="#94a3b8" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Badge -->
+  <circle cx="60" cy="60" r="54" fill="url(#worker-bg)" stroke="#fb923c" stroke-width="2.5" />
+  <circle cx="60" cy="60" r="48" stroke="#c2410c" stroke-width="1" stroke-dasharray="3 3" opacity="0.8" />
+
+  <!-- Crossed Craftsman Tools in Background (Wrench & Hammer) -->
+  <!-- Tool 1: Wrench (Schraubenschlüssel) diagonal -->
+  <g transform="rotate(45 60 60)">
+    <rect x="56" y="24" width="8" height="72" rx="4" fill="url(#tool-steel)" stroke="#475569" stroke-width="1" />
+    <path d="M53 28 C53 23 57 19 60 19 C63 19 67 23 67 28 H64 C64 26 62 25 60 25 C58 25 56 26 56 28 Z" fill="#64748b" />
+    <circle cx="60" cy="88" r="4" fill="#64748b" />
+  </g>
+
+  <!-- Tool 2: Hammer (Zimmermannshammer) diagonal -->
+  <g transform="rotate(-45 60 60)">
+    <rect x="56" y="26" width="8" height="68" rx="3" fill="#78350f" stroke="#451a03" stroke-width="1" />
+    <path d="M46 25 H74 V35 H46 Z" fill="url(#tool-steel)" stroke="#334155" stroke-width="1" />
+    <path d="M44 26 H46 V34 H44 Z" fill="#64748b" />
+    <path d="M74 27 C78 27 82 25 84 22 C82 28 80 33 74 33 Z" fill="url(#tool-steel)" stroke="#334155" stroke-width="0.8" />
+  </g>
+
+  <!-- Construction Safety Hard Hat (Schutzhelm) -->
+  <path d="M36 58 C36 41 46 32 60 32 C74 32 84 41 84 58 Z"
+        fill="url(#helmet-gold)" stroke="#ca8a04" stroke-width="2" stroke-linejoin="round" />
+  <path d="M57 32 H63 V54 H57 Z" fill="#fef08a" opacity="0.9" />
+  <path d="M42 54 C42 45 48 38 56 35" stroke="#fef9c3" stroke-width="2" stroke-linecap="round" />
+  <path d="M30 58 C30 55 36 54 44 54 H76 C84 54 90 55 90 58 C90 61 84 63 76 63 H44 C36 63 30 61 30 58 Z"
+        fill="#eab308" stroke="#a16207" stroke-width="2" />
+  <circle cx="60" cy="58" r="2.5" fill="#713f12" />
+
+  <!-- Time Tracking / Stempeluhr Badge at bottom (Zeiterfassung & Schichtstempel) -->
+  <circle cx="60" cy="88" r="16" fill="#1e293b" stroke="#fb923c" stroke-width="2" />
+  <circle cx="60" cy="88" r="13" fill="#0f172a" />
+  <line x1="60" y1="77" x2="60" y2="79" stroke="#fde047" stroke-width="1.5" stroke-linecap="round" />
+  <line x1="60" y1="97" x2="60" y2="99" stroke="#fde047" stroke-width="1.5" stroke-linecap="round" />
+  <line x1="49" y1="88" x2="51" y2="88" stroke="#fde047" stroke-width="1.5" stroke-linecap="round" />
+  <line x1="69" y1="88" x2="71" y2="88" stroke="#fde047" stroke-width="1.5" stroke-linecap="round" />
+  <line x1="60" y1="88" x2="60" y2="81" stroke="#f8fafc" stroke-width="2" stroke-linecap="round" />
+  <line x1="60" y1="88" x2="67" y2="92" stroke="#fb923c" stroke-width="2" stroke-linecap="round" />
+  <circle cx="60" cy="88" r="1.8" fill="#fbbf24" />
+</svg>

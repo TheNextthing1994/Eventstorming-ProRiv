@@ -323,6 +323,18 @@ test('question card clearly separates selection, review, comment and proposal in
   assert.equal(readWorkshopRoute('#/workshop/admin').mode, 'roles');
 });
 
+test('question view allows switching between topic section overview and single question card', () => {
+  const htmlDefault = renderToStaticMarkup(<IsaQuestionsWorkshop language="de" />);
+  // In section overview mode, "Alle Fragen des Themas anzeigen" or "Nur ausgewählte Frage anzeigen" is available
+  assert.ok(htmlDefault.includes('Fragen in diesem Abschnitt'));
+  assert.ok(htmlDefault.includes('Nur ausgewählte Frage anzeigen'));
+
+  // And question card can be rendered when open
+  const htmlCard = renderToStaticMarkup(<IsaQuestionCard question={first} note={EMPTY_ISA_QUESTION_NOTE} language="de" editable onUpdate={() => {}} />);
+  assert.ok(htmlCard.includes('Teamkommentar'));
+  assert.ok(htmlCard.includes('Unser Vorschlag an Isa'));
+});
+
 test('autosave survives interrupted writes, storage failures, rapid edits and JSON export', async () => {
   const stores = new Map<string, Map<string, unknown>>();
   const storage = new Map<string, string>();

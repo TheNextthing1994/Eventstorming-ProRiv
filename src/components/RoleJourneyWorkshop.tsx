@@ -4,7 +4,7 @@ import { ADMIN_JOURNEY_STEPS, ROLE_JOURNEYS, journeyQuestionKey, type JourneyRol
 import { ROLE_INTERACTIONS, interactionForAdminStep, interactionsBetween, interactionSource, type InteractionActor, type RoleInteraction } from '../data/roleInteractions';
 import type { DatabaseState, Language, TopicId } from '../types';
 import type { WorkshopNote, WorkshopNotes } from '../db/indexedDb';
-import { RoleKnowledgeMap } from './RoleKnowledgeMap';
+import { RoleKnowledgeMap, RolePortrait } from './RoleKnowledgeMap';
 import { roleQuestions } from '../data/roleKnowledge';
 
 interface Props {
@@ -119,7 +119,8 @@ export function RoleJourneyWorkshop({ language, roleId, stepId, interactionId, n
 
             {interaction ? <ol aria-label={t('So interagieren die Rollen', 'Так взаимодействуют роли')} className="space-y-2.5">{interaction.beats.map((beat, index) => {
               const Icon = actorIcons[beat.actor];
-              return <li key={index}><div className={`flex items-start gap-3 rounded-xl border p-3.5 ${beat.actor === roleId ? 'bg-indigo-50/60 border-indigo-200' : 'bg-slate-50 border-slate-200'}`}><Icon aria-hidden="true" className="mt-0.5 w-5 h-5 shrink-0 text-slate-500" /><div><div className="text-xs font-bold text-slate-700"><span className="text-slate-400 mr-1.5">{index + 1}.</span>{t(actorLabels[beat.actor].de, actorLabels[beat.actor].ru)}</div><p className="mt-1 text-sm leading-relaxed"><Copy text={beat.action} language={language} /></p></div></div>{index < interaction.beats.length - 1 && <ArrowDown aria-hidden="true" className="w-3.5 h-3.5 mx-auto my-1 text-slate-300" />}</li>;
+              const isMainRole = beat.actor === 'worker' || beat.actor === 'foreman' || beat.actor === 'admin';
+              return <li key={index}><div className={`flex items-start gap-3 rounded-xl border p-3.5 ${beat.actor === roleId ? 'bg-indigo-50/60 border-indigo-200' : 'bg-slate-50 border-slate-200'}`}>{isMainRole ? <RolePortrait roleId={beat.actor as JourneyRoleId} className="mt-0.5 w-6 h-6 shrink-0 rounded-full" /> : <Icon aria-hidden="true" className="mt-0.5 w-5 h-5 shrink-0 text-slate-500" />}<div><div className="text-xs font-bold text-slate-700"><span className="text-slate-400 mr-1.5">{index + 1}.</span>{t(actorLabels[beat.actor].de, actorLabels[beat.actor].ru)}</div><p className="mt-1 text-sm leading-relaxed"><Copy text={beat.action} language={language} /></p></div></div>{index < interaction.beats.length - 1 && <ArrowDown aria-hidden="true" className="w-3.5 h-3.5 mx-auto my-1 text-slate-300" />}</li>;
             })}</ol> : <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200"><p className="text-sm text-slate-500 leading-relaxed"><Copy text={ownStep!.situation} language={language} /></p><p className="text-sm leading-relaxed"><Copy text={ownStep!.action} language={language} /></p></div>}
 
             {adminStep?.id === 'report-policy' && <div className="space-y-2 rounded-xl bg-amber-50 border border-amber-200 p-3"><p className="text-xs font-bold text-amber-900">{t('Zwei Varianten · Isa entscheidet', 'Два варианта · решает Иса')}</p><div className="text-xs space-y-2"><p><strong>{t('Gespräch: ', 'Разговор: ')}</strong>{t('Arbeiter → Kunde', 'Рабочий → Клиент')}</p><p><strong>{t('Teamvorschlag: ', 'Предложение команды: ')}</strong>{t('Arbeiter → Vorarbeiter → Kunde', 'Рабочий → Прораб → Клиент')}</p></div></div>}

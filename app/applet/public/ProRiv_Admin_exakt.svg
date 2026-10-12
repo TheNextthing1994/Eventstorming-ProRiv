@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%" fill="none">
+  <defs>
+    <linearGradient id="admin-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="50%" stop-color="#1e1b4b" />
+      <stop offset="100%" stop-color="#312e81" />
+    </linearGradient>
+    <linearGradient id="admin-shield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#312e81" />
+      <stop offset="100%" stop-color="#1e1b4b" />
+    </linearGradient>
+    <linearGradient id="admin-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Badge -->
+  <circle cx="60" cy="60" r="54" fill="url(#admin-bg)" stroke="#818cf8" stroke-width="2.5" />
+  <circle cx="60" cy="60" r="48" stroke="#4338ca" stroke-width="1" stroke-dasharray="3 3" opacity="0.7" />
+
+  <!-- Corporate Governance & Security Shield -->
+  <path d="M60 20 L86 32 C86 54 75 72 60 80 C45 72 34 54 34 32 Z"
+        fill="url(#admin-shield)" stroke="#818cf8" stroke-width="2" stroke-linejoin="round" />
+  <path d="M60 25 L81 35 C81 53 71 68 60 74 C49 68 39 53 39 35 Z"
+        fill="#1e1b4b" stroke="#4f46e5" stroke-width="1" stroke-linejoin="round" opacity="0.6" />
+
+  <!-- Executive / Administrator Figure Inside Shield -->
+  <circle cx="60" cy="40" r="9" fill="#f8fafc" stroke="#c7d2fe" stroke-width="1.5" />
+  <path d="M47 62 C47 53 53 48 60 48 C67 48 73 53 73 62 Z" fill="#e0e7ff" />
+  <path d="M58 52 L62 52 L63 60 L60 65 L57 60 Z" fill="#4f46e5" />
+  <path d="M55 49 L60 55 L65 49" stroke="#cbd5e1" stroke-width="1.2" fill="none" />
+
+  <!-- Digital Hub / System Access Key & Management Badge at bottom -->
+  <circle cx="60" cy="88" r="17" fill="#1e1b4b" stroke="#818cf8" stroke-width="2" />
+  
+  <!-- Golden Master Access Key (Tripletex & System Setup) -->
+  <circle cx="54" cy="88" r="5.5" stroke="url(#admin-gold)" stroke-width="2.2" fill="#0f172a" />
+  <circle cx="54" cy="88" r="2.2" fill="url(#admin-gold)" />
+  <path d="M59.5 88 H73 M66.5 88 V92 M70.5 88 V92" stroke="url(#admin-gold)" stroke-width="2.4" stroke-linecap="round" />
+
+  <!-- Authority Triple-Node atop shield -->
+  <circle cx="60" cy="18" r="3" fill="url(#admin-gold)" stroke="#b45309" stroke-width="0.8" />
+  <circle cx="48" cy="22" r="2.2" fill="url(#admin-gold)" />
+  <circle cx="72" cy="22" r="2.2" fill="url(#admin-gold)" />
+</svg>

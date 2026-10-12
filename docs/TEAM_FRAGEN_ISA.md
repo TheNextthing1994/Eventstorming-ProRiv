@@ -4,7 +4,7 @@ Stand: 12.10.2026. Einstieg: **Fragen für Isa / Вопросы Исе**, Route 
 
 ## Regler für das Gespräch
 
-**Gesprächsumfang** steht direkt unter dem dunklen Kopfbereich und über Katalogfiltern und Suche. Standard ist **Minimum · 12 Fragen**. Den Schieber ziehen oder eine der sechs Stufen anklicken. Die Einstellung wird in diesem Browser behalten.
+**Gesprächsumfang** steht direkt unter dem dunklen Kopfbereich und über Fortschritt und Suche. Standard ist **Minimum · 12 Fragen**. Den Schieber ziehen oder eine der sechs Stufen anklicken. Die Einstellung wird in diesem Browser behalten.
 
 | Regler | Paket | Fragen insgesamt |
 | --- | --- | --- |
@@ -19,7 +19,7 @@ Die Stufen sind kuratierte, aufeinander aufbauende Fragenpakete. Prozentwerte be
 
 Die kleinste Stufe fragt nach Rechten, Stammdatenführung, Ankunftsnachweis, Pausen, Pflichtfeldern, Preispriorität, kombinierten Zuschlägen, Rapportversand, Abhängigkeiten von der Kundenantwort, Tripletex-Ausgabe, Offline-Funktionen und dem Umfang der ersten Version. Bereits belegte MVA-Fragen werden erst in der vollständigen Ansicht gezeigt.
 
-Der Regler verändert ausschließlich die Anzeige. Ausgeblendete Haken, Teamkommentare und Vorschläge bleiben gespeichert. Die Isa-Vorlage enthält weiterhin **alle angehakten Fragen**, auch außerhalb der aktuellen Stufe; in diesem Fall zeigt der Regler einen Hinweis. Katalogfilter und Suche gelten innerhalb des gewählten Pakets. **100 %** zeigt den gesamten Bestand.
+Der Regler verändert ausschließlich die Anzeige. Ausgeblendete Haken, Teamkommentare und Vorschläge bleiben gespeichert. Die Isa-Vorlage enthält weiterhin **alle angehakten Fragen**, auch außerhalb der aktuellen Stufe; in diesem Fall zeigt der Regler einen Hinweis. Alle Fragen des Pakets erscheinen in einer gemeinsamen Ansicht, nach Arbeitsschritten geordnet. Suche und Bearbeitungsfilter gelten innerhalb des gewählten Pakets. **100 %** zeigt den gesamten Bestand.
 
 Umsetzung: `src/data/isaQuestionDepth.ts`, `src/components/IsaQuestionDepthControl.tsx` und die bestehende Fragenansicht. Die Browserpräferenz `isa_question_depth_v1` ist von den Frage-/Notizdaten getrennt.
 
@@ -27,13 +27,13 @@ Umsetzung: `src/data/isaQuestionDepth.ts`, `src/components/IsaQuestionDepthContr
 
 Der **Gesamtkatalog enthält 155 Fragen**: die unveränderten 45 Teamfragen und 50 Ich-/Rollenfragen aus `Fragen Amruddy(1).txt` sowie 60 ergänzende Projektfragen. Alle sind nach 14 Abschnitten geordnet. Originalfragen werden nicht gelöscht oder umgeschrieben. Ergänzungen klären weitere konkrete Entscheidungen; bereits abgedeckte Projektfragen bekommen Quellenverweise statt zusätzlicher Kopien.
 
-1. **Gesamtkatalog** öffnen und links einen Abschnitt wählen. Die Fragen stehen vollständig in einer lesbaren Liste. Auf schmalen Bildschirmen Abschnitt und Frage über die Auswahllisten wählen.
+1. **Fragen für Isa** öffnen, den Gesprächsumfang wählen und links einen Abschnitt wählen. Die Fragen stehen vollständig in einer gemeinsamen lesbaren Liste. Auf schmalen Bildschirmen Abschnitt und Frage über die Auswahllisten wählen.
 2. Bei der Frage **Vorschlag des Teams** oder **Bearbeiten** wählen. Deutsch, Russisch oder beide Sprachen sind über den vorhandenen Sprachschalter verfügbar.
 3. Vorschlag eingeben und **Fertig** klicken; auch Enter speichert. Erst dann wird der Text gespeichert und die Frage als durchgesehen markiert. Vorhandene Teamkommentare bleiben getrennt erhalten. Gesprächsgrundlagen füllen euren Vorschlag nicht automatisch aus.
 4. **Für Isa übernehmen** anhaken. Das nimmt die Frage in die Vorlage auf und markiert sie als durchgesehen. **Durchgesehen & weiter** dokumentiert nur den Teamfortschritt.
 5. **Verwandte Fragen und andere Rollenperspektiven** zeigt konkrete Verbindungen. Jede Perspektive bleibt einzeln auswählbar. Kommentare, Auswahl und Vorschläge werden beim Wechsel behalten.
 6. **Isa-Vorlage ansehen** öffnen, Sprache wählen und herunterladen oder kopieren. Sie enthält ausgewählte Fragen aus allen Bereichen in der Reihenfolge der Arbeitsschritte, vorhandene Grundlagen und eure Vorschläge. Teamkommentare werden nur auf Wunsch aufgenommen.
-7. **Alle Fragen herunterladen** liefert den vollständigen Lesekatalog. **Original · Teamfragen**, **Original · Ich-Perspektiven** und **Ergänzende Projektfragen** filtern denselben Bestand.
+7. **Alle Fragen herunterladen** liefert den vollständigen Lesekatalog. Die Gesprächsansicht zeigt Teamfragen, Ich-Perspektiven und ergänzende Projektfragen gemeinsam in der Reihenfolge des Arbeitsablaufs.
 
 | Eingabe | Bedeutung | Isa-Vorlage |
 | --- | --- | --- |

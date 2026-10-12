@@ -94,9 +94,15 @@ test('the depth slider is at the top of the questions page with six accessible s
   }
   const page = renderToStaticMarkup(<IsaQuestionsWorkshop language="de" />);
   assert.ok(page.includes('id="isa-question-depth"'));
-  assert.ok(page.indexOf('id="isa-question-depth"') < page.indexOf('aria-label="Fragenkatalog"'));
+  assert.ok(page.indexOf('id="isa-question-depth"') < page.indexOf('aria-label="Fragenfortschritt"'));
   assert.ok(page.indexOf('id="isa-question-depth"') < page.indexOf('placeholder="Frage oder Stichwort'));
   assert.ok(page.includes('Minimum'));
+  for (const language of ['de', 'ru'] as const) {
+    const questionsPage = renderToStaticMarkup(<IsaQuestionsWorkshop language={language} />);
+    assert.ok(!questionsPage.includes('aria-label="Fragenkatalog"'));
+    assert.ok(!questionsPage.includes('aria-label="Список вопросов"'));
+    for (const label of ['Original · Teamfragen', 'Original · Ich-Perspektiven', 'Ergänzende Projektfragen', 'Оригинал · основные', 'Оригинал · от первого лица', 'Дополнения по проекту']) assert.ok(!questionsPage.includes(label));
+  }
 });
 
 test('every uploaded question survives verbatim, including both numbering sequences and valid topic groups', () => {

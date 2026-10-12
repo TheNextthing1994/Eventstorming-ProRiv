@@ -11,8 +11,14 @@ const questionIds = new Set(ISA_TEAM_QUESTIONS.map(question => question.id));
 export function changeIsaQuestionNote(notes: IsaQuestionNotes, id: string, change: Partial<IsaQuestionNote>): IsaQuestionNotes {
   if (!questionIds.has(id)) throw new Error('Unknown question');
   const current = notes[id] || EMPTY_ISA_QUESTION_NOTE;
+  const answer = change.answer ?? current.answer ?? '';
+  const answerChanged = change.answer !== undefined && change.answer !== (current.answer ?? '');
+  const isaConfirmed = !!answer.trim() && (change.isaConfirmed ?? (answerChanged ? false : current.isaConfirmed ?? false));
   return { ...notes, [id]: {
     ...current, ...change,
+    ...(change.answer !== undefined || current.answer !== undefined ? { answer } : {}),
+    ...(change.isaConfirmed !== undefined || current.isaConfirmed !== undefined || answerChanged ? { isaConfirmed } : {}),
+    ...(change.status !== undefined || current.status !== undefined ? { status: (change.status ?? current.status) === 'decided' && !answer.trim() ? 'open' : change.status ?? current.status } : {}),
     reviewed: change.includeInIsa === true ? true : change.reviewed ?? current.reviewed,
     updatedAt: new Date().toISOString(),
   } };
@@ -29,7 +35,13 @@ export function parseIsaQuestionNotes(input: unknown): IsaQuestionNotes {
       || typeof note.comment !== 'string' || typeof note.proposal !== 'string' || typeof note.updatedAt !== 'string') {
       throw new Error('Invalid question note');
     }
-    result[id] = { includeInIsa: note.includeInIsa, reviewed: note.reviewed, comment: note.comment, proposal: note.proposal, updatedAt: note.updatedAt };
+    for (const field of ['answer', 'owner', 'nextStep'] as const) if (note[field] !== undefined && typeof note[field] !== 'string') throw new Error('Invalid question answer');
+    if (note.isaConfirmed !== undefined && typeof note.isaConfirmed !== 'boolean') throw new Error('Invalid client confirmation');
+    if (note.status !== undefined && !['open', 'test', 'decided'].includes(note.status)) throw new Error('Invalid meeting status');
+    if (note.isaConfirmed && !note.answer?.trim()) throw new Error('Empty client confirmation');
+    result[id] = { includeInIsa: note.includeInIsa, reviewed: note.reviewed, comment: note.comment, proposal: note.proposal, updatedAt: note.updatedAt,
+      ...(note.answer !== undefined ? { answer: note.answer } : {}), ...(note.isaConfirmed !== undefined ? { isaConfirmed: note.isaConfirmed } : {}),
+      ...(note.status !== undefined ? { status: note.status } : {}), ...(note.owner !== undefined ? { owner: note.owner } : {}), ...(note.nextStep !== undefined ? { nextStep: note.nextStep } : {}) };
   }
   return result;
 }
@@ -116,7 +128,9 @@ export function isaTemplateMarkdown(notes: IsaQuestionNotes, language: Language 
         }
         if (note.proposal.trim()) lines.push('**' + t('Unser Vorschlag an Isa', 'Наше предложение Исе') + ':**', '', note.proposal.trim(), '');
         if (includeComments && note.comment.trim()) lines.push('**' + t('Kommentar des Teams', 'Комментарий команды') + ':**', '', note.comment.trim(), '');
-        lines.push('**' + t('Antwort von Isa', 'Ответ Исы') + ':** ____________________', '');
+        if (note.answer?.trim()) lines.push('**' + t('Festgehaltene Antwort / Ergebnis', 'Записанный ответ / результат') + ':**', '', note.answer.trim(), '',
+          '**' + t('Von Isa bestätigt', 'Подтверждено Исой') + ':** ' + (note.isaConfirmed ? t('Ja', 'Да') : t('Noch nicht bestätigt', 'Ещё не подтверждено')), '');
+        else lines.push('**' + t('Antwort von Isa', 'Ответ Исы') + ':** ____________________', '');
       }
   }
   return lines.join('\n');

@@ -235,6 +235,11 @@ export interface IsaQuestionNote {
   reviewed: boolean;
   comment: string;
   proposal: string;
+  answer?: string;
+  isaConfirmed?: boolean;
+  status?: 'open' | 'test' | 'decided';
+  owner?: string;
+  nextStep?: string;
   updatedAt: string;
 }
 

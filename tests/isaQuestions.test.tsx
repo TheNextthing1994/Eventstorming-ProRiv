@@ -16,6 +16,10 @@ import { changeIsaQuestionNote, EMPTY_ISA_QUESTION_NOTE, isaCatalogMarkdown, isa
 import { readWorkshopRoute } from '../src/utils/roleWorkshop';
 import { loadIsaQuestionNotes, saveIsaQuestionNotes, exportStateAsJson, loadEntireDatabase } from '../src/db/indexedDb';
 import type { IsaQuestionNotes } from '../src/types';
+import { draftFields, type IsaQuestionDrafts } from '../src/hooks/useIsaQuestionStore';
+import { IsaQuestionAnswerFields } from '../src/components/IsaSharedQuestion';
+import { legacyEntriesForQuestion, reuseQuestionEntry, isaNoteAsWorkshopNote } from '../src/utils/isaRoleQuestions';
+import { catalogQuestionsForRoleSource } from '../src/data/roleQuestionLinks';
 
 const first = ISA_TEAM_QUESTIONS[0];
 const second = ISA_TEAM_QUESTIONS[1];
@@ -26,6 +30,7 @@ function elements(node: React.ReactNode): TestElement[] {
   React.Children.forEach(node, child => {
     if (!React.isValidElement<TestElement['props']>(child)) return;
     result.push(child, ...elements(child.props.children));
+    if (typeof child.type === 'function') result.push(...elements((child.type as (props: any) => React.ReactNode)(child.props)));
   });
   return result;
 }
@@ -37,7 +42,7 @@ function overviewElement<P>(tree: React.ReactNode, match: (element: TestElement)
 
 test('interview depth adds curated questions cumulatively and restores every source question at 100 percent', () => {
   assert.deepEqual(ISA_QUESTION_DEPTH_PACKETS.map(packet => packet.value), [0, 20, 40, 60, 80, 100]);
-  assert.deepEqual(ISA_QUESTION_DEPTH_PACKETS.map(packet => packet.questionIds.length), [12, 32, 54, 92, 131, 155]);
+  assert.deepEqual(ISA_QUESTION_DEPTH_PACKETS.map(packet => packet.questionIds.length), [12, 33, 56, 94, 133, 157]);
   let previous = new Set<string>();
   for (const packet of ISA_QUESTION_DEPTH_PACKETS) {
     const entries = isaQuestionsAtDepth(packet.value);
@@ -87,7 +92,7 @@ test('the depth slider is at the top of the questions page with six accessible s
     const html = renderToStaticMarkup(<IsaQuestionDepthControl value={20} onChange={() => {}} hiddenSelected={2} language={language} />);
     for (const attribute of ['type="range"', 'min="0"', 'max="100"', 'step="20"', 'value="20"']) assert.ok(html.includes(attribute));
     assert.equal((html.match(/aria-pressed=/g) || []).length, 6);
-    assert.ok(html.includes('32'));
+    assert.ok(html.includes('33'));
     assert.ok(html.includes(language === 'de' ? 'Gesprächsumfang' : 'Объём обсуждения'));
     assert.ok(html.includes(language === 'de' ? 'gemessene Wissensabdeckung' : 'измеренный охват знаний'));
     assert.ok(html.includes(language === 'de' ? 'bleiben in eurer Isa-Vorlage' : 'остаются в вашей подборке'));
@@ -126,11 +131,11 @@ test('every uploaded question survives verbatim, including both numbering sequen
 
 test('the overall list contains every original and addition once and assigns every question to a process stage', () => {
   const all = isaQuestionsForView('all');
-  assert.equal(all.length, 155);
+  assert.equal(all.length, 157);
   assert.equal(new Set(all.map(question => question.id)).size, all.length);
   assert.equal(isaQuestionsForView('team').length, 45);
   assert.equal(isaQuestionsForView('roles').length, 50);
-  assert.equal(isaQuestionsForView('project').length, 60);
+  assert.equal(isaQuestionsForView('project').length, 62);
   assert.equal(isaGroupsForView('all').length, 14);
   for (const stage of ISA_QUESTION_STAGES) assert.ok(all.some(question => isaQuestionGroupId(question, 'all') === stage.id));
   for (const question of all) {
@@ -183,86 +188,85 @@ test('the phase overview shows complete questions, known context, selections and
   const questions = isaQuestionsForView('all').filter(question => question.stageId === 'pricing');
   const tax = questions.find(question => question.id === 'amruddy:team:14')!;
   const notes = changeIsaQuestionNote({}, tax.id, { includeInIsa: true, comment: 'Retained draft' });
-  const html = renderToStaticMarkup(<IsaQuestionOverview questions={questions} notes={notes} proposalDrafts={{}} language="de" editable onOpen={() => {}} onSelect={() => {}} onUpdate={() => {}} onDraftChange={() => {}} onDraftClose={() => {}} />);
+  const html = renderToStaticMarkup(<IsaQuestionOverview questions={questions} notes={notes} proposalDrafts={{}} language="de" editable onSelect={() => {}} onUpdate={() => {}} onDraftChange={() => {}} onDraftClose={() => {}} onFinish={() => {}} />);
   assert.equal((html.match(/type="checkbox"/g) || []).length, questions.length);
   assert.equal((html.match(/checked=""/g) || []).length, 1);
   assert.ok(html.includes('Preisliste nennt Preise ohne MVA'));
-  assert.ok(html.includes('Notizen ansehen / bearbeiten'));
+  assert.ok(html.includes('Vorschlag / Antwort festhalten'));
   assert.ok(html.includes('Helferregel ab Ø400'));
   const originalApproval = ISA_TEAM_QUESTIONS.find(question => question.id === 'amruddy:roles:25')!;
   const card = renderToStaticMarkup(<IsaQuestionCard question={originalApproval} note={EMPTY_ISA_QUESTION_NOTE} language="de" editable onUpdate={() => {}} onOpenQuestion={() => {}} />);
   assert.ok(card.includes('offener Teamvorschlag'));
-  assert.ok(card.includes('Verwandte Fragen'));
+  assert.ok(card.includes('Vorschlag / Antwort festhalten'));
   assert.equal(EMPTY_ISA_QUESTION_NOTE.includeInIsa, false);
   assert.equal(EMPTY_ISA_QUESTION_NOTE.proposal, '');
 });
 
-test('typing stays a draft across section changes; Finish commits once without changing comments or selections', () => {
+test('typing stays a draft across section changes; Finish saves proposal and answer once, preserving selection and comment', () => {
   let notes = changeIsaQuestionNote({}, first.id, { includeInIsa: true, comment: 'Private team comment', proposal: 'Previous proposal' });
-  let proposalDrafts: Record<string, string> = {};
+  let proposalDrafts: IsaQuestionDrafts = {};
   let writes = 0;
   const view = (questions = [first]) => IsaQuestionOverview({
     questions, notes, proposalDrafts, language: 'de', editable: true,
     onSelect: (id, includeInIsa) => { writes++; notes = changeIsaQuestionNote(notes, id, { includeInIsa }); },
     onUpdate: (id, change) => { writes++; notes = changeIsaQuestionNote(notes, id, change); },
-    onDraftChange: (id, value) => { proposalDrafts = { ...proposalDrafts, [id]: value }; },
-    onDraftClose: id => { delete proposalDrafts[id]; }
+    onDraftChange: (id, change) => { proposalDrafts = { ...proposalDrafts, [id]: { ...(proposalDrafts[id] || notes[id] || EMPTY_ISA_QUESTION_NOTE), ...change } }; },
+    onDraftClose: id => { delete proposalDrafts[id]; },
+    onFinish: id => { writes++; notes = changeIsaQuestionNote(notes, id, draftFields(proposalDrafts[id])); delete proposalDrafts[id]; }
   });
-  const opening = overviewElement<React.ButtonHTMLAttributes<HTMLButtonElement>>(view(), element => element.type === 'button' && element.props.children === 'Bearbeiten');
+  const opening = overviewElement<React.ButtonHTMLAttributes<HTMLButtonElement>>(view(), element => element.type === 'button' && element.props.children === 'Vorschlag / Antwort festhalten');
   opening.props.onClick!({} as React.MouseEvent<HTMLButtonElement>);
-  assert.equal(proposalDrafts[first.id], 'Previous proposal');
+  assert.equal(proposalDrafts[first.id].proposal, 'Previous proposal');
   assert.equal(writes, 0);
   for (const value of ['N', 'Ne', 'New team proposal']) {
-    const input = overviewElement<React.InputHTMLAttributes<HTMLInputElement>>(view(), element => element.type === 'input' && element.props.type === 'text');
-    input.props.onChange!({ target: { value } } as React.ChangeEvent<HTMLInputElement>);
+    const input = overviewElement<React.TextareaHTMLAttributes<HTMLTextAreaElement>>(view(), element => element.type === 'textarea' && element.props['aria-label'] === 'Unser Vorschlag an Isa');
+    input.props.onChange!({ target: { value } } as React.ChangeEvent<HTMLTextAreaElement>);
     assert.equal(writes, 0, 'Each character only updates the draft');
     assert.equal(notes[first.id].proposal, 'Previous proposal');
     assert.ok(!isaTemplateMarkdown(notes, 'de').includes('New team proposal'));
     assert.ok(!isaQuestionsBackup(notes).includes('New team proposal'));
   }
   assert.ok(!renderToStaticMarkup(view([second])).includes('New team proposal'));
-  const resumed = overviewElement<React.InputHTMLAttributes<HTMLInputElement>>(view(), element => element.type === 'input' && element.props.type === 'text');
-  assert.equal(resumed.props.value, 'New team proposal', 'Parent-owned draft survives leaving and reopening its section');
+  const resumed = overviewElement<React.TextareaHTMLAttributes<HTMLTextAreaElement>>(view(), element => element.type === 'textarea' && element.props['aria-label'] === 'Unser Vorschlag an Isa');
+  assert.equal(resumed.props.value, 'New team proposal', 'Parent-owned draft survives changing sections');
+  const answer = overviewElement<React.TextareaHTMLAttributes<HTMLTextAreaElement>>(view(), element => element.type === 'textarea' && element.props['aria-label'] === 'Antwort / Ergebnis der Besprechung');
+  answer.props.onChange!({ target: { value: 'Team result, not confirmed by Isa' } } as React.ChangeEvent<HTMLTextAreaElement>);
   const checkbox = overviewElement<React.InputHTMLAttributes<HTMLInputElement>>(view(), element => element.type === 'input' && element.props.type === 'checkbox');
-  checkbox.props.onChange!({ target: { checked: true } } as React.ChangeEvent<HTMLInputElement>);
-  assert.equal(notes[first.id].proposal, 'Previous proposal', 'Saving a selection cannot save unfinished text');
+  checkbox.props.onChange!({ target: { checked: false } } as React.ChangeEvent<HTMLInputElement>);
+  assert.equal(notes[first.id].proposal, 'Previous proposal', 'Selecting cannot save unfinished text');
   const finish = overviewElement<React.ButtonHTMLAttributes<HTMLButtonElement>>(view(), element => element.type === 'button' && element.props.children === 'Fertig');
   finish.props.onClick!({} as React.MouseEvent<HTMLButtonElement>);
   assert.equal(writes, 2, 'One selection write and one Finish write');
   assert.equal(notes[first.id].proposal, 'New team proposal');
+  assert.equal(notes[first.id].answer, 'Team result, not confirmed by Isa');
+  assert.equal(notes[first.id].isaConfirmed, false);
   assert.equal(notes[first.id].comment, 'Private team comment');
-  assert.equal(notes[first.id].includeInIsa, true);
+  assert.equal(notes[first.id].includeInIsa, false, 'Finishing an old draft must not restore its stale selection');
   assert.equal(notes[first.id].reviewed, true);
   assert.equal(Object.hasOwn(proposalDrafts, first.id), false);
-  assert.ok(isaTemplateMarkdown(notes, 'de').includes('New team proposal'));
   assert.ok(renderToStaticMarkup(view()).includes('New team proposal'));
 });
 
-test('Enter finishes an empty proposal, composition keeps the draft open and locked editors cannot commit', () => {
-  const notes = changeIsaQuestionNote({}, first.id, { comment: 'Keep comment', proposal: 'Remove this' });
-  const updates: unknown[] = [];
-  const closed: string[] = [];
-  const props: React.ComponentProps<typeof IsaQuestionOverview> = {
-    questions: [first], notes, proposalDrafts: { [first.id]: '', [second.id]: 'Other unfinished proposal' }, language: 'de', editable: true,
-    onSelect: () => {}, onDraftChange: () => {}, onDraftClose: id => closed.push(id),
-    onUpdate: (id, change) => updates.push({ id, change })
-  };
-  const input = overviewElement<React.InputHTMLAttributes<HTMLInputElement>>(IsaQuestionOverview(props), element => element.type === 'input' && element.props.type === 'text');
+test('plain Enter keeps multiline drafts; Ctrl/Cmd+Enter finishes unless composing or locked', () => {
+  let finishes = 0;
   let prevented = 0;
-  const enter = (isComposing: boolean) => ({ key: 'Enter', nativeEvent: { isComposing }, preventDefault: () => { prevented++; } } as React.KeyboardEvent<HTMLInputElement>);
+  const props: React.ComponentProps<typeof IsaQuestionAnswerFields> = {
+    note: EMPTY_ISA_QUESTION_NOTE, draft: { ...EMPTY_ISA_QUESTION_NOTE, proposal: '' }, language: 'de', editable: true,
+    onUpdate: () => {}, onDraftChange: () => {}, onClose: () => {}, onFinish: () => { finishes++; }
+  };
+  const input = overviewElement<React.TextareaHTMLAttributes<HTMLTextAreaElement>>(IsaQuestionAnswerFields(props), element => element.type === 'textarea' && element.props['aria-label'] === 'Unser Vorschlag an Isa');
+  const enter = (ctrlKey = false, isComposing = false, metaKey = false) => ({ key: 'Enter', ctrlKey, metaKey, nativeEvent: { isComposing }, preventDefault: () => { prevented++; } } as React.KeyboardEvent<HTMLTextAreaElement>);
+  input.props.onKeyDown!(enter());
+  input.props.onKeyDown!(enter(true, true));
+  assert.equal(finishes, 0);
   input.props.onKeyDown!(enter(true));
-  assert.equal(updates.length, 0);
-  assert.equal(closed.length, 0);
-  input.props.onKeyDown!(enter(false));
-  assert.deepEqual(updates, [{ id: first.id, change: { proposal: '', reviewed: true } }]);
-  assert.deepEqual(closed, [first.id]);
-  assert.equal(prevented, 1);
-  assert.equal(props.proposalDrafts[second.id], 'Other unfinished proposal');
-  const locked = overviewElement<React.ButtonHTMLAttributes<HTMLButtonElement>>(IsaQuestionOverview({ ...props, editable: false }), element => element.type === 'button' && element.props.children === 'Fertig');
+  input.props.onKeyDown!(enter(false, false, true));
+  assert.equal(finishes, 2);
+  assert.equal(prevented, 2);
+  const locked = overviewElement<React.ButtonHTMLAttributes<HTMLButtonElement>>(IsaQuestionAnswerFields({ ...props, editable: false }), element => element.type === 'button' && element.props.children === 'Fertig');
   assert.equal(locked.props.disabled, true);
   locked.props.onClick!({} as React.MouseEvent<HTMLButtonElement>);
-  assert.equal(updates.length, 1);
-  assert.equal(closed.length, 1);
+  assert.equal(finishes, 2);
 });
 
 test('checking a question includes it for Isa; unchecking keeps its comments and review progress', () => {
@@ -298,7 +302,7 @@ test('Isa template includes only checked questions, keeps proposals and makes co
 });
 
 test('a backup restores selection, review state and multiline notes; unrelated or malformed imports are rejected', () => {
-  const notes = changeIsaQuestionNote({}, first.id, { includeInIsa: true, comment: 'Zeile 1\nZeile 2', proposal: 'Предложение' });
+  const notes = changeIsaQuestionNote({}, first.id, { includeInIsa: true, comment: 'Zeile 1\nZeile 2', proposal: 'Предложение', answer: 'Isa result', isaConfirmed: true, owner: 'Team', nextStep: 'Implement', status: 'decided' });
   assert.deepEqual(parseIsaQuestionsBackup(isaQuestionsBackup(notes)), notes);
   assert.throws(() => parseIsaQuestionsBackup('{"questions":[]}'));
   const malformed = JSON.parse(isaQuestionsBackup(notes));
@@ -307,18 +311,50 @@ test('a backup restores selection, review state and multiline notes; unrelated o
   const unknown = JSON.parse(isaQuestionsBackup(notes));
   unknown.notes['amruddy:team:99'] = unknown.notes[first.id];
   assert.throws(() => parseIsaQuestionsBackup(JSON.stringify(unknown)));
+  for (const change of [{ answer: 42 }, { isaConfirmed: 'yes' }, { status: 'approved' }, { owner: [] }, { nextStep: {} }, { answer: '', isaConfirmed: true }]) {
+    const invalid = JSON.parse(isaQuestionsBackup(notes));
+    Object.assign(invalid.notes[first.id], change);
+    assert.throws(() => parseIsaQuestionsBackup(JSON.stringify(invalid)));
+  }
+  const template = isaTemplateMarkdown(notes, 'de');
+  assert.ok(template.includes('Isa result'));
+  assert.ok(template.includes('**Von Isa bestätigt:** Ja'));
+  assert.ok(!template.includes('Zeile 1'));
+});
+
+test('older compound role answers are preserved as context and reused explicitly without completing related questions', () => {
+  const rights = catalogQuestionsForRoleSource('admin:profile:worker-rights');
+  assert.equal(rights.length, 3, 'The old question combined rights, role combinations and missing prices');
+  const legacy = { 'role:admin:profile:worker-rights': { status: 'decided' as const, answer: 'Worker may send', revisedRecommendation: 'Start with direct dispatch', isaConfirmed: true, owner: 'Isa', nextStep: '', updatedAt: 'old' } };
+  const before = JSON.stringify(legacy);
+  const notes = changeIsaQuestionNote({}, rights[0].id, { proposal: 'Existing proposal', comment: 'Private note' });
+  const context = legacyEntriesForQuestion(rights[0].id, legacy);
+  assert.equal(context.length, 1);
+  assert.equal(context[0].answer, 'Worker may send');
+  const change = reuseQuestionEntry(notes[rights[0].id], context[0]);
+  assert.equal(change.proposal, 'Existing proposal\n\nStart with direct dispatch');
+  assert.equal(change.comment, 'Private note');
+  assert.equal(change.isaConfirmed, false);
+  assert.equal(change.reviewed, undefined);
+  assert.equal(change.includeInIsa, undefined);
+  const committed = changeIsaQuestionNote(notes, rights[0].id, change);
+  assert.equal(committed[rights[1].id], undefined);
+  assert.equal(committed[rights[2].id], undefined);
+  assert.equal(isaNoteAsWorkshopNote(committed[rights[0].id]).isaConfirmed, false);
+  assert.equal(JSON.stringify(legacy), before, 'The old source record is never rewritten');
 });
 
 test('question card clearly separates selection, review, comment and proposal in German and Russian', () => {
   for (const language of ['de', 'ru', 'bilingual'] as const) {
-    const html = renderToStaticMarkup(<IsaQuestionCard question={first} note={EMPTY_ISA_QUESTION_NOTE} language={language} editable onUpdate={() => {}} />);
+    const html = renderToStaticMarkup(<IsaQuestionCard question={first} note={EMPTY_ISA_QUESTION_NOTE} draft={EMPTY_ISA_QUESTION_NOTE} language={language} editable onUpdate={() => {}} />);
     assert.equal((html.match(/type="checkbox"/g) || []).length, 2);
-    assert.equal((html.match(/<textarea/g) || []).length, 2);
+    assert.equal((html.match(/<textarea/g) || []).length, 3);
     assert.ok(html.includes(language === 'ru' ? 'Включить в вопросы Исе' : 'Für Isa übernehmen'));
     assert.ok(html.includes(language === 'ru' ? 'Наше предложение Исе' : 'Unser Vorschlag an Isa'));
   }
   const locked = renderToStaticMarkup(<IsaQuestionCard question={first} note={EMPTY_ISA_QUESTION_NOTE} language="de" editable={false} onUpdate={() => {}} />);
-  assert.equal((locked.match(/disabled=""/g) || []).length, 4);
+  assert.ok(locked.includes('type="checkbox" disabled=""'));
+  assert.ok(locked.includes('button type="button" disabled=""'));
   assert.equal(readWorkshopRoute('#/workshop/questions').mode, 'questions');
   assert.equal(readWorkshopRoute('#/workshop/admin').mode, 'roles');
 });
@@ -330,7 +366,7 @@ test('question view allows switching between topic section overview and single q
   assert.ok(htmlDefault.includes('Nur ausgewählte Frage anzeigen'));
 
   // And question card can be rendered when open
-  const htmlCard = renderToStaticMarkup(<IsaQuestionCard question={first} note={EMPTY_ISA_QUESTION_NOTE} language="de" editable onUpdate={() => {}} />);
+  const htmlCard = renderToStaticMarkup(<IsaQuestionCard question={first} note={EMPTY_ISA_QUESTION_NOTE} draft={EMPTY_ISA_QUESTION_NOTE} language="de" editable onUpdate={() => {}} />);
   assert.ok(htmlCard.includes('Teamkommentar'));
   assert.ok(htmlCard.includes('Unser Vorschlag an Isa'));
 });
@@ -383,7 +419,21 @@ test('autosave survives interrupted writes, storage failures, rapid edits and JS
     const saving = saveIsaQuestionNotes(initial);
     assert.deepEqual(await loadIsaQuestionNotes(), initial, 'latest synchronous draft is readable before commit');
     await saving;
-    let notes = initial;
+    const sharedQuestion = catalogQuestionsForRoleSource('admin:report-policy:sender')[0];
+    const fromRole = changeIsaQuestionNote(initial, sharedQuestion.id, { answer: 'Direct worker dispatch', proposal: 'Keep the current route', reviewed: true, isaConfirmed: true, includeInIsa: true, comment: 'Private role comment' });
+    await saveIsaQuestionNotes(fromRole);
+    const inCatalog = await loadIsaQuestionNotes();
+    const html = renderToStaticMarkup(<IsaQuestionCard question={sharedQuestion} note={inCatalog[sharedQuestion.id]} language="de" editable onUpdate={() => {}} />);
+    assert.ok(html.includes('Direct worker dispatch'));
+    assert.ok(html.includes('Von Isa bestätigt'));
+    const fromCatalog = changeIsaQuestionNote(inCatalog, sharedQuestion.id, { answer: 'Worker dispatch; foreman only sees the result' });
+    await saveIsaQuestionNotes(fromCatalog);
+    const backInRole = isaNoteAsWorkshopNote((await loadIsaQuestionNotes())[sharedQuestion.id]);
+    assert.equal(backInRole.answer, 'Worker dispatch; foreman only sees the result');
+    assert.equal(backInRole.isaConfirmed, false);
+    assert.equal((await loadIsaQuestionNotes())[sharedQuestion.id].comment, 'Private role comment');
+    assert.equal(isaTemplateMarkdown(await loadIsaQuestionNotes(), 'de').split(sharedQuestion.text.de).length - 1, 1);
+    let notes = fromCatalog;
     const writes: Promise<void>[] = [];
     for (const proposal of ['A', 'AB', 'ABC']) {
       notes = changeIsaQuestionNote(notes, first.id, { proposal });

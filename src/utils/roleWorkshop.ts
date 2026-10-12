@@ -1,6 +1,8 @@
 import { ROLE_JOURNEYS, journeyQuestionKey, type JourneyRoleId } from '../data/roleJourneys';
 import { ROLE_INTERACTIONS } from '../data/roleInteractions';
 import type { WorkshopNote, WorkshopNotes } from '../db/indexedDb';
+import type { IsaQuestionNotes } from '../types';
+import { isaQuestionsForView } from './isaQuestions';
 
 export function readWorkshopRoute(hash: string): { mode: 'process' | 'roles' | 'questions'; roleId?: JourneyRoleId; stepId?: string; interactionId?: string } {
   const [, roleId, stepId, interactionId] = hash.replace(/^#\/?/, '').split('/');
@@ -29,11 +31,12 @@ export function changeWorkshopNote(notes: WorkshopNotes, key: string, change: Pa
   return { ...notes, [key]: note };
 }
 
-export function roleJourneyMarkdown(notes: WorkshopNotes): string {
+export function roleJourneyMarkdown(notes: WorkshopNotes, sharedNotes: IsaQuestionNotes = {}): string {
   const lines = [
     '# Rollen-Workshop · ProRiv (Isa\'s Projekt)', '',
     '> Gesprächsvorbereitung. Team-Entwurf, Gesprächsgrundlage und neue Vorschläge sind keine bestätigte Spezifikation. „Entschieden“ dokumentiert ein Meeting-Ergebnis, keine formelle Kundenfreigabe.', ''
   ];
+  if (Object.keys(sharedNotes).length) lines.push('## Archiv der ursprünglichen Rollenformulierungen', '', 'Die folgenden Quellformulierungen und früheren Einträge bleiben erhalten. Die aktuellen gemeinsamen Antworten stehen im Abschnitt „Gemeinsame Fragen und Antworten“.', '');
   for (const role of ROLE_JOURNEYS) {
     lines.push('## ' + role.name.de + ' / ' + role.name.ru, '', role.purpose.de, '', role.purpose.ru, '', role.boundary.de, '', role.boundary.ru, '');
     for (const [index, step] of role.steps.entries()) {
@@ -54,6 +57,18 @@ export function roleJourneyMarkdown(notes: WorkshopNotes): string {
     lines.push('### ' + interaction.title.de + ' / ' + interaction.title.ru, '', '**Zwischen:** ' + interaction.participants.map(id => ROLE_JOURNEYS.find(r => r.id === id)!.name.de).join(' ↔ '), '**Quellablauf:** ' + (interaction.adminStepId ? 'Admin: ' + interaction.adminStepId : 'Prozess: ' + interaction.processStepId), '');
     interaction.beats.forEach((beat, i) => lines.push((i + 1) + '. **' + beat.actor + ':** ' + beat.action.de, '   ' + beat.action.ru));
     lines.push('');
+  }
+  const recorded = isaQuestionsForView('all').filter(q => sharedNotes[q.id] && (sharedNotes[q.id].reviewed || sharedNotes[q.id].proposal.trim() || sharedNotes[q.id].answer?.trim() || sharedNotes[q.id].comment.trim()));
+  if (recorded.length) {
+    lines.push('## Gemeinsame Fragen und Antworten', '', 'Diese Einträge werden von Rollenkarte und Fragenkatalog gemeinsam verwendet. Jede Frage erscheint hier einmal.', '');
+    for (const q of recorded) {
+      const note = sharedNotes[q.id];
+      lines.push('### ' + q.title.de + ' [' + q.id + ']', '', q.text.de, '', q.text.ru, '',
+        '**Vorschlag an Isa:** ' + (note.proposal || '—'), '**Besprochene Antwort:** ' + (note.answer || '—'),
+        '**Von Isa bestätigt:** ' + (note.isaConfirmed ? 'Ja' : 'Nein'), '**Im Team durchgesehen:** ' + (note.reviewed ? 'Ja' : 'Nein'),
+        '**Für Isa ausgewählt:** ' + (note.includeInIsa ? 'Ja' : 'Nein'), '**Teamkommentar:** ' + (note.comment || '—'),
+        '**Verantwortlich:** ' + (note.owner || '—'), '**Nächster Schritt:** ' + (note.nextStep || '—'), '');
+    }
   }
   return lines.join('\n');
 }

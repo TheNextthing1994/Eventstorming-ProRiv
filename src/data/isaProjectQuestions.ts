@@ -147,6 +147,10 @@ const entries = [
     l('Wie sollen die Mitarbeiter die App auf Android und iPhone erhalten und aktualisieren? Wer hilft bei Installation, Berechtigungen und dem ersten echten Einsatz, und welche Geräte stellt ihr für den Test bereit?', 'Как сотрудники должны получать и обновлять приложение на Android и iPhone? Кто помогает с установкой, разрешениями и первым настоящим выездом и какие устройства вы предоставите для проверки?'), ['analysis:mobile-rollout', 'sketch:q-orig-mobile-app-1'], [t(26), t(40), t(45)]),
   q('working-languages', 'launch', l('Sprachen für Mitarbeiter und Kunden', 'Языки сотрудников и клиентов'),
     l('Welche Sprachen brauchen Mitarbeiter in der App und Kunden im Rapport beziehungsweise auf der Bestätigungsseite? Müssen norwegische Leistungsnamen zusätzlich erklärt werden?', 'Какие языки нужны сотрудникам в приложении и клиентам в рапорте и на странице подтверждения? Нужно ли дополнительно объяснять норвежские названия работ?'), ['analysis:language-boundary', 'admin:profile:required-data'], [t(26)]),
+  q('role-combination', 'access', l('Mehrere Rollen für eine Person', 'Несколько ролей у одного человека'),
+    l('Darf eine Person zugleich Admin, Vorarbeiter und Arbeiter sein? Welche Rollen darf sie verbinden, und wer vergibt oder entzieht diese Rechte?', 'Может ли один человек быть одновременно администратором, прорабом и рабочим? Какие роли разрешено совмещать и кто выдаёт или отзывает эти права?'), ['admin:profile:worker-rights'], [t(4), r(1), r(9)]),
+  q('sent-report-correction', 'corrections', l('Gesendeten oder bestätigten Rapport ändern', 'Изменение отправленного или подтверждённого рапорта'),
+    l('Wer darf einen bereits gesendeten oder unterschriebenen Rapport korrigieren? Muss der Kunde die neue Version erneut bestätigen?', 'Кто может исправить уже отправленный или подписанный рапорт? Должен ли клиент повторно подтвердить новую версию?'), ['admin:correction:report-editor'], [t(13), r(23), r(26), r(43)]),
 ];
 
 export const ISA_PROJECT_QUESTIONS: IsaTeamQuestion[] = entries.map((question, index) => ({ ...question, number: index + 1 }));

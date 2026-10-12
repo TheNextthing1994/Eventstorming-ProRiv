@@ -4,9 +4,11 @@ import { ISA_TEAM_QUESTIONS, type IsaTeamQuestion } from '../data/isaTeamQuestio
 import { ISA_QUESTION_STAGES } from '../data/isaQuestionStages';
 import { ISA_QUESTION_DEPTH_STORAGE_KEY, isaDepthForQuestion, isaQuestionsAtDepth, parseIsaQuestionDepth, type IsaQuestionDepth } from '../data/isaQuestionDepth';
 import { IsaQuestionDepthControl } from './IsaQuestionDepthControl';
-import type { IsaQuestionNote, IsaQuestionNotes, Language } from '../types';
-import { loadIsaQuestionNotes, saveIsaQuestionNotes } from '../db/indexedDb';
-import { changeIsaQuestionNote, EMPTY_ISA_QUESTION_NOTE, isaCatalogMarkdown, isaGroupsForView, isaQuestionGroupId, isaQuestionLabel, isaQuestionSources, isaQuestionsBackup, isaTemplateMarkdown, parseIsaQuestionsBackup, relatedIsaQuestions, selectedIsaQuestions } from '../utils/isaQuestions';
+import type { IsaQuestionNotes, Language } from '../types';
+import { useIsaQuestionStore } from '../hooks/useIsaQuestionStore';
+import { IsaQuestionCard, IsaQuestionOverview } from './IsaSharedQuestion';
+import { legacyEntriesForQuestion, relatedEntriesForQuestion } from '../utils/isaRoleQuestions';
+import { EMPTY_ISA_QUESTION_NOTE, isaCatalogMarkdown, isaGroupsForView, isaQuestionGroupId, isaQuestionLabel, isaQuestionSources, isaQuestionsBackup, isaTemplateMarkdown, parseIsaQuestionsBackup, selectedIsaQuestions } from '../utils/isaQuestions';
 
 function Text({ text, language }: { text: { de: string; ru: string }; language: Language }) {
   return <>{language === 'ru' ? text.ru : text.de}{language === 'bilingual' && <span lang="ru" className="mt-3 block font-normal text-slate-500">{text.ru}</span>}</>;
@@ -23,148 +25,12 @@ function download(filename: string, content: string, mime: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export function IsaQuestionCard({ question, note, language, editable, onUpdate, onOpenQuestion }: {
-  question: IsaTeamQuestion;
-  note: IsaQuestionNote;
-  language: Language;
-  editable: boolean;
-  onUpdate: (change: Partial<IsaQuestionNote>) => void;
-  onOpenQuestion?: (id: string) => void;
-}) {
-  const t = (de: string, ru: string) => language === 'ru' ? ru : de;
-  return <article aria-label={t('Frage ', 'Вопрос ') + question.number} className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-    <div className="p-5 sm:p-7 border-b border-slate-100">
-      <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
-        <span className="text-xs font-semibold text-emerald-800">{isaQuestionLabel(question, language)}</span>
-        <label className="flex items-center gap-2 text-xs text-slate-500 cursor-pointer"><input type="checkbox" checked={note.reviewed} disabled={!editable} onChange={event => onUpdate({ reviewed: event.target.checked })} className="w-4 h-4 accent-emerald-700" />{t('Im Team durchgesehen', 'Обсудили в команде')}</label>
-      </div>
-      <h2 className="text-xl sm:text-2xl font-semibold leading-relaxed tracking-tight"><Text text={question.text} language={language} /></h2>
-      {question.context && <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/60 p-4 text-sm leading-relaxed"><p className="text-xs font-bold text-amber-900 mb-2">{question.context.kind === 'interview' ? t('Vorhandene Gesprächsgrundlage', 'По исходному разговору') : question.context.kind === 'evidence' ? t('Bereits aus den Quellen bekannt', 'Уже известно из источников') : t('Hinweis aus dem Entwurf · noch zu klären', 'Примечание из черновика · уточнить')} </p><Text text={question.context.text} language={language} /></div>}
-      <p className="mt-3 text-xs text-slate-500">{t('Quelle: ', 'Источник: ')}{isaQuestionSources(question, language).join(' · ')}</p>
-      {!!relatedIsaQuestions(question).length && onOpenQuestion && <details className="mt-4 text-xs rounded-xl border border-slate-200 p-3"><summary className="font-semibold cursor-pointer">{t('Verwandte Fragen und andere Rollenperspektiven', 'Связанные вопросы и другие роли')} ({relatedIsaQuestions(question).length})</summary><p className="mt-2 text-slate-500 leading-relaxed">{t('Die Fragen bleiben einzeln auswählbar. Prüft, welche Perspektiven ihr Isa tatsächlich vorlegen wollt.', 'Вопросы выбираются отдельно. Решите, какие точки зрения нужно обсудить с Исой.')}</p><div className="mt-2 space-y-1">{relatedIsaQuestions(question).map(other => <button key={other.id} type="button" onClick={() => onOpenQuestion(other.id)} className="block w-full text-left rounded-lg p-2 hover:bg-slate-50 text-emerald-900"><strong>{isaQuestionLabel(other, language)}</strong> · {language === 'ru' ? other.title.ru : other.title.de}</button>)}</div></details>}
-      <label className={`mt-6 flex items-center gap-3 cursor-pointer rounded-xl border p-4 ${note.includeInIsa ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-slate-50 border-slate-200 text-slate-700'}`}>
-        <input type="checkbox" checked={note.includeInIsa} disabled={!editable} onChange={event => onUpdate({ includeInIsa: event.target.checked })} className="w-5 h-5 shrink-0 accent-emerald-700" />
-        <span><span className="block text-sm font-bold">{t('Für Isa übernehmen', 'Включить в вопросы Исе')}</span><span className="block mt-1 text-xs opacity-75">{t('Diese Frage erscheint in eurer Isa-Vorlage.', 'Этот вопрос появится в вашей подборке для Исы.')}</span></span>
-      </label>
-    </div>
-    <div className="p-5 sm:p-7 space-y-5">
-      <label className="block"><span className="text-sm font-semibold">{t('Teamkommentar', 'Комментарий команды')}</span><span className="block mt-1 text-xs text-slate-500">{t('Gedanken, bisherige Antworten oder Punkte aus eurer Besprechung.', 'Мысли, уже известные ответы и заметки из обсуждения.')}</span>
-        <textarea disabled={!editable} rows={3} value={note.comment} onChange={event => onUpdate({ comment: event.target.value })} placeholder={t('Was habt ihr dazu besprochen?', 'Что вы обсудили?')} className="mt-2 w-full rounded-xl border border-slate-300 p-3 text-sm leading-relaxed resize-y focus:outline-2 focus:outline-emerald-600 disabled:opacity-50" />
-      </label>
-      <label className="block"><span className="text-sm font-semibold text-emerald-900">{t('Unser Vorschlag an Isa', 'Наше предложение Исе')}</span><span className="block mt-1 text-xs text-slate-500">{t('Eure Formulierung für Isa. Sie wird zusammen mit der ausgewählten Frage übernommen.', 'Формулировка для Исы. Она попадёт в подборку вместе с выбранным вопросом.')}</span>
-        <textarea disabled={!editable} rows={4} value={note.proposal} onChange={event => onUpdate({ proposal: event.target.value })} placeholder={t('Wir schlagen vor, dass …', 'Мы предлагаем …')} className="mt-2 w-full rounded-xl border border-emerald-200 bg-emerald-50/30 p-3 text-sm leading-relaxed resize-y focus:outline-2 focus:outline-emerald-600 disabled:opacity-50" />
-      </label>
-    </div>
-  </article>;
-}
-
-export function IsaQuestionOverview({ questions, notes, proposalDrafts, language, editable, onOpen, onSelect, onUpdate, onDraftChange, onDraftClose }: {
-  questions: IsaTeamQuestion[];
-  notes: IsaQuestionNotes;
-  proposalDrafts: Record<string, string>;
-  language: Language;
-  editable: boolean;
-  onOpen?: (id: string) => void;
-  onSelect: (id: string, include: boolean) => void;
-  onUpdate: (id: string, change: Partial<IsaQuestionNote>) => void;
-  onDraftChange: (id: string, value: string) => void;
-  onDraftClose: (id: string) => void;
-}) {
-  const t = (de: string, ru: string) => language === 'ru' ? ru : de;
-  const openField = (id: string) => {
-    if (editable) onDraftChange(id, notes[id]?.proposal ?? '');
-  };
-  const finishField = (id: string) => {
-    if (!editable || !Object.hasOwn(proposalDrafts, id)) return;
-    const proposal = proposalDrafts[id];
-    if (proposal !== (notes[id]?.proposal ?? '') || !notes[id]?.reviewed) {
-      onUpdate(id, { proposal, reviewed: true });
-    }
-    onDraftClose(id);
-  };
-
-  return <ol aria-label={t('Fragen dieses Abschnitts', 'Вопросы этого раздела')} className="space-y-3">{questions.map(question => {
-    const isOpen = Object.hasOwn(proposalDrafts, question.id);
-    const note = notes[question.id];
-    return <li key={question.id} id={`question-${question.id}`} className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 space-y-3">
-      <div className="flex flex-wrap gap-2 justify-between text-xs">
-        <span className="font-semibold text-emerald-800">{isaQuestionLabel(question, language)}</span>
-        {note?.reviewed && <span className="text-slate-500 flex items-center gap-1"><Check className="inline h-3.5 w-3.5 text-emerald-700" />{t('Durchgesehen', 'Обсудили')}</span>}
-      </div>
-      <p className="text-sm leading-relaxed font-medium"><Text text={question.text} language={language} /></p>
-      {question.context && <p className="text-xs leading-relaxed text-amber-900 bg-amber-50 rounded-lg p-3"><Text text={question.context.text} language={language} /></p>}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <label className="inline-flex gap-2 items-center text-xs font-semibold text-emerald-900 cursor-pointer shrink-0">
-          <input type="checkbox" checked={!!note?.includeInIsa} disabled={!editable} onChange={event => onSelect(question.id, event.target.checked)} className="w-4 h-4 accent-emerald-700" />
-          {t('Für Isa übernehmen', 'Включить в вопросы Исе')}
-        </label>
-        {isOpen ? (
-          <div className="flex-1 min-w-[240px]">
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                aria-label={t('Vorschlag des Teams: ', 'Предложение команды: ') + isaQuestionLabel(question, language)}
-                disabled={!editable}
-                value={proposalDrafts[question.id]}
-                onChange={event => onDraftChange(question.id, event.target.value)}
-                onKeyDown={event => {
-                  if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
-                    event.preventDefault();
-                    finishField(question.id);
-                  }
-                }}
-                placeholder={t('Vorschlag des Teams …', 'Предложение команды …')}
-                className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-xs bg-white focus:outline-emerald-600 shadow-xs"
-                autoFocus
-              />
-              <button
-                type="button"
-                disabled={!editable}
-                onClick={() => finishField(question.id)}
-                className="text-xs rounded-lg border border-slate-200 px-2.5 py-1.5 hover:bg-slate-100 text-slate-700 font-medium shrink-0 disabled:opacity-50"
-              >
-                {t('Fertig', 'Готово')}
-              </button>
-            </div>
-            <p className="mt-1 text-[11px] text-slate-500">{t('Mit „Fertig“ speichern.', 'Сохранить кнопкой «Готово».')}</p>
-          </div>
-        ) : (
-          <button
-            type="button"
-            disabled={!editable}
-            onClick={() => {
-              openField(question.id);
-              onOpen?.(question.id);
-            }}
-            className="text-xs rounded-lg border border-slate-200 bg-white px-3 py-1.5 hover:bg-slate-50 text-slate-700 font-medium flex items-center gap-1.5 shrink-0 transition-colors"
-          >
-            {note?.proposal || note?.comment
-              ? t('Vorschlag des Teams · Notizen ansehen / bearbeiten', 'Предложение команды · Посмотреть / изменить записи')
-              : t('Vorschlag des Teams', 'Предложение команды')}
-          </button>
-        )}
-      </div>
-      {(note?.proposal || note?.comment) && !isOpen && (
-        <div className="rounded-lg bg-emerald-50/50 border border-emerald-200/70 px-3 py-2 text-xs text-slate-700 flex justify-between items-start gap-2">
-          <p className="leading-relaxed"><strong className="text-emerald-950 mr-1.5">{t('Vorschlag des Teams:', 'Предложение команды:')}</strong>{note.proposal || note.comment}</p>
-          <button type="button" disabled={!editable} onClick={() => openField(question.id)} className="text-[11px] text-emerald-800 hover:underline shrink-0 font-medium disabled:opacity-50">
-            {t('Bearbeiten', 'Изменить')}
-          </button>
-        </div>
-      )}
-    </li>;
-  })}</ol>;
-}
+export { IsaQuestionCard, IsaQuestionOverview } from './IsaSharedQuestion';
 
 export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Language; refreshKey?: unknown }) {
   const t = (de: string, ru: string) => language === 'ru' ? ru : de;
-  const [notes, setNotes] = useState<IsaQuestionNotes>({});
-  const [proposalDrafts, setProposalDrafts] = useState<Record<string, string>>({});
-  const notesRef = useRef<IsaQuestionNotes>({});
-  const revision = useRef(0);
-  const [loaded, setLoaded] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'loading' | 'saving' | 'saved' | 'error'>('loading');
-  const [loadError, setLoadError] = useState(false);
+  const store = useIsaQuestionStore(refreshKey);
+  const { notes, notesRef, drafts: proposalDrafts, loaded, loadError, saveStatus, persist, update } = store;
   const [depth, setDepth] = useState<IsaQuestionDepth>(() => {
     try { return typeof window === 'undefined' ? 0 : parseIsaQuestionDepth(window.localStorage.getItem(ISA_QUESTION_DEPTH_STORAGE_KEY)); }
     catch { return 0; }
@@ -186,57 +52,20 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
   }, [depth]);
 
   useEffect(() => {
-    let alive = true;
-    ++revision.current;
-    setLoaded(false);
-    setLoadError(false);
-    setSaveStatus('loading');
-    loadIsaQuestionNotes().then(current => {
-      if (!alive) return;
-      notesRef.current = current;
-      setNotes(current);
-      setProposalDrafts({});
-      setLoaded(true);
-      setSaveStatus('saved');
-      try {
-        const last = sessionStorage.getItem('isa_questions_last');
-        const question = ISA_TEAM_QUESTIONS.find(item => item.id === last);
-        if (question) setActiveId(question.id);
-      } catch { /* Meeting navigation also works without session storage. */ }
-    }).catch(() => { if (alive) { setLoadError(true); setSaveStatus('error'); } });
-    return () => { alive = false; };
-  }, [refreshKey]);
+    if (!loaded) return;
+    try {
+      const last = sessionStorage.getItem('isa_questions_last');
+      if (ISA_TEAM_QUESTIONS.some(question => question.id === last)) setActiveId(last!);
+    } catch { /* Navigation memory is optional. */ }
+  }, [loaded]);
 
   useEffect(() => {
     if (!loaded) return;
     try { sessionStorage.setItem('isa_questions_last', activeId); } catch { /* Optional navigation memory. */ }
   }, [activeId, loaded]);
 
-  const persist = async (next: IsaQuestionNotes) => {
-    const edit = ++revision.current;
-    notesRef.current = next;
-    setNotes(next);
-    setSaveStatus('saving');
-    try {
-      await saveIsaQuestionNotes(next);
-      if (revision.current === edit) setSaveStatus('saved');
-    } catch {
-      if (revision.current === edit) setSaveStatus('error');
-    }
-  };
-
-  const update = (id: string, change: Partial<IsaQuestionNote>) => {
-    if (loaded) void persist(changeIsaQuestionNote(notesRef.current, id, change));
-  };
-  const changeProposalDraft = (id: string, value: string) => {
-    if (loaded) setProposalDrafts(current => ({ ...current, [id]: value }));
-  };
-  const closeProposalDraft = (id: string) => setProposalDrafts(current => {
-    const next = { ...current };
-    delete next[id];
-    return next;
-  });
-  const unfinishedProposalIds = Object.keys(proposalDrafts).filter(id => proposalDrafts[id] !== (notes[id]?.proposal ?? ''));
+  const unfinishedProposalIds = Object.keys(proposalDrafts);
+  const references = (question: IsaTeamQuestion) => ({ legacyEntries: legacyEntriesForQuestion(question.id, store.legacyNotes), relatedEntries: relatedEntriesForQuestion(question, notes) });
 
   const catalogQuestions = isaQuestionsAtDepth(depth);
   const groupId = (question: IsaTeamQuestion) => isaQuestionGroupId(question, 'all');
@@ -307,7 +136,7 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
     </div>
     {loadError && <div role="alert" className="p-4 rounded-xl border border-rose-200 bg-rose-50 text-sm">{t('Euer gespeicherter Stand konnte nicht geladen werden. Die Bearbeitung bleibt gesperrt. Erneut laden oder eine Sicherung einlesen.', 'Не удалось загрузить сохранённые записи. Редактирование заблокировано. Обновите страницу или загрузите резервную копию.')} <button type="button" onClick={() => window.location.reload()} className="underline font-bold">{t('Erneut laden', 'Обновить')}</button></div>}
     {importError && <p role="alert" className="rounded-xl bg-rose-50 border border-rose-200 p-3 text-sm text-rose-900">{t('Diese Datei ist keine gültige Fragen-Sicherung. Euer bisheriger Stand wurde nicht verändert.', 'Этот файл не является корректной резервной копией вопросов. Ваши записи не изменились.')}</p>}
-    {pendingImport && <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm space-y-3"><p>{t('Diese Sicherung enthält ', 'В этой копии ')}{Object.keys(pendingImport).length} {t('bearbeitete Fragen und ', 'обработанных вопросов и ')}{selectedIsaQuestions(pendingImport).length} {t('Auswahlen für Isa. Beim Übernehmen wird euer bisheriger Fragenstand ersetzt.', 'выбранных вопросов Исе. При загрузке текущие записи вопросов будут заменены.')}{unfinishedProposalIds.length > 0 && ' ' + t('Dabei werden auch noch offene Vorschläge verworfen.', 'Незавершённые предложения также будут удалены.')}</p><div className="flex flex-wrap gap-2"><button type="button" onClick={() => { const restored = pendingImport; setPendingImport(null); setProposalDrafts({}); setLoadError(false); setLoaded(true); void persist(restored); }} className="px-3 py-2 rounded-lg bg-slate-900 text-white font-semibold">{t('Sicherung übernehmen', 'Загрузить копию')}</button><button type="button" onClick={() => setPendingImport(null)} className="px-3 py-2 rounded-lg bg-white border border-slate-200">{t('Abbrechen', 'Отмена')}</button>{loaded && <button type="button" onClick={() => download('ProRiv_Fragen_Sicherung.json', isaQuestionsBackup(notesRef.current), 'application/json')} className="px-3 py-2 underline">{t('Aktuellen Stand zuerst sichern', 'Сначала сохранить текущие записи')}</button>}</div></div>}
+    {pendingImport && <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm space-y-3"><p>{t('Diese Sicherung enthält ', 'В этой копии ')}{Object.keys(pendingImport).length} {t('bearbeitete Fragen und ', 'обработанных вопросов и ')}{selectedIsaQuestions(pendingImport).length} {t('Auswahlen für Isa. Beim Übernehmen wird euer bisheriger Fragenstand ersetzt.', 'выбранных вопросов Исе. При загрузке текущие записи вопросов будут заменены.')}{unfinishedProposalIds.length > 0 && ' ' + t('Dabei werden auch noch offene Vorschläge verworfen.', 'Незавершённые предложения также будут удалены.')}</p><div className="flex flex-wrap gap-2"><button type="button" onClick={() => { const restored = pendingImport; setPendingImport(null); store.restore(restored); }} className="px-3 py-2 rounded-lg bg-slate-900 text-white font-semibold">{t('Sicherung übernehmen', 'Загрузить копию')}</button><button type="button" onClick={() => setPendingImport(null)} className="px-3 py-2 rounded-lg bg-white border border-slate-200">{t('Abbrechen', 'Отмена')}</button>{loaded && <button type="button" onClick={() => download('ProRiv_Fragen_Sicherung.json', isaQuestionsBackup(notesRef.current), 'application/json')} className="px-3 py-2 underline">{t('Aktuellen Stand zuerst sichern', 'Сначала сохранить текущие записи')}</button>}</div></div>}
 
     {preview && unfinishedProposalIds.length > 0 && <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
       {t('Noch offene Vorschläge mit „Fertig“ speichern, damit sie in der Vorlage erscheinen.', 'Сохраните незавершённые предложения кнопкой «Готово», чтобы включить их в подборку.')}
@@ -322,14 +151,14 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
       {copyStatus === 'error' && <p role="alert" className="px-5 pt-4 text-sm text-amber-800">{t('Kopieren war nicht möglich. Bitte die Vorlage herunterladen.', 'Не удалось скопировать. Скачайте подборку.')}</p>}
       {!selected.length ? <div className="p-8 text-center text-slate-500"><ClipboardList className="w-9 h-9 mx-auto mb-3" /><p className="font-semibold">{t('Noch keine Fragen ausgewählt.', 'Пока ни одного вопроса не выбрано.')}</p><p className="mt-2 text-sm">{t('Bei einer Frage „Für Isa übernehmen“ anhaken.', 'Отметьте у нужного вопроса «Включить в вопросы Исе».')}</p></div>
         : <div className="p-5 sm:p-8 max-w-4xl mx-auto space-y-8"><div><h2 className="text-2xl font-bold">{templateLanguage === 'ru' ? 'Вопросы Исе · ProRiv (проект Исы)' : "Fragen an Isa · ProRiv (Isa's Projekt)"}</h2><p className="mt-2 text-sm text-slate-500">{templateLanguage === 'ru' ? 'Наши предложения — основа для обсуждения.' : 'Unsere Vorschläge dienen als Gesprächsgrundlage.'}</p></div>
-          {ISA_QUESTION_STAGES.filter(group => selected.some(question => question.stageId === group.id)).map(group => <section key={group.id} className="space-y-5"><h3 className="text-sm font-bold uppercase tracking-wide text-emerald-800 border-b border-emerald-100 pb-2">{templateLanguage === 'ru' ? group.title.ru : group.title.de}</h3>{selected.filter(question => question.stageId === group.id).map(question => <article key={question.id} className="space-y-3"><h4 className="text-base leading-relaxed font-semibold"><span className="text-slate-400 mr-2">{selected.indexOf(question) + 1}.</span><Text text={question.text} language={templateLanguage} /></h4>{question.context && <div className="rounded-lg bg-amber-50/60 p-3 text-sm leading-relaxed"><p className="font-semibold mb-1">{templateLanguage === 'ru' ? 'Имеющиеся сведения · подтвердить' : 'Vorhandene Grundlage · zu bestätigen'}</p><Text text={question.context.text} language={templateLanguage} /></div>}{notes[question.id].proposal.trim() && <div className="border-l-2 border-emerald-300 pl-4 text-sm"><p className="font-semibold text-emerald-900">{templateLanguage === 'ru' ? 'Наше предложение Исе' : 'Unser Vorschlag an Isa'}</p><p className="mt-1 whitespace-pre-wrap break-words leading-relaxed">{notes[question.id].proposal}</p></div>}{includeComments && notes[question.id].comment.trim() && <div className="text-sm text-slate-600"><p className="font-semibold">{templateLanguage === 'ru' ? 'Комментарий команды' : 'Kommentar des Teams'}</p><p className="mt-1 whitespace-pre-wrap break-words leading-relaxed">{notes[question.id].comment}</p></div>}<p className="text-xs text-slate-400">{templateLanguage === 'ru' ? 'Ответ Исы: ____________________' : 'Antwort von Isa: ____________________'}</p></article>)}</section>)}
+          {ISA_QUESTION_STAGES.filter(group => selected.some(question => question.stageId === group.id)).map(group => <section key={group.id} className="space-y-5"><h3 className="text-sm font-bold uppercase tracking-wide text-emerald-800 border-b border-emerald-100 pb-2">{templateLanguage === 'ru' ? group.title.ru : group.title.de}</h3>{selected.filter(question => question.stageId === group.id).map(question => <article key={question.id} className="space-y-3"><h4 className="text-base leading-relaxed font-semibold"><span className="text-slate-400 mr-2">{selected.indexOf(question) + 1}.</span><Text text={question.text} language={templateLanguage} /></h4>{question.context && <div className="rounded-lg bg-amber-50/60 p-3 text-sm leading-relaxed"><p className="font-semibold mb-1">{templateLanguage === 'ru' ? 'Имеющиеся сведения · подтвердить' : 'Vorhandene Grundlage · zu bestätigen'}</p><Text text={question.context.text} language={templateLanguage} /></div>}{notes[question.id].proposal.trim() && <div className="border-l-2 border-emerald-300 pl-4 text-sm"><p className="font-semibold text-emerald-900">{templateLanguage === 'ru' ? 'Наше предложение Исе' : 'Unser Vorschlag an Isa'}</p><p className="mt-1 whitespace-pre-wrap break-words leading-relaxed">{notes[question.id].proposal}</p></div>}{includeComments && notes[question.id].comment.trim() && <div className="text-sm text-slate-600"><p className="font-semibold">{templateLanguage === 'ru' ? 'Комментарий команды' : 'Kommentar des Teams'}</p><p className="mt-1 whitespace-pre-wrap break-words leading-relaxed">{notes[question.id].comment}</p></div>}{notes[question.id].answer?.trim() ? <div className="whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-sm"><p className="font-semibold">{templateLanguage === 'ru' ? 'Записанный ответ / результат' : 'Festgehaltene Antwort / Ergebnis'} · {notes[question.id].isaConfirmed ? (templateLanguage === 'ru' ? 'Подтверждено Исой' : 'Von Isa bestätigt') : (templateLanguage === 'ru' ? 'Ещё не подтверждено' : 'Noch nicht bestätigt')}</p><p className="mt-1">{notes[question.id].answer}</p></div> : <p className="text-xs text-slate-400">{templateLanguage === 'ru' ? 'Ответ Исы: ____________________' : 'Antwort von Isa: ____________________'}</p>}</article>)}</section>)}
         </div>}
     </div> : <>
       <div aria-label={t('Fragenfortschritt', 'Прогресс обсуждения')} className="flex flex-wrap justify-between items-center gap-3 text-xs text-slate-500">
         <p><strong className="text-slate-800 tabular-nums">{reviewed} / {catalogQuestions.length}</strong> {t('durchgesehen', 'обсудили')}</p>
         <p><strong className="text-emerald-800 tabular-nums">{selected.length}</strong> {t('für Isa · gesamter Katalog', 'для Исы · из всех вопросов')}</p>
       </div>
-      <details className="text-xs text-slate-500"><summary className="cursor-pointer font-semibold">{t('Vollständiger Fragenbestand · 155 Fragen', 'Полный список · 155 вопросов')}</summary><p className="mt-2 leading-relaxed">{t('95 Originalfragen und 60 Ergänzungen bleiben erhalten. Bei 100 % werden alle angezeigt. Die Gesprächsstufe blendet nur Fragen aus; eure Auswahl und Notizen werden nicht verändert.', '95 исходных вопросов и 60 дополнений сохранены. На уровне 100 % видны все вопросы. Уровень обсуждения только скрывает вопросы; ваши отметки и записи не меняются.')}</p></details>
+      <details className="text-xs text-slate-500"><summary className="cursor-pointer font-semibold">{t('Vollständiger Fragenbestand · ', 'Полный список · ') + ISA_TEAM_QUESTIONS.length}</summary><p className="mt-2 leading-relaxed">{t('95 Originalfragen und 62 Ergänzungen bleiben erhalten. Der Bestand dient der Vorbereitung; nicht jede Frage muss erneut an Isa gestellt werden. Bei 100 % werden alle angezeigt. Eure Auswahl und Notizen bleiben erhalten.', '95 исходных вопросов и 62 дополнения сохранены. Это материал для подготовки; не каждый вопрос нужно снова задавать Исе. На уровне 100 % виден весь список. Ваши отметки и записи сохраняются.')}</p><a href="https://github.com/TheNextthing1994/Eventstorming-ProRiv/blob/main/docs/ISA_FRAGENPRUEFUNG_2026-10-12.md" target="_blank" rel="noreferrer" className="mt-2 inline-block font-semibold text-emerald-800 underline">{t('Prüfung aller Fragen ansehen', 'Посмотреть разбор всех вопросов')}</a></details>
       <div className="flex flex-wrap gap-2 items-center"><label className="relative flex-1 min-w-[200px]"><span className="sr-only">{t('Fragen durchsuchen', 'Поиск вопросов')}</span><Search className="absolute left-3 top-3 w-4 h-4 text-slate-400" /><input value={search} onChange={event => setSearch(event.target.value)} placeholder={t('Frage oder Stichwort suchen …', 'Поиск вопроса или слова …')} className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl bg-white border border-slate-200" /></label><select aria-label={t('Fragen filtern', 'Фильтр вопросов')} value={filter} onChange={event => setFilter(event.target.value as typeof filter)} className="rounded-xl border border-slate-200 bg-white p-2.5 text-sm"><option value="all">{t('Alle Fragen', 'Все вопросы')}</option><option value="pending">{t('Noch durchgehen', 'Ещё не обсудили')}</option><option value="selected">{t('Für Isa ausgewählt', 'Выбраны для Исы')}</option></select></div>
       <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)] items-start">
         <div className="lg:hidden grid sm:grid-cols-2 gap-2">
@@ -367,7 +196,7 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
                       </span>
                       <button
                         type="button"
-                        onClick={() => setViewMode('single')}
+                        onClick={() => { setViewMode('single'); }}
                         className="text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700"
                       >
                         {t('Nur ausgewählte Frage anzeigen', 'Показать только выбранный вопрос')}
@@ -386,9 +215,14 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
                   question={current}
                   note={notes[current.id] || EMPTY_ISA_QUESTION_NOTE}
                   language={language}
-                  editable={loaded}
+                  editable={loaded && saveStatus !== 'saving'}
                   onUpdate={change => update(current.id, change)}
                   onOpenQuestion={openQuestion}
+                  draft={proposalDrafts[current.id]}
+                  onDraftChange={change => store.changeDraft(current.id, change)}
+                  onDraftClose={() => store.closeDraft(current.id)}
+                  onFinish={() => void store.finishDraft(current.id)}
+                  references={references}
                 />
                 <div className="flex justify-between items-center pt-2">
                   <button
@@ -430,12 +264,14 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
                 notes={notes}
                 proposalDrafts={proposalDrafts}
                 language={language}
-                editable={loaded}
+                editable={loaded && saveStatus !== 'saving'}
                 onOpen={openQuestion}
                 onSelect={(id, includeInIsa) => update(id, { includeInIsa })}
                 onUpdate={update}
-                onDraftChange={changeProposalDraft}
-                onDraftClose={closeProposalDraft}
+                onDraftChange={store.changeDraft}
+                onDraftClose={store.closeDraft}
+                onFinish={id => void store.finishDraft(id)}
+                references={references}
               />
             )}
 

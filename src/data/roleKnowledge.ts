@@ -1,7 +1,8 @@
-import { ADMIN_JOURNEY_STEPS, ROLE_JOURNEYS, journeyQuestionKey, type JourneyRoleId, type LocalizedText } from './roleJourneys';
+import { ADMIN_JOURNEY_STEPS, ROLE_JOURNEYS, type JourneyRoleId, type LocalizedText } from './roleJourneys';
 import { ROLE_INTERACTIONS, interactionSource, type RoleInteraction } from './roleInteractions';
 import { WORKSHOP_STEPS } from './workshopContent';
 import type { WorkshopNote } from '../db/indexedDb';
+import { catalogQuestionsForRoleSource } from './roleQuestionLinks';
 
 export type RoleBranchId = 'rights' | 'duties' | 'flow' | 'handoffs' | 'questions';
 export type RoleKnowledgeState = 'evidenced' | 'proposal' | 'open';
@@ -53,43 +54,44 @@ function relation(id: string, roleId: JourneyRoleId): RoleKnowledgeItem {
   };
 }
 
-function adminQuestion(stepId: string, questionId: string, proposal?: LocalizedText): RoleKnowledgeItem {
+function adminQuestion(stepId: string, questionId: string): RoleKnowledgeItem[] {
   const step = ADMIN_JOURNEY_STEPS.find(item => item.id === stepId)!;
-  const question = step.questions.find(item => item.id === questionId)!;
-  const existingProposal = proposal || (question.provenance === 'team' ? question.previousAnswer : undefined);
-  return {
-    id: journeyQuestionKey('admin', step.id, question.id),
-    noteKey: journeyQuestionKey('admin', step.id, question.id),
-    title: step.title, text: question.text, question: question.text,
-    context: question.previousAnswer, proposal: existingProposal,
-    state: existingProposal ? 'proposal' : 'open', source: step.source,
+  return catalogQuestionsForRoleSource(`admin:${stepId}:${questionId}`).map(question => ({
+    id: question.id, noteKey: question.id,
+    title: question.title, text: question.text, question: question.text,
+    context: question.context?.text,
+    state: 'open', source: question.sourceKeys.join(' · '),
     adminStepId: step.id
-  };
+  }));
+}
+function uniqueQuestions(items: RoleKnowledgeItem[]): RoleKnowledgeItem[] {
+  const seen = new Set<string>();
+  return items.filter(item => !seen.has(item.id) && !!seen.add(item.id));
 }
 
 export function roleRights(roleId: JourneyRoleId): RoleKnowledgeItem[] {
-  if (roleId === 'worker') return [
+  if (roleId === 'worker') return uniqueQuestions([
     fact('time'), fact('work'),
-    adminQuestion('profile', 'worker-rights'),
-    adminQuestion('prices', 'missing-price'),
-    adminQuestion('correction', 'time-editor'),
-    adminQuestion('report-policy', 'sender')
-  ];
-  if (roleId === 'foreman') return [
+    ...adminQuestion('profile', 'worker-rights'),
+    ...adminQuestion('prices', 'missing-price'),
+    ...adminQuestion('correction', 'time-editor'),
+    ...adminQuestion('report-policy', 'sender')
+  ]);
+  if (roleId === 'foreman') return uniqueQuestions([
     fact('approval'),
-    adminQuestion('assignment', 'assignment-owner'),
-    adminQuestion('assignment', 'report-owner'),
-    adminQuestion('report-policy', 'sender'),
-    adminQuestion('correction', 'time-editor')
-  ];
-  return [
-    adminQuestion('invite', 'inviter'),
-    adminQuestion('profile', 'worker-rights'),
-    adminQuestion('site', 'site-owner'),
-    adminQuestion('assignment', 'assignment-owner'),
-    adminQuestion('prices', 'price-owner'),
-    adminQuestion('access', 'first-admin')
-  ];
+    ...adminQuestion('assignment', 'assignment-owner'),
+    ...adminQuestion('assignment', 'report-owner'),
+    ...adminQuestion('report-policy', 'sender'),
+    ...adminQuestion('correction', 'time-editor')
+  ]);
+  return uniqueQuestions([
+    ...adminQuestion('invite', 'inviter'),
+    ...adminQuestion('profile', 'worker-rights'),
+    ...adminQuestion('site', 'site-owner'),
+    ...adminQuestion('assignment', 'assignment-owner'),
+    ...adminQuestion('prices', 'price-owner'),
+    ...adminQuestion('access', 'first-admin')
+  ]);
 }
 
 function adminFlow(): RoleKnowledgeItem[] {
@@ -145,20 +147,16 @@ export function roleQuestions(roleId: JourneyRoleId): RoleKnowledgeItem[] {
     ? ADMIN_JOURNEY_STEPS.map(step => step.id)
     : [...new Set(['invite', 'profile', ...relations.map(item => item.adminStepId).filter((id): id is string => !!id)])];
   const items = ADMIN_JOURNEY_STEPS.filter(step => adminIds.includes(step.id))
-    .flatMap(step => step.questions.map(question => adminQuestion(step.id, question.id)));
+    .flatMap(step => step.questions.flatMap(question => adminQuestion(step.id, question.id)));
   for (const id of ownRole.processStepIds) {
     const step = WORKSHOP_STEPS.find(item => item.id === id)!;
-    items.push({
-      id: 'process-question:' + id, noteKey: id,
-      title: l(step.title, step.titleRu),
-      text: l(step.openQuestion, step.openQuestionRu),
-      question: l(step.openQuestion, step.openQuestionRu),
-      context: l(step.customerFact, step.customerFactRu),
-      proposal: l(step.recommendation, step.recommendationRu),
-      state: 'proposal', source: step.source, processStepId: id
-    });
+    items.push(...catalogQuestionsForRoleSource('process:' + id).map(question => ({
+      id: question.id, noteKey: question.id, title: question.title,
+      text: question.text, question: question.text, context: question.context?.text,
+      state: 'open' as const, source: question.sourceKeys.join(' · '), processStepId: id
+    })));
   }
-  return items;
+  return uniqueQuestions(items);
 }
 
 export function roleHandoffs(roleId: JourneyRoleId): RoleInteraction[] {

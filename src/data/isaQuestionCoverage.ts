@@ -3,6 +3,7 @@ import { WORKSHOP_STEPS } from './workshopContent';
 import { DOMAIN_EVENTS_LIST, INITIAL_OPEN_POINTS, SENIOR_DECISION_QUESTIONS } from '../db/knowledgeSeed';
 import { generateInitialQuestions } from '../db/defaultData';
 import { ISA_TEAM_QUESTIONS } from './isaTeamQuestions';
+import { ROLE_QUESTION_LINKS } from './roleQuestionLinks';
 
 export interface IsaQuestionCoverage {
   sourceKey: string;
@@ -74,7 +75,7 @@ const covered: Record<string, string[]> = {
 const additional = (key: string) => ISA_TEAM_QUESTIONS.filter(question => question.sourceKeys.includes(key)).map(question => question.id);
 const technical = new Set(['open:op-vremya-1', 'open:op-api-1', 'open:op-app-1', 'qa:p1-1', 'qa:p1-2', 'qa:p1-3', 'qa:p1-4', 'qa:p1-5', 'diagram:mfa', 'diagramv2:tripletex', 'diagramv2:architecture']);
 const coverage = (sourceKey: string, source: string, text: string): IsaQuestionCoverage => ({
-  sourceKey, source, text, questionIds: [...new Set([...(covered[sourceKey] || []), ...additional(sourceKey)])], audience: technical.has(sourceKey) ? 'team' : 'isa',
+  sourceKey, source, text, questionIds: [...new Set([...(ROLE_QUESTION_LINKS[sourceKey] || covered[sourceKey] || []), ...additional(sourceKey)])], audience: technical.has(sourceKey) ? 'team' : 'isa',
 });
 
 const libraryQuestions: [string, string, string][] = [

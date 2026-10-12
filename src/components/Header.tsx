@@ -105,55 +105,21 @@ export const Header: React.FC<HeaderProps> = ({
         >
           {getTranslation('appName', language)}
         </button>
-        <span className="hidden xl:inline text-xs text-slate-400 font-normal">
-          {getTranslation('appSubtitle', language)}
-        </span>
       </div>
 
-      {/* Meeting-first navigation. Research remains accessible, but doesn't compete for attention. */}
-      <nav className="flex items-center gap-1.5">
-        <button
-          onClick={() => onNavigate('home')}
-          className={`px-3 py-2 text-xs font-semibold rounded-lg ${currentView === 'home' ? 'bg-emerald-50 text-emerald-900' : 'text-slate-600 hover:bg-slate-100'}`}>
-          {language === 'ru' ? 'Рабочая панель' : 'Cockpit'}
-        </button>
-
+      {/* Clean, ergonomic global navigation */}
+      <nav className="flex items-center gap-2">
         <button
           onClick={() => onNavigate('roles')}
-          className={`px-3 py-2 text-xs font-semibold rounded-lg ${currentView === 'workshop' ? 'bg-emerald-700 text-white' : 'text-emerald-800 bg-emerald-50 hover:bg-emerald-100'}`}>
+          className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${currentView === 'workshop' && (window.location.hash.includes('/roles') || window.location.hash === '#/workshop/roles') ? 'bg-emerald-700 text-white' : 'text-slate-700 hover:bg-slate-100'}`}>
           {language === 'ru' ? 'Карта ролей' : 'Rollenkarte'}
         </button>
 
         <button
           onClick={() => onNavigate('isa-questions')}
-          className={`px-3 py-2 text-xs font-semibold rounded-lg ${currentView === 'isa-questions' ? 'bg-emerald-700 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
+          className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${currentView === 'isa-questions' ? 'bg-emerald-700 text-white' : 'text-slate-700 hover:bg-slate-100'}`}>
           {language === 'ru' ? 'Вопросы Исе' : 'Fragen für Isa'}
         </button>
-
-        <details className="relative group">
-          <summary className="px-3 py-2 cursor-pointer rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 list-none select-none">
-            {language === 'ru' ? 'Архив и инструменты ▾' : 'Archiv & Werkzeuge ▾'}
-          </summary>
-          <div className="absolute top-full right-0 mt-2 w-56 p-2 bg-white border border-slate-200 rounded-xl shadow-xl z-40 space-y-1">
-            {[
-              ['workshop', language === 'ru' ? 'Старый воркшоп' : 'Bisheriger Senior-Workshop'],
-              ['presentation', language === 'ru' ? 'Презентация' : 'Bisherige Präsentation'],
-              ['overview', language === 'ru' ? 'Статус' : 'Status & Übersicht'],
-              ['competitors', language === 'ru' ? 'Конкуренты' : 'Wettbewerber'],
-              ['event-storming', 'Event Storming'],
-              ['senior-decisions', language === 'ru' ? 'Открытые решения' : 'Offene Entscheidungen']
-            ].map(([view,label])=>(
-              <button key={view} onClick={() => onNavigate(view)} className="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-slate-100 text-slate-700">{label}</button>
-            ))}
-            <div className="h-px bg-slate-100 my-1"/>
-            <button onClick={onOpenSearch} className="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-slate-100 text-slate-700">
-              {language === 'ru' ? 'Поиск' : 'Suche'} (Ctrl+K)
-            </button>
-            <button onClick={onOpenImportExport} className="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-slate-100 text-slate-700">
-              {language === 'ru' ? 'Импорт / экспорт' : 'Import / Export'}
-            </button>
-          </div>
-        </details>
       </nav>
 
       {/* Zone 3: Language Switcher & Presentation Button */}

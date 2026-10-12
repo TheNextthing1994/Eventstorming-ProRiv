@@ -397,11 +397,7 @@ export function RoleKnowledgeMap({ roleId, stepId, interactionId, language, note
             </div>
             <p className={'text-sm leading-relaxed ' + (item.question ? 'font-semibold' : 'text-slate-700')}><Copy text={item.text} language={language} /></p>
             {item.question && item.noteKey && <div className="mt-3 space-y-3">
-              {item.context && <details className="rounded-lg border border-slate-200 bg-white/80 p-2.5 text-xs text-slate-600">
-                <summary className="cursor-pointer font-semibold">{t('Bisherige Grundlage · Quelle ansehen', 'Исходные сведения · посмотреть источник')}</summary>
-                <p className="mt-2 leading-relaxed"><Copy text={item.context} language={language} /></p>
-              </details>}
-              {renderAnswerFields(item.noteKey, item.proposal)}
+
             </div>}
             <details className="mt-3 text-[10px] text-slate-500"><summary className="cursor-pointer font-semibold">{t('Quelle', 'Источник')}</summary><p className="mt-1 break-words leading-relaxed">{item.source}</p></details>
             {!item.question && <div className="mt-3 flex flex-wrap gap-3 text-xs">

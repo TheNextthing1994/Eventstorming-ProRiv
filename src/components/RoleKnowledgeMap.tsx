@@ -104,19 +104,30 @@ export function RoleKnowledgeMap({ roleId, stepId, interactionId, language, note
     });
   }
 
-  if (!role) return <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-8">
-    <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">{t('Rollenkarte', 'Карта ролей')}</p>
-    <h2 className="mt-2 text-xl font-bold">{t('Wähle eine Rolle. Ihre fünf Bereiche klappen auf.', 'Выбери роль. Откроются пять её разделов.')}</h2>
-    <div className="mt-6 grid gap-4 sm:grid-cols-3">
-      {ROLE_JOURNEYS.map(item => <button type="button" key={item.id}
-        aria-label={t(item.name.de, item.name.ru) + t('-Perspektive öffnen', ': открыть перспективу')}
-        onClick={() => onNavigate(item.id)}
-        className="group rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center transition hover:border-indigo-400 hover:bg-indigo-50 focus-visible:outline-2 focus-visible:outline-indigo-600">
-        <RolePortrait roleId={item.id} className="mx-auto h-32 w-32 transition-transform motion-reduce:transition-none group-hover:scale-105" />
-        <h3 className="mt-3 text-lg font-bold"><Copy text={item.name} language={language} /></h3>
-        <p className="mt-2 text-xs leading-relaxed text-slate-500"><Copy text={item.purpose} language={language} /></p>
-        <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-indigo-700">{t('Rolle öffnen', 'Открыть роль')}<ArrowRight aria-hidden="true" className="h-3.5 w-3.5" /></span>
-      </button>)}
+  if (!role) return <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+    <div className="px-5 pt-5">
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-700">{t('Rollenkarte', 'Карта ролей')}</p>
+      <h2 className="mt-1 text-lg font-bold">{t('Welche Rolle willst du betrachten?', 'Какую роль хочешь рассмотреть?')}</h2>
+    </div>
+    <div className="relative h-[440px] sm:h-[420px]" style={{ backgroundImage: 'radial-gradient(circle, #cbd5e150 1px, transparent 1px)', backgroundSize: '22px 22px' }}>
+      <svg viewBox="0 0 1000 440" preserveAspectRatio="none" className="absolute inset-0 h-full w-full text-slate-200" aria-hidden="true">
+        <path d="M450 170 L280 270 M550 170 L720 270 M330 327 L670 327" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="5 7" />
+      </svg>
+      {([
+        { id: 'admin', position: 'left-[50%] top-[27%]' },
+        { id: 'worker', position: 'left-[23%] top-[73%]' },
+        { id: 'foreman', position: 'left-[77%] top-[73%]' }
+      ] as const).map(({ id, position }) => {
+        const item = ROLE_JOURNEYS.find(entry => entry.id === id)!;
+        return <button type="button" key={id}
+          aria-label={t(item.name.de, item.name.ru) + t('-Perspektive öffnen', ': открыть перспективу')}
+          onClick={() => onNavigate(id)}
+          className={'group absolute w-[128px] -translate-x-1/2 -translate-y-1/2 rounded-2xl p-2 text-center transition hover:bg-indigo-50 focus-visible:outline-2 focus-visible:outline-indigo-600 sm:w-[160px] ' + position}>
+          <RolePortrait roleId={id} className="mx-auto h-24 w-24 transition-transform motion-reduce:transition-none group-hover:scale-105 sm:h-32 sm:w-32" />
+          <span className="mt-2 block text-sm font-bold sm:text-base"><Copy text={item.name} language={language} /></span>
+        </button>;
+      })}
+      <p className="absolute left-1/2 top-[48%] w-[80%] -translate-x-1/2 text-center text-xs text-slate-500">{t('Ein Symbol anklicken. Die fünf Bereiche dieser Rolle klappen auf.', 'Нажми на символ. Откроются пять разделов этой роли.')}</p>
     </div>
   </div>;
 

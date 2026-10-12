@@ -58,21 +58,33 @@ export function IsaQuestionCard({ question, note, language, editable, onUpdate, 
   </article>;
 }
 
-export function IsaQuestionOverview({ questions, notes, language, editable, onOpen, onSelect, onUpdate }: {
+export function IsaQuestionOverview({ questions, notes, proposalDrafts, language, editable, onOpen, onSelect, onUpdate, onDraftChange, onDraftClose }: {
   questions: IsaTeamQuestion[];
   notes: IsaQuestionNotes;
+  proposalDrafts: Record<string, string>;
   language: Language;
   editable: boolean;
   onOpen?: (id: string) => void;
   onSelect: (id: string, include: boolean) => void;
-  onUpdate?: (id: string, change: Partial<IsaQuestionNote>) => void;
+  onUpdate: (id: string, change: Partial<IsaQuestionNote>) => void;
+  onDraftChange: (id: string, value: string) => void;
+  onDraftClose: (id: string) => void;
 }) {
   const t = (de: string, ru: string) => language === 'ru' ? ru : de;
-  const [openFields, setOpenFields] = useState<Record<string, boolean>>({});
-  const toggleField = (id: string) => setOpenFields(prev => ({ ...prev, [id]: !prev[id] }));
+  const openField = (id: string) => {
+    if (editable) onDraftChange(id, notes[id]?.proposal ?? '');
+  };
+  const finishField = (id: string) => {
+    if (!editable || !Object.hasOwn(proposalDrafts, id)) return;
+    const proposal = proposalDrafts[id];
+    if (proposal !== (notes[id]?.proposal ?? '') || !notes[id]?.reviewed) {
+      onUpdate(id, { proposal, reviewed: true });
+    }
+    onDraftClose(id);
+  };
 
   return <ol aria-label={t('Fragen dieses Abschnitts', 'Вопросы этого раздела')} className="space-y-3">{questions.map(question => {
-    const isOpen = !!openFields[question.id];
+    const isOpen = Object.hasOwn(proposalDrafts, question.id);
     const note = notes[question.id];
     return <li key={question.id} id={`question-${question.id}`} className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 space-y-3">
       <div className="flex flex-wrap gap-2 justify-between text-xs">
@@ -87,33 +99,41 @@ export function IsaQuestionOverview({ questions, notes, language, editable, onOp
           {t('Für Isa übernehmen', 'Включить в вопросы Исе')}
         </label>
         {isOpen ? (
-          <div className="flex-1 flex items-center gap-2 min-w-[240px]">
-            <input
-              type="text"
-              disabled={!editable}
-              value={note?.proposal ?? ''}
-              onChange={event => {
-                const val = event.target.value;
-                onUpdate?.(question.id, { proposal: val, reviewed: true });
-              }}
-              onKeyDown={event => { if (event.key === 'Enter') toggleField(question.id); }}
-              placeholder={t('Vorschlag des Teams …', 'Предложение команды …')}
-              className="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-xs bg-white focus:outline-emerald-600 shadow-xs"
-              autoFocus
-            />
-            <button
-              type="button"
-              onClick={() => toggleField(question.id)}
-              className="text-xs rounded-lg border border-slate-200 px-2.5 py-1.5 hover:bg-slate-100 text-slate-700 font-medium shrink-0"
-            >
-              {t('Fertig', 'Готово')}
-            </button>
+          <div className="flex-1 min-w-[240px]">
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                aria-label={t('Vorschlag des Teams: ', 'Предложение команды: ') + isaQuestionLabel(question, language)}
+                disabled={!editable}
+                value={proposalDrafts[question.id]}
+                onChange={event => onDraftChange(question.id, event.target.value)}
+                onKeyDown={event => {
+                  if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+                    event.preventDefault();
+                    finishField(question.id);
+                  }
+                }}
+                placeholder={t('Vorschlag des Teams …', 'Предложение команды …')}
+                className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-xs bg-white focus:outline-emerald-600 shadow-xs"
+                autoFocus
+              />
+              <button
+                type="button"
+                disabled={!editable}
+                onClick={() => finishField(question.id)}
+                className="text-xs rounded-lg border border-slate-200 px-2.5 py-1.5 hover:bg-slate-100 text-slate-700 font-medium shrink-0 disabled:opacity-50"
+              >
+                {t('Fertig', 'Готово')}
+              </button>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-500">{t('Mit „Fertig“ speichern.', 'Сохранить кнопкой «Готово».')}</p>
           </div>
         ) : (
           <button
             type="button"
+            disabled={!editable}
             onClick={() => {
-              toggleField(question.id);
+              openField(question.id);
               onOpen?.(question.id);
             }}
             className="text-xs rounded-lg border border-slate-200 bg-white px-3 py-1.5 hover:bg-slate-50 text-slate-700 font-medium flex items-center gap-1.5 shrink-0 transition-colors"
@@ -127,7 +147,7 @@ export function IsaQuestionOverview({ questions, notes, language, editable, onOp
       {(note?.proposal || note?.comment) && !isOpen && (
         <div className="rounded-lg bg-emerald-50/50 border border-emerald-200/70 px-3 py-2 text-xs text-slate-700 flex justify-between items-start gap-2">
           <p className="leading-relaxed"><strong className="text-emerald-950 mr-1.5">{t('Vorschlag des Teams:', 'Предложение команды:')}</strong>{note.proposal || note.comment}</p>
-          <button type="button" onClick={() => toggleField(question.id)} className="text-[11px] text-emerald-800 hover:underline shrink-0 font-medium">
+          <button type="button" disabled={!editable} onClick={() => openField(question.id)} className="text-[11px] text-emerald-800 hover:underline shrink-0 font-medium disabled:opacity-50">
             {t('Bearbeiten', 'Изменить')}
           </button>
         </div>
@@ -139,6 +159,7 @@ export function IsaQuestionOverview({ questions, notes, language, editable, onOp
 export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Language; refreshKey?: unknown }) {
   const t = (de: string, ru: string) => language === 'ru' ? ru : de;
   const [notes, setNotes] = useState<IsaQuestionNotes>({});
+  const [proposalDrafts, setProposalDrafts] = useState<Record<string, string>>({});
   const notesRef = useRef<IsaQuestionNotes>({});
   const revision = useRef(0);
   const [loaded, setLoaded] = useState(false);
@@ -175,6 +196,7 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
       if (!alive) return;
       notesRef.current = current;
       setNotes(current);
+      setProposalDrafts({});
       setLoaded(true);
       setSaveStatus('saved');
       try {
@@ -207,6 +229,15 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
   const update = (id: string, change: Partial<IsaQuestionNote>) => {
     if (loaded) void persist(changeIsaQuestionNote(notesRef.current, id, change));
   };
+  const changeProposalDraft = (id: string, value: string) => {
+    if (loaded) setProposalDrafts(current => ({ ...current, [id]: value }));
+  };
+  const closeProposalDraft = (id: string) => setProposalDrafts(current => {
+    const next = { ...current };
+    delete next[id];
+    return next;
+  });
+  const unfinishedProposalIds = Object.keys(proposalDrafts).filter(id => proposalDrafts[id] !== (notes[id]?.proposal ?? ''));
 
   const catalogQuestions = isaQuestionsAtDepth(depth, catalog);
   const groupId = (question: IsaTeamQuestion) => isaQuestionGroupId(question, catalog);
@@ -264,7 +295,7 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
 
   const saveMessage = saveStatus === 'loading' ? t('Lade euren Stand …', 'Загружаем ваши записи …')
     : saveStatus === 'saving' ? t('Speichere …', 'Сохраняем …')
-    : saveStatus === 'saved' ? t('Automatisch in diesem Browser gespeichert.', 'Автоматически сохранено в этом браузере.')
+    : saveStatus === 'saved' ? t('In diesem Browser gespeichert.', 'Сохранено в этом браузере.')
     : !loaded ? t('Gespeicherter Stand konnte nicht geladen werden.', 'Не удалось загрузить сохранённые записи.')
     : t('Speichern fehlgeschlagen. Eure Eingaben sind noch hier; bitte eine Sicherung herunterladen.', 'Не удалось сохранить. Ваши записи ещё здесь; скачайте резервную копию.');
 
@@ -282,7 +313,12 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
     </div>
     {loadError && <div role="alert" className="p-4 rounded-xl border border-rose-200 bg-rose-50 text-sm">{t('Euer gespeicherter Stand konnte nicht geladen werden. Die Bearbeitung bleibt gesperrt. Erneut laden oder eine Sicherung einlesen.', 'Не удалось загрузить сохранённые записи. Редактирование заблокировано. Обновите страницу или загрузите резервную копию.')} <button type="button" onClick={() => window.location.reload()} className="underline font-bold">{t('Erneut laden', 'Обновить')}</button></div>}
     {importError && <p role="alert" className="rounded-xl bg-rose-50 border border-rose-200 p-3 text-sm text-rose-900">{t('Diese Datei ist keine gültige Fragen-Sicherung. Euer bisheriger Stand wurde nicht verändert.', 'Этот файл не является корректной резервной копией вопросов. Ваши записи не изменились.')}</p>}
-    {pendingImport && <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm space-y-3"><p>{t('Diese Sicherung enthält ', 'В этой копии ')}{Object.keys(pendingImport).length} {t('bearbeitete Fragen und ', 'обработанных вопросов и ')}{selectedIsaQuestions(pendingImport).length} {t('Auswahlen für Isa. Beim Übernehmen wird euer bisheriger Fragenstand ersetzt.', 'выбранных вопросов Исе. При загрузке текущие записи вопросов будут заменены.')}</p><div className="flex flex-wrap gap-2"><button type="button" onClick={() => { const restored = pendingImport; setPendingImport(null); setLoadError(false); setLoaded(true); void persist(restored); }} className="px-3 py-2 rounded-lg bg-slate-900 text-white font-semibold">{t('Sicherung übernehmen', 'Загрузить копию')}</button><button type="button" onClick={() => setPendingImport(null)} className="px-3 py-2 rounded-lg bg-white border border-slate-200">{t('Abbrechen', 'Отмена')}</button>{loaded && <button type="button" onClick={() => download('ProRiv_Fragen_Sicherung.json', isaQuestionsBackup(notesRef.current), 'application/json')} className="px-3 py-2 underline">{t('Aktuellen Stand zuerst sichern', 'Сначала сохранить текущие записи')}</button>}</div></div>}
+    {pendingImport && <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm space-y-3"><p>{t('Diese Sicherung enthält ', 'В этой копии ')}{Object.keys(pendingImport).length} {t('bearbeitete Fragen und ', 'обработанных вопросов и ')}{selectedIsaQuestions(pendingImport).length} {t('Auswahlen für Isa. Beim Übernehmen wird euer bisheriger Fragenstand ersetzt.', 'выбранных вопросов Исе. При загрузке текущие записи вопросов будут заменены.')}{unfinishedProposalIds.length > 0 && ' ' + t('Dabei werden auch noch offene Vorschläge verworfen.', 'Незавершённые предложения также будут удалены.')}</p><div className="flex flex-wrap gap-2"><button type="button" onClick={() => { const restored = pendingImport; setPendingImport(null); setProposalDrafts({}); setLoadError(false); setLoaded(true); void persist(restored); }} className="px-3 py-2 rounded-lg bg-slate-900 text-white font-semibold">{t('Sicherung übernehmen', 'Загрузить копию')}</button><button type="button" onClick={() => setPendingImport(null)} className="px-3 py-2 rounded-lg bg-white border border-slate-200">{t('Abbrechen', 'Отмена')}</button>{loaded && <button type="button" onClick={() => download('ProRiv_Fragen_Sicherung.json', isaQuestionsBackup(notesRef.current), 'application/json')} className="px-3 py-2 underline">{t('Aktuellen Stand zuerst sichern', 'Сначала сохранить текущие записи')}</button>}</div></div>}
+
+    {preview && unfinishedProposalIds.length > 0 && <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+      {t('Noch offene Vorschläge mit „Fertig“ speichern, damit sie in der Vorlage erscheinen.', 'Сохраните незавершённые предложения кнопкой «Готово», чтобы включить их в подборку.')}
+      <button type="button" onClick={() => { setPreview(false); openQuestion(unfinishedProposalIds[0]); }} className="ml-2 font-semibold underline">{t('Offenen Vorschlag bearbeiten', 'Продолжить предложение')}</button>
+    </p>}
 
     {preview ? <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
       <div className="bg-slate-50 p-4 sm:p-5 border-b border-slate-200 flex flex-wrap gap-4 items-center justify-between">
@@ -334,11 +370,14 @@ export function IsaQuestionsWorkshop({ language, refreshKey }: { language: Langu
             <IsaQuestionOverview
               questions={visible.filter(question => groupId(question) === currentGroup?.id)}
               notes={notes}
+              proposalDrafts={proposalDrafts}
               language={language}
               editable={loaded}
               onOpen={openQuestion}
               onSelect={(id, includeInIsa) => update(id, { includeInIsa })}
               onUpdate={update}
+              onDraftChange={changeProposalDraft}
+              onDraftClose={closeProposalDraft}
             />
 
             <div className="flex justify-between gap-2">

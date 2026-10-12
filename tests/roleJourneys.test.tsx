@@ -103,7 +103,7 @@ test('every relation resolves to existing notes; changing perspective reuses the
   assert.equal(interactionForAdminStep('invite')?.id, 'invitation');
 });
 
-test('the initial page shows three role symbols and does not open a questionnaire before a role or relationship is selected', () => {
+test('the initial page shows the three role symbols in their original triangle before opening a role', () => {
   const html = renderToStaticMarkup(<RoleJourneyWorkshop
     language="de" notes={{}} databaseState={{ questions: [] } as unknown as DatabaseState}
     loaded saveStatus="idle" onNavigate={() => {}} onOpenProcess={() => {}} onSelectTopic={() => {}}
@@ -112,7 +112,24 @@ test('the initial page shows three role symbols and does not open a questionnair
   assert.ok(html.includes('Admin-Perspektive öffnen'));
   assert.ok(html.includes('Arbeiter-Perspektive öffnen'));
   assert.ok(html.includes('Vorarbeiter-Perspektive öffnen'));
+  for (const [name, position] of [
+    ['Admin', 'left-[50%] top-[27%]'],
+    ['Arbeiter', 'left-[23%] top-[73%]'],
+    ['Vorarbeiter', 'left-[77%] top-[73%]']
+  ]) {
+    const button = html.match(new RegExp('<button[^>]*aria-label="' + name + '-Perspektive öffnen"[^>]*>'))?.[0];
+    assert.ok(button?.includes(position), `${name} retains its place in the triangle`);
+  }
   assert.ok(!html.includes('<textarea'));
+  for (const role of ROLE_JOURNEYS) {
+    const selected = renderToStaticMarkup(<RoleJourneyWorkshop
+      language="de" roleId={role.id} notes={{}} databaseState={{ questions: [] } as unknown as DatabaseState}
+      loaded saveStatus="idle" onNavigate={() => {}} onOpenProcess={() => {}} onSelectTopic={() => {}}
+      onUpdateNote={() => {}} onSave={async () => {}}
+    />);
+    for (const title of ['Was darf ich?', 'Was muss ich?', 'Mein Ablauf', 'Zusammenarbeit', 'Mit Isa klären']) assert.ok(selected.includes(title));
+    assert.equal((selected.match(/class="role-map-node /g) || []).length, 5);
+  }
 });
 
 test('worker perspective opens the foreman exchange with the original report policy answer', () => {

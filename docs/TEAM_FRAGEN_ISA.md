@@ -28,8 +28,8 @@ Umsetzung: `src/data/isaQuestionDepth.ts`, `src/components/IsaQuestionDepthContr
 Der **Gesamtkatalog enthält 155 Fragen**: die unveränderten 45 Teamfragen und 50 Ich-/Rollenfragen aus `Fragen Amruddy(1).txt` sowie 60 ergänzende Projektfragen. Alle sind nach 14 Abschnitten geordnet. Originalfragen werden nicht gelöscht oder umgeschrieben. Ergänzungen klären weitere konkrete Entscheidungen; bereits abgedeckte Projektfragen bekommen Quellenverweise statt zusätzlicher Kopien.
 
 1. **Gesamtkatalog** öffnen und links einen Abschnitt wählen. Die Fragen stehen vollständig in einer lesbaren Liste. Auf schmalen Bildschirmen Abschnitt und Frage über die Auswahllisten wählen.
-2. **Frage öffnen · Kommentar & Vorschlag** wählen. Deutsch, Russisch oder beide Sprachen sind über den vorhandenen Sprachschalter verfügbar.
-3. **Teamkommentar** und **Unser Vorschlag an Isa** notieren. Vorhandene Gesprächsgrundlagen stehen getrennt daneben und füllen eure Eingaben nicht automatisch aus.
+2. Bei der Frage **Vorschlag des Teams** oder **Bearbeiten** wählen. Deutsch, Russisch oder beide Sprachen sind über den vorhandenen Sprachschalter verfügbar.
+3. Vorschlag eingeben und **Fertig** klicken; auch Enter speichert. Erst dann wird der Text gespeichert und die Frage als durchgesehen markiert. Vorhandene Teamkommentare bleiben getrennt erhalten. Gesprächsgrundlagen füllen euren Vorschlag nicht automatisch aus.
 4. **Für Isa übernehmen** anhaken. Das nimmt die Frage in die Vorlage auf und markiert sie als durchgesehen. **Durchgesehen & weiter** dokumentiert nur den Teamfortschritt.
 5. **Verwandte Fragen und andere Rollenperspektiven** zeigt konkrete Verbindungen. Jede Perspektive bleibt einzeln auswählbar. Kommentare, Auswahl und Vorschläge werden beim Wechsel behalten.
 6. **Isa-Vorlage ansehen** öffnen, Sprache wählen und herunterladen oder kopieren. Sie enthält ausgewählte Fragen aus allen Bereichen in der Reihenfolge der Arbeitsschritte, vorhandene Grundlagen und eure Vorschläge. Teamkommentare werden nur auf Wunsch aufgenommen.
@@ -54,7 +54,9 @@ Die 14 Abschnitte umfassen Rollen/Zugang, Auftrag/Baustelle, Mannschaft, Ankunft
 
 ## Speichern und mitnehmen
 
-Auswahl, Fortschritt und Text werden automatisch in diesem Browser gespeichert. Der jüngste Entwurf wird sofort gesichert; IndexedDB erhält danach geordnete Schreibvorgänge. Die bestehenden 95 IDs und Speicherkennungen bleiben erhalten. Es gibt keine Migration, die alte Kommentare oder Vorschläge zusammenführt oder überschreibt.
+Haken werden beim Anklicken in diesem Browser gespeichert. Das Vorschlagsfeld hält den eingegebenen Text zunächst nur im Arbeitsspeicher; **Fertig** oder Enter übernimmt und speichert ihn. Einzelne Buchstaben lösen keine Speicherung aus. Offene Eingaben bleiben beim Wechsel zwischen Abschnitten, Reglerstufen und Isa-Vorlage erhalten. Die Vorlage und Sicherungen enthalten die übernommenen Texte; die Vorschau weist auf noch nicht übernommene Vorschläge hin. Vor einem Neuladen **Fertig** klicken.
+
+Nach dem Übernehmen wird der neue Stand sofort im Browserspeicher gesichert; IndexedDB erhält danach geordnete Schreibvorgänge. Die bestehenden 95 IDs und Speicherkennungen bleiben erhalten. Es gibt keine Migration, die alte Kommentare oder Vorschläge zusammenführt oder überschreibt.
 
 **Sicherung herunterladen** enthält Auswahl, Fortschritt, Kommentare und Vorschläge aus allen Bereichen. Auf einem anderen Gerät **Sicherung laden**, Umfang prüfen und übernehmen. Die Wiederherstellung ersetzt nur den Fragenstand. Die vollständige JSON-Sicherung enthält weiterhin den optionalen Eintrag `isaQuestionNotes`; alte globale Sicherungen ohne diesen Eintrag löschen ihn nicht. Die App synchronisiert Teamnotizen nicht automatisch zwischen Geräten.
 

@@ -4,6 +4,42 @@
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
+
+  button,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  summary,
+  select,
+  label:has(input[type="checkbox"]),
+  label:has(input[type="radio"]) {
+    cursor: pointer;
+  }
+
+  button:not(:disabled):not([aria-disabled="true"]),
+  [role="button"]:not([aria-disabled="true"]) {
+    transition-property: color, background-color, border-color, box-shadow, transform;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  button:not(:disabled):not([aria-disabled="true"]):hover,
+  [role="button"]:not([aria-disabled="true"]):hover {
+    cursor: pointer;
+  }
+
+  button:not(:disabled):not([aria-disabled="true"]):active,
+  [role="button"]:not([aria-disabled="true"]):active {
+    transform: scale(0.98) translateY(1px);
+  }
+
+  button:disabled,
+  [role="button"][aria-disabled="true"],
+  input:disabled {
+    cursor: not-allowed;
+    transform: none !important;
+  }
 }
 
 .role-map-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 20px; background: radial-gradient(circle, #cbd5e140 1px, transparent 1px) 0 0 / 24px 24px; }

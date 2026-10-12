@@ -79,7 +79,7 @@ export const GuidedPresentation: React.FC<GuidedPresentationProps> = ({
   };
   const updateNote = (change: Partial<WorkshopNote>) => {
     if (!selected || !loaded) return;
-    setNotes(prev => ({
+    setNotes((prev: WorkshopNotes) => ({
       ...prev, [selected.id]: {...(prev[selected.id] || BLANK_NOTE),...change,updatedAt:new Date().toISOString()}
     }));
     setSaveStatus('idle');

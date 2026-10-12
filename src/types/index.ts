@@ -235,15 +235,28 @@ export interface IsaQuestionNote {
   reviewed: boolean;
   comment: string;
   proposal: string;
+  updatedAt: string;
   answer?: string;
   isaConfirmed?: boolean;
-  status?: 'open' | 'test' | 'decided';
+  owner?: string;
+  nextStep?: string;
+  status?: 'unanswered' | 'in_progress' | 'decided';
+}
+
+export type IsaQuestionNotes = Record<string, IsaQuestionNote>;
+
+export interface WorkshopNote {
+  status: 'open' | 'test' | 'decided' | 'in_progress' | 'unanswered';
+  answer: string;
+  revisedRecommendation?: string;
+  revisedCustomerFact?: string;
+  isaConfirmed?: boolean;
   owner?: string;
   nextStep?: string;
   updatedAt: string;
 }
 
-export type IsaQuestionNotes = Record<string, IsaQuestionNote>;
+export type WorkshopNotes = Record<string, WorkshopNote>;
 
 export interface DatabaseState {
   topics: Record<TopicId, TopicContent>;

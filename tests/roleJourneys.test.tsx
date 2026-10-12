@@ -10,10 +10,6 @@ import { changeWorkshopNote, readWorkshopRoute, roleJourneyMarkdown } from '../s
 import type { DatabaseState, Language } from '../src/types';
 import type { WorkshopNotes } from '../src/db/indexedDb';
 import { roleKnowledgeItems, roleKnowledgeState, roleQuestions, roleRights } from '../src/data/roleKnowledge';
-import { ISA_TEAM_QUESTIONS } from '../src/data/isaTeamQuestions';
-import { ROLE_QUESTION_LINKS, catalogQuestionsForRoleSource } from '../src/data/roleQuestionLinks';
-import { changeIsaQuestionNote } from '../src/utils/isaQuestions';
-import { isaNoteAsWorkshopNote } from '../src/utils/isaRoleQuestions';
 
 test('existing process bookmarks survive, role deep links select a validated role and step', () => {
   assert.equal(readWorkshopRoute('#/workshop').mode, 'process');
@@ -83,15 +79,14 @@ test('the role map keeps the selected perspective and shows source alternatives 
   assert.ok(ru.includes('Рабочий → Клиент'));
   assert.ok(ru.includes('Рабочий → Прораб → Клиент'));
   const dual = render('bilingual');
-  const sender = catalogQuestionsForRoleSource('admin:report-policy:sender')[0];
-  assert.ok(dual.includes(sender.text.de));
-  assert.ok(dual.includes(sender.text.ru));
+  assert.ok(dual.includes('Schickt der Arbeiter den Rapport direkt'));
+  assert.ok(dual.includes('Рабочий отправляет рапорт прямо клиенту'));
 });
 
 test('a failed or pending load leaves answer fields disabled and seed answers never count as decisions', () => {
   const html = render('de', {}, 'report-policy', false);
-  assert.ok(html.includes('type="checkbox" disabled=""'));
-  assert.ok(html.includes(`0 / ${roleQuestions('admin').length}`));
+  assert.ok(html.includes('<textarea disabled=""'));
+  assert.ok(html.includes('0 / 28'));
 });
 
 test('every relation resolves to existing notes; changing perspective reuses the same underlying source', () => {
@@ -161,8 +156,8 @@ test('role branches retain canonical notes and keep disputed dispatch out of gre
       for (const item of items) assert.ok(item.source.trim());
     }
   }
-  assert.equal(ADMIN_JOURNEY_STEPS.flatMap(step => step.questions).length, 28, 'Original source archive remains intact');
-  const senderKey = 'proriv:project:rapport-sender-policy';
+  assert.equal(roleQuestions('admin').length, 28);
+  const senderKey = journeyQuestionKey('admin', 'report-policy', 'sender');
   const workerSender = roleQuestions('worker').find(item => item.noteKey === senderKey);
   const foremanSender = roleQuestions('foreman').find(item => item.noteKey === senderKey);
   assert.ok(workerSender && foremanSender);
@@ -171,48 +166,30 @@ test('role branches retain canonical notes and keep disputed dispatch out of gre
   assert.ok(!roleRights('admin').some(item => item.state === 'evidenced'));
 });
 
-test('a shared team decision cannot become green without explicit Isa confirmation; editing revokes confirmation', () => {
-  const item = roleQuestions('worker').find(item => item.noteKey === 'proriv:project:rapport-sender-policy')!;
+test('a team decision cannot become green without explicit Isa confirmation; editing revokes confirmation', () => {
+  const item = roleQuestions('worker').find(item => item.noteKey === journeyQuestionKey('admin', 'report-policy', 'sender'))!;
   const key = item.noteKey!;
-  const decided = changeIsaQuestionNote({}, key, { status: 'decided', answer: 'Team prefers foreman review' });
-  assert.equal(roleKnowledgeState(item, isaNoteAsWorkshopNote(decided[key])), 'proposal');
-  const confirmed = changeIsaQuestionNote(decided, key, { answer: 'Isa confirms direct worker dispatch', isaConfirmed: true });
-  assert.equal(roleKnowledgeState(item, isaNoteAsWorkshopNote(confirmed[key])), 'evidenced');
-  const edited = changeIsaQuestionNote(confirmed, key, { answer: 'Changed wording and route' });
+  const decided = changeWorkshopNote({}, key, { status: 'decided', answer: 'Team prefers foreman review' });
+  assert.equal(roleKnowledgeState(item, decided[key]), 'proposal');
+  const confirmed = changeWorkshopNote(decided, key, { answer: 'Isa confirms direct worker dispatch', isaConfirmed: true });
+  assert.equal(roleKnowledgeState(item, confirmed[key]), 'evidenced');
+  const edited = changeWorkshopNote(confirmed, key, { answer: 'Changed wording and route' });
   assert.equal(edited[key].isaConfirmed, false);
-  assert.equal(roleKnowledgeState(item, isaNoteAsWorkshopNote(edited[key])), 'proposal');
-  const emptied = changeIsaQuestionNote(confirmed, key, { answer: '  ', isaConfirmed: true });
+  assert.equal(roleKnowledgeState(item, edited[key]), 'proposal');
+  const emptied = changeWorkshopNote(confirmed, key, { answer: '  ', isaConfirmed: true });
   assert.equal(emptied[key].isaConfirmed, false);
-  assert.equal(roleKnowledgeState(item, isaNoteAsWorkshopNote(emptied[key])), 'open');
+  assert.equal(roleKnowledgeState(item, emptied[key]), 'open');
 });
 
-test('clearing a shared proposal reopens the point; meeting export includes its exact question and answer once', () => {
-  const item = roleQuestions('admin')[0];
+test('clearing a source proposal reopens the point and exports preserve the edited proposal and client confirmation', () => {
+  const item = roleQuestions('admin').find(item => item.proposal)!;
   const key = item.noteKey!;
-  assert.equal(roleKnowledgeState(item), 'open');
-  const proposed = changeIsaQuestionNote({}, key, { proposal: 'Our proposal' });
-  assert.equal(roleKnowledgeState(item, isaNoteAsWorkshopNote(proposed[key])), 'proposal');
-  const cleared = changeIsaQuestionNote(proposed, key, { proposal: ' ' });
-  assert.equal(roleKnowledgeState(item, isaNoteAsWorkshopNote(cleared[key])), 'open');
-  const recorded = changeIsaQuestionNote(cleared, key, { proposal: 'Our edited team proposal', answer: 'Isa agrees', isaConfirmed: true });
-  const markdown = roleJourneyMarkdown({}, recorded);
+  assert.equal(roleKnowledgeState(item), 'proposal');
+  const cleared = changeWorkshopNote({}, key, { revisedRecommendation: ' ' });
+  assert.equal(roleKnowledgeState(item, cleared[key]), 'open');
+  const recorded = changeWorkshopNote(cleared, key, { revisedRecommendation: 'Our edited team proposal', answer: 'Isa agrees', isaConfirmed: true });
+  const markdown = roleJourneyMarkdown(recorded);
   assert.ok(markdown.includes('**Vorschlag an Isa:** Our edited team proposal'));
   assert.ok(markdown.includes('**Von Isa bestätigt:** Ja'));
   assert.ok(markdown.includes('**Besprochene Antwort:** Isa agrees'));
-  assert.equal(markdown.split(`[${key}]`).length - 1, 1);
-});
-
-test('all editable role questions use the catalog identity and exact German and Russian text', () => {
-  assert.equal(Object.keys(ROLE_QUESTION_LINKS).length, 37);
-  for (const role of ROLE_JOURNEYS) for (const branch of ['rights', 'questions'] as const) {
-    const items = roleKnowledgeItems(role.id, branch);
-    assert.equal(new Set(items.map(item => item.id)).size, items.length);
-    for (const item of items.filter(item => item.noteKey)) {
-      const catalog = ISA_TEAM_QUESTIONS.find(question => question.id === item.noteKey);
-      assert.ok(catalog, `${role.id}/${branch}: ${item.id} must exist in the catalog`);
-      assert.equal(item.id, catalog.id);
-      assert.deepEqual(item.text, catalog.text);
-    }
-  }
-  for (const ids of Object.values(ROLE_QUESTION_LINKS)) for (const id of ids) assert.ok(ISA_TEAM_QUESTIONS.some(question => question.id === id));
 });

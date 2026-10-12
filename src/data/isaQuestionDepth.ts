@@ -24,13 +24,13 @@ const packets: DepthPacket[] = [
     p('rapport-sender-policy'), p('customer-gates'), t(22), t(21), t(27),
   ] },
   { value: 20, title: l('Kernablauf', 'Основной процесс'), purpose: l('Den normalen Einsatz konkret machen: Zuständigkeiten, Abrechnungsregeln und Stundenprüfung.', 'Уточнить обычный выезд: ответственность, правила расчёта и проверку часов.'), addedIds: [
-    p('role-combination'), t(8), t(9), p('arrival-vs-start'), p('hms-responsibility'), p('hms-app-scope'), p('gps-scope'),
+    t(8), t(9), p('arrival-vs-start'), p('hms-responsibility'), p('hms-app-scope'), p('gps-scope'),
     p('ra-aa-details'), p('helper-400'), r(46), p('discount-scope'), p('send-without-price'),
     p('foreman-app-purpose'), p('tripletex-report-view'), p('hours-approval-location'),
     p('weekly-overtime'), t(23), t(33), r(43), t(10), t(29),
   ] },
   { value: 40, title: l('Wichtige Ausnahmen', 'Важные исключения'), purpose: l('Fehler, Rückfragen, strittige Positionen, fehlende Verbindung und geänderte Einsätze klären.', 'Разобрать ошибки, спорные позиции, отсутствие связи и изменения выездов.'), addedIds: [
-    p('sent-report-correction'), r(16), p('time-deadline'), t(20), p('offline-duration'), p('offline-conflict'), p('offline-new-assignment'),
+    r(16), p('time-deadline'), t(20), p('offline-duration'), p('offline-conflict'), p('offline-new-assignment'),
     p('customer-link-validity'), p('partial-acceptance'), p('signature-required'), t(35), p('late-customer-response'),
     p('pending-photo-send'), p('delivery-failure'), p('absent-author-correction'), p('minimum-order'),
     p('missing-matrix-row'), p('surcharge-conditions'), p('height-lift'), r(48), p('solo-worker'), t(31), t(32),
@@ -48,7 +48,7 @@ const packets: DepthPacket[] = [
     r(4), r(8), r(9), r(12), r(13), r(14), r(15), r(20), r(21), r(22), r(23), r(25), r(26), r(27), r(29), r(31), r(32),
     t(12), t(13), t(15), t(16), t(17), t(19), t(24), t(28), t(36), t(37), t(39), t(41), t(42), t(43), t(44), t(45),
   ] },
-  { value: 100, title: l('Vollständiger Katalog', 'Полный каталог'), purpose: l('Alle Fragen einschließlich sämtlicher Originale und weiterer Ich-Perspektiven anzeigen.', 'Показать все вопросы, включая все оригиналы и остальные вопросы от первого лица.'), addedIds: [] },
+  { value: 100, title: l('Vollständiger Katalog', 'Полный каталог'), purpose: l('Alle 155 Fragen einschließlich sämtlicher Originale und weiterer Ich-Perspektiven anzeigen.', 'Показать все 155 вопросов, включая все оригиналы и остальные вопросы от первого лица.'), addedIds: [] },
 ];
 
 const knownIds = new Set(ISA_TEAM_QUESTIONS.map(question => question.id));

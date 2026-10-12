@@ -11,7 +11,9 @@ import {
   AttachmentItem,
   HotspotCoordinates,
   GlobalStats,
-  IsaQuestionNotes
+  IsaQuestionNotes,
+  WorkshopNotes,
+  WorkshopNote
 } from '../types';
 import { parseIsaQuestionNotes } from '../utils/isaQuestions';
 import { TOPIC_DEFINITIONS, generateInitialQuestions } from './defaultData';
@@ -845,25 +847,9 @@ export async function importFromJson(jsonString: string): Promise<boolean> {
 }
 
 
-/**
- * Workshop notes belong to the current browser (IndexedDB settings store).
- * They are deliberately separate from the seed, so future content upgrades
- * never overwrite what was agreed during the senior meeting.
- */
-export interface WorkshopNote {
-  status: 'open' | 'test' | 'decided';
-  /** Explicitly recorded client confirmation; a team decision alone is insufficient. */
-  isaConfirmed?: boolean;
-  /** Current working interpretation; never overwrites the source interview seed. */
-  revisedCustomerFact?: string;
-  /** Editable working proposal; never overwrites the original proposal. */
-  revisedRecommendation?: string;
-  answer: string;
-  owner: string;
-  nextStep: string;
-  updatedAt: string;
-}
-export type WorkshopNotes = Record<string, WorkshopNote>;
+
+
+export type { WorkshopNote, WorkshopNotes } from '../types';
 
 export async function loadWorkshopNotes(): Promise<WorkshopNotes> {
   const items = await getAllFromStore<{ key: string; value: WorkshopNotes }>('settings');

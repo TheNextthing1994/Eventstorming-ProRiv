@@ -17,7 +17,7 @@ import { WORKSHOP_STEPS } from '../data/workshopContent';
 import { ROLE_JOURNEYS, journeyQuestionKey } from '../data/roleJourneys';
 import { ROLE_INTERACTIONS } from '../data/roleInteractions';
 import { EVENT_STORMING_LEGACY_RULES, EVENT_STORMING_LEGACY_EXCEPTIONS } from '../data/eventStormingLegacy';
-import type { WorkshopNotes } from '../db/indexedDb';
+import type { WorkshopNote, WorkshopNotes } from '../db/indexedDb';
 
 export interface SddHandoff {
   createdAt: string;
@@ -192,8 +192,13 @@ export function prepareSddHandoff(
     '## Notes To Not Forget',
     '',
     'Agreed or assigned follow-up fields as recorded in workshop notes (recorded does not mean contractually agreed):',
-    ...Object.entries(liveNotes).filter(([,n]) => !!n.nextStep?.trim())
-      .map(([id,n]) => entry('NOTE:' + id, n.nextStep, 'Owner: ' + paragraph(n.owner))),
+    ...Object.entries(liveNotes).filter(([, rawN]) => {
+      const n = rawN as WorkshopNote;
+      return !!n.nextStep?.trim();
+    }).map(([id, rawN]) => {
+      const n = rawN as WorkshopNote;
+      return entry('NOTE:' + id, n.nextStep || '', 'Owner: ' + paragraph(n.owner));
+    }),
     '',
     'Never infer HMS register ownership, vendor/API availability, the mandatory approval hierarchy, data-retention requirements or the validity of GPS controls from unverified notes. Check applicable law and actual client operation before changing project scope.',
     '',

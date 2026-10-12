@@ -239,7 +239,7 @@ export function IsaQuestionsWorkshop({ language, refreshKey, planning = false }:
                   onOpenQuestion={openQuestion}
                   draft={proposalDrafts[current.id]}
                   onDraftChange={change => store.changeDraft(current.id, change)}
-                  onDraftClose={() => store.closeDraft(current.id)}
+                  onClose={() => store.closeDraft(current.id)}
                   onFinish={() => void store.finishDraft(current.id)}
                   references={references}
                 />

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronDown, ClipboardList, Download, ExternalLink, GitBranch, Lightbulb, MapPinned, MessageCircleQuestion, Save, ShieldCheck, X } from 'lucide-react';
-import { DatabaseState, Language, TopicId, type IsaQuestionNotes } from '../types';
+import { DatabaseState, Language, TopicId } from '../types';
 import { DOMAIN_EVENTS_LIST } from '../db/knowledgeSeed';
 import { TOPIC_DEFINITIONS } from '../db/defaultData';
-import { loadWorkshopNotes, saveWorkshopNotes, loadIsaQuestionNotes, WorkshopNote, WorkshopNotes } from '../db/indexedDb';
+import { loadWorkshopNotes, saveWorkshopNotes, WorkshopNote, WorkshopNotes } from '../db/indexedDb';
 import { WORKSHOP_ROLE_LABELS, WORKSHOP_STEPS, WorkshopStep } from '../data/workshopContent';
 import { RoleJourneyWorkshop } from './RoleJourneyWorkshop';
 import { IsaQuestionsWorkshop } from './IsaQuestionsWorkshop';
@@ -29,7 +29,7 @@ function isRelevantToTopic<T extends {topicId: TopicId; additionalTopicIds?: Top
   return item.topicId === topicId || Boolean(item.additionalTopicIds?.includes(topicId));
 }
 
-function createMarkdown(notes: WorkshopNotes, sharedNotes: IsaQuestionNotes = {}) {
+function createMarkdown(notes: WorkshopNotes) {
   const now = new Date().toLocaleString('de-AT');
   let markdown = '# ISA / ProRiv – Senior-Workshop-Protokoll\n\nStand: ' + now + '\n\n';
   markdown += '> Grundlage: Kundengespräch RAW, Deep Research und bestehende GitHub-Recherche. Vorschläge sind nicht automatisch freigegeben.\n\n';
@@ -46,7 +46,7 @@ function createMarkdown(notes: WorkshopNotes, sharedNotes: IsaQuestionNotes = {}
     markdown += '**Nächster Schritt:** ' + (note?.nextStep || '—') + '\n\n';
     markdown += '**Quelle:** ' + step.source + '\n\n';
   }
-  return markdown + '\n---\n\n' + roleJourneyMarkdown(notes, sharedNotes);
+  return markdown + '\n---\n\n' + roleJourneyMarkdown(notes);
 }
 
 function downloadText(filename: string, text: string, mime: string) {
@@ -106,12 +106,15 @@ export const SeniorWorkshop: React.FC<SeniorWorkshopProps> = ({
   const updateNoteByKey = (key: string, change: Partial<WorkshopNote>) => {
     if (!loaded) return;
     setSaveStatus('idle');
-    setNotes(prev => changeWorkshopNote(prev, key, change));
+    setNotes((prev: WorkshopNotes) => changeWorkshopNote(prev, key, change));
   };
   const updateNote = (change: Partial<WorkshopNote>) => updateNoteByKey(selected.id, change);
   const saveNote = async () => {
     if (!loaded) return;
-    if (Object.entries(notes).some(([key, note]) => (key === selected.id || key.startsWith('role:')) && note.status === 'decided' && !(note.answer || '').trim())) {
+    if (Object.entries(notes).some(([key, rawNote]) => {
+      const note = rawNote as WorkshopNote;
+      return (key === selected.id || key.startsWith('role:')) && note.status === 'decided' && !(note.answer || '').trim();
+    })) {
       alert(t('Für „Entschieden“ zuerst die besprochene Antwort dokumentieren.', 'Для статуса «Решено» сначала запишите согласованный ответ.'));
       return;
     }
@@ -170,7 +173,7 @@ export const SeniorWorkshop: React.FC<SeniorWorkshopProps> = ({
             </div>
           </div>
           {roleRoute.mode !== 'questions' && <div className="flex items-center gap-2">
-            <button disabled={!loaded} onClick={async () => { try { downloadText('ISA_Senior_Meeting_'+new Date().toISOString().slice(0,10)+'.md', createMarkdown(notes, await loadIsaQuestionNotes()), 'text/markdown'); } catch { alert(t('Fragen konnten nicht für den Export geladen werden. Bitte den Fragenstand zuerst sichern.', 'Не удалось загрузить вопросы для экспорта. Сначала сохраните резервную копию вопросов.')); } }}
+            <button disabled={!loaded} onClick={() => downloadText('ISA_Senior_Meeting_'+new Date().toISOString().slice(0,10)+'.md', createMarkdown(notes), 'text/markdown')}
               className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold bg-white border border-slate-200 rounded-lg hover:bg-slate-100 disabled:opacity-40">
               <Download className="w-4 h-4" />{t('Meeting-Protokoll', 'Протокол встречи')}
             </button>

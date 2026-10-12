@@ -1,33 +1,43 @@
-import { roleLegacyKeysForQuestion } from '../data/roleQuestionLinks';
-import type { WorkshopNote, WorkshopNotes } from '../db/indexedDb';
-import type { IsaQuestionNote, IsaQuestionNotes } from '../types';
-import { relatedIsaQuestions } from './isaQuestions';
 import type { IsaTeamQuestion } from '../data/isaTeamQuestions';
+import type { IsaQuestionNote, IsaQuestionNotes, WorkshopNote, WorkshopNotes } from '../types';
+import { catalogQuestionsForRoleSource } from '../data/roleQuestionLinks';
 
-export function isaNoteAsWorkshopNote(note?: IsaQuestionNote): WorkshopNote {
-  return { status: note?.status ?? (note?.reviewed ? 'test' : 'open'), answer: note?.answer ?? '',
-    revisedRecommendation: note?.proposal ?? '', isaConfirmed: note?.isaConfirmed ?? false,
-    owner: note?.owner ?? '', nextStep: note?.nextStep ?? '', updatedAt: note?.updatedAt ?? '' };
+export function legacyEntriesForQuestion(questionId: string, legacyNotes: WorkshopNotes): Array<{ answer: string; revisedRecommendation?: string }> {
+  const result: Array<{ answer: string; revisedRecommendation?: string }> = [];
+  for (const [key, rawNote] of Object.entries(legacyNotes)) {
+    const note = rawNote as WorkshopNote;
+    if (key.includes(questionId) || key.includes('admin:') || key.includes('process:')) {
+      if (note.answer || note.revisedRecommendation) {
+        result.push({ answer: note.answer, revisedRecommendation: note.revisedRecommendation });
+      }
+    }
+  }
+  return result;
 }
-export interface ExistingQuestionEntry { key: string; text: string; proposal: string; answer: string; comment?: string }
-export function legacyEntriesForQuestion(id: string, notes: WorkshopNotes): ExistingQuestionEntry[] {
-  return roleLegacyKeysForQuestion(id).flatMap(({ key, text }) => {
-    const note = notes[key];
-    return note && (note.answer.trim() || note.revisedRecommendation?.trim())
-      ? [{ key, text, proposal: note.revisedRecommendation ?? '', answer: note.answer }] : [];
-  });
+
+export function relatedEntriesForQuestion(question: IsaTeamQuestion, notes: IsaQuestionNotes): IsaTeamQuestion[] {
+  const sourceKeys = question.sourceKeys;
+  return catalogQuestionsForRoleSource(sourceKeys[0] || '').filter(q => q.id !== question.id);
 }
-export function relatedEntriesForQuestion(question: IsaTeamQuestion, notes: IsaQuestionNotes): ExistingQuestionEntry[] {
-  return relatedIsaQuestions(question).flatMap(other => {
-    const note = notes[other.id];
-    return note && (note.answer?.trim() || note.proposal.trim())
-      ? [{ key: other.id, text: other.text.de, proposal: note.proposal, answer: note.answer ?? '', comment: note.comment }] : [];
-  });
+
+export function reuseQuestionEntry(currentNote: IsaQuestionNote, entry: { answer: string; revisedRecommendation?: string }): Partial<IsaQuestionNote> {
+  const textToReuse = entry.revisedRecommendation || entry.answer;
+  const proposal = currentNote.proposal ? `${currentNote.proposal}\n\n${textToReuse}` : textToReuse;
+  return {
+    proposal,
+    comment: currentNote.comment,
+    isaConfirmed: false,
+  };
 }
-// Reuse is explicit, as a draft. It never marks a broader related question
-// complete or imports somebody else's client-confirmation flag.
-export function reuseQuestionEntry(current: IsaQuestionNote, entry: ExistingQuestionEntry): Partial<IsaQuestionNote> {
-  const append = (old: string, text: string) => !text.trim() || old === text ? old : old.trim() ? old + '\n\n' + text : text;
-  return { proposal: append(current.proposal, entry.proposal), answer: append(current.answer ?? '', entry.answer),
-    comment: append(current.comment, entry.comment ?? ''), isaConfirmed: false };
+
+export function isaNoteAsWorkshopNote(note: IsaQuestionNote): WorkshopNote {
+  return {
+    status: note.isaConfirmed ? 'decided' : note.reviewed ? 'in_progress' : 'unanswered',
+    answer: note.answer || note.proposal,
+    revisedRecommendation: note.proposal,
+    isaConfirmed: !!note.isaConfirmed,
+    owner: note.owner,
+    nextStep: note.nextStep,
+    updatedAt: new Date().toISOString(),
+  };
 }

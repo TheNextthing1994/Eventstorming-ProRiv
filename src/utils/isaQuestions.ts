@@ -4,6 +4,7 @@ import type { IsaQuestionNote, IsaQuestionNotes, Language } from '../types';
 
 export const EMPTY_ISA_QUESTION_NOTE: IsaQuestionNote = {
   includeInIsa: false, reviewed: false, comment: '', proposal: '', updatedAt: '',
+  answer: undefined, isaConfirmed: false, owner: undefined, nextStep: undefined, status: undefined,
 };
 
 const questionIds = new Set(ISA_TEAM_QUESTIONS.map(question => question.id));
@@ -11,14 +12,8 @@ const questionIds = new Set(ISA_TEAM_QUESTIONS.map(question => question.id));
 export function changeIsaQuestionNote(notes: IsaQuestionNotes, id: string, change: Partial<IsaQuestionNote>): IsaQuestionNotes {
   if (!questionIds.has(id)) throw new Error('Unknown question');
   const current = notes[id] || EMPTY_ISA_QUESTION_NOTE;
-  const answer = change.answer ?? current.answer ?? '';
-  const answerChanged = change.answer !== undefined && change.answer !== (current.answer ?? '');
-  const isaConfirmed = !!answer.trim() && (change.isaConfirmed ?? (answerChanged ? false : current.isaConfirmed ?? false));
   return { ...notes, [id]: {
     ...current, ...change,
-    ...(change.answer !== undefined || current.answer !== undefined ? { answer } : {}),
-    ...(change.isaConfirmed !== undefined || current.isaConfirmed !== undefined || answerChanged ? { isaConfirmed } : {}),
-    ...(change.status !== undefined || current.status !== undefined ? { status: (change.status ?? current.status) === 'decided' && !answer.trim() ? 'open' : change.status ?? current.status } : {}),
     reviewed: change.includeInIsa === true ? true : change.reviewed ?? current.reviewed,
     updatedAt: new Date().toISOString(),
   } };
@@ -35,13 +30,24 @@ export function parseIsaQuestionNotes(input: unknown): IsaQuestionNotes {
       || typeof note.comment !== 'string' || typeof note.proposal !== 'string' || typeof note.updatedAt !== 'string') {
       throw new Error('Invalid question note');
     }
-    for (const field of ['answer', 'owner', 'nextStep'] as const) if (note[field] !== undefined && typeof note[field] !== 'string') throw new Error('Invalid question answer');
-    if (note.isaConfirmed !== undefined && typeof note.isaConfirmed !== 'boolean') throw new Error('Invalid client confirmation');
-    if (note.status !== undefined && !['open', 'test', 'decided'].includes(note.status)) throw new Error('Invalid meeting status');
-    if (note.isaConfirmed && !note.answer?.trim()) throw new Error('Empty client confirmation');
-    result[id] = { includeInIsa: note.includeInIsa, reviewed: note.reviewed, comment: note.comment, proposal: note.proposal, updatedAt: note.updatedAt,
-      ...(note.answer !== undefined ? { answer: note.answer } : {}), ...(note.isaConfirmed !== undefined ? { isaConfirmed: note.isaConfirmed } : {}),
-      ...(note.status !== undefined ? { status: note.status } : {}), ...(note.owner !== undefined ? { owner: note.owner } : {}), ...(note.nextStep !== undefined ? { nextStep: note.nextStep } : {}) };
+    if (note.answer !== undefined && typeof note.answer !== 'string') throw new Error('Invalid answer');
+    if (note.isaConfirmed !== undefined && typeof note.isaConfirmed !== 'boolean') throw new Error('Invalid isaConfirmed');
+    if (note.owner !== undefined && typeof note.owner !== 'string') throw new Error('Invalid owner');
+    if (note.nextStep !== undefined && typeof note.nextStep !== 'string') throw new Error('Invalid nextStep');
+    if (note.status !== undefined && (typeof note.status !== 'string' || !['unanswered', 'in_progress', 'decided'].includes(note.status))) throw new Error('Invalid status');
+    if (note.isaConfirmed === true && !note.answer) throw new Error('Confirmed answer requires answer text');
+    result[id] = {
+      includeInIsa: note.includeInIsa,
+      reviewed: note.reviewed,
+      comment: note.comment,
+      proposal: note.proposal,
+      updatedAt: note.updatedAt,
+      answer: note.answer,
+      isaConfirmed: note.isaConfirmed,
+      owner: note.owner,
+      nextStep: note.nextStep,
+      status: note.status,
+    };
   }
   return result;
 }
@@ -128,9 +134,12 @@ export function isaTemplateMarkdown(notes: IsaQuestionNotes, language: Language 
         }
         if (note.proposal.trim()) lines.push('**' + t('Unser Vorschlag an Isa', 'Наше предложение Исе') + ':**', '', note.proposal.trim(), '');
         if (includeComments && note.comment.trim()) lines.push('**' + t('Kommentar des Teams', 'Комментарий команды') + ':**', '', note.comment.trim(), '');
-        if (note.answer?.trim()) lines.push('**' + t('Festgehaltene Antwort / Ergebnis', 'Записанный ответ / результат') + ':**', '', note.answer.trim(), '',
-          '**' + t('Von Isa bestätigt', 'Подтверждено Исой') + ':** ' + (note.isaConfirmed ? t('Ja', 'Да') : t('Noch nicht bestätigt', 'Ещё не подтверждено')), '');
-        else lines.push('**' + t('Antwort von Isa', 'Ответ Исы') + ':** ____________________', '');
+        if (note.answer?.trim()) {
+          lines.push('**' + (ru ? 'Записанный ответ' : 'Festgehaltene Antwort') + ':**', '', note.answer.trim(), '');
+          lines.push('**' + (ru ? 'Подтверждено Исой' : 'Von Isa bestätigt') + ':** ' + (note.isaConfirmed ? (ru ? 'Да' : 'Ja') : (ru ? 'Нет' : 'Nein')), '');
+        } else {
+          lines.push('**' + t('Antwort von Isa', 'Ответ Исы') + ':** ____________________', '');
+        }
       }
   }
   return lines.join('\n');
@@ -143,19 +152,18 @@ export function isaCatalogMarkdown(language: Language = 'bilingual'): string {
   const additions = ISA_TEAM_QUESTIONS.filter(question => question.catalog === 'project').length;
   const lines = [
     '# ' + (ru ? 'Полный список вопросов · ProRiv (проект Исы)' : "Gesamtkatalog der Fragen · ProRiv (Isa's Projekt)"), '',
-    ru ? `95 исходных вопросов сохранены без изменений. ${additions} дополнительных вопросов закрывают другие решения процесса.`
-      : `Die 95 Originalfragen bleiben erhalten. ${additions} Ergänzungen klären zusätzliche Entscheidungen im Ablauf.`, '',
-    ru ? 'Похожие вопросы могут раскрывать разные роли. Уже известные сведения служат основой обсуждения; предложения ещё не являются решениями.'
-      : 'Ähnliche Fragen können unterschiedliche Rollen klären. Vorhandene Erkenntnisse dienen als Gesprächsgrundlage; Vorschläge sind noch keine Entscheidungen.', '',
+    ru ? `Исходные 95 вопросов плюс ${additions} дополнения, разделённые на 14 этапов.` : `Die 95 Originalfragen plus ${additions} Ergänzungen, geordnet nach 14 Abschnitten.`, '',
   ];
-  let number = 0;
-  for (const stage of ISA_QUESTION_STAGES) {
-    lines.push('## ' + (ru ? stage.title.ru : stage.title.de), '', localized(stage.events), '');
-    for (const question of isaQuestionsForView('all').filter(question => question.stageId === stage.id)) {
-      lines.push(`### ${++number}. ${isaQuestionLabel(question, language)} · ${ru ? question.title.ru : question.title.de}`, '', localized(question.text), '');
-      if (question.context) lines.push(localized(question.context.text).split('\n').map(line => line ? '> ' + line : '>').join('\n'), '');
-      lines.push((ru ? 'Источник: ' : 'Quelle: ') + isaQuestionSources(question, language).join(' · '), '', `ID: ${question.id}`, '');
-    }
+  for (const group of ISA_QUESTION_STAGES) {
+      const questions = ISA_TEAM_QUESTIONS.filter(question => question.stageId === group.id);
+      if (!questions.length) continue;
+      lines.push('## ' + localized(group.title), '');
+      for (const question of questions) {
+        lines.push('### ' + question.number + '. ' + isaQuestionLabel(question, language) + ' · ' + localized(question.title), '', localized(question.text), '');
+        if (question.context) lines.push('**' + (ru ? 'Контекст' : 'Kontext') + ':** ' + localized(question.context.text), '');
+        lines.push('**' + (ru ? 'Источник' : 'Quelle') + ':** ' + isaQuestionSources(question, language).join(' · '), '');
+        lines.push('ID: ' + question.id, '');
+      }
   }
-  return lines.join('\n').trimEnd() + '\n';
+  return lines.join('\n');
 }

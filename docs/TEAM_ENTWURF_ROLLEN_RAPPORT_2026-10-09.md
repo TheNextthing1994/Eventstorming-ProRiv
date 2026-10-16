@@ -1,5 +1,8 @@
 # Team-Entwurf: Rollen, Baustellenzuordnung und Rapportfreigabe (09.10.2026)
 
+> **АРХИВ / ÜBERHOLT AB 16.10.2026:** Die Teamhypothese in dieser Datei ist als historischer Diskussionsstand erhalten. Sie ist **nicht mehr für Implementierung, EventStorming-Entscheidungen oder SDD maßgeblich**, soweit sie vom [bestätigten ProRiv-Kanon](PRORIV_CANON_ROLES_PROCESSES_2026-10-16.md) abweicht. Besonders überholt: ein verpflichtender gemeinsamer Kundenrapport durch einen benannten Verantwortlichen, ein obligatorisches Vorarbeiter-Gate für alle Einzelrapporte und die Blockierung der Zeiterfassung anhand GPS. Aktuell: individuelle Rapporte, zwei Versandwege, optionaler zusammengeführter Kundenrapport durch den Vorarbeiter, GPS-Distanz ohne Blockierung und gelb/grüne Stundenprüfung in ProRiv.
+
+
 > **Status: TEAM-HYPOTHESE / NOCH NICHT VOM KUNDEN BESTÄTIGT.**
 > Dies ist eine strukturierte Ableitung aus zusätzlichen russischen Teamnotizen. Sie ist **kein akzeptierter Anforderungskatalog** und ersetzt nicht das Kundeninterview.
 > **Entscheidung ausstehend:** Senior und Ansprechpartner/Kunde müssen Konflikte auflösen. Bis dahin keine Änderung des bestätigten Kundenprozesses im Living Workshop.

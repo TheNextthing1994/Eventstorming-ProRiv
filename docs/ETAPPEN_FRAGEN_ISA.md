@@ -1,5 +1,8 @@
 # Etappenfragen für Isa festlegen
 
+> **Aktualisierung 16.10.2026:** Die neue [kanonische Beschreibung der Rollen und Prozesse](PRORIV_CANON_ROLES_PROCESSES_2026-10-16.md) beantwortet mehrere dieser ursprünglich offenen Fragen (u. a. GPS-Distanz statt Geofence, e-mail-basierte Kundenantwort, Einzelrapporte und optionales Zusammenführen, Schichtbeginn, manuelle Korrekturen, Admin-Abschluss). Die Etappenfragen bleiben als historischer Fragekatalog und zur Ermittlung des tatsächlichen Umfangs bestehen. Vor einer neuen Kundenbefragung bitte gegen den Kanon abgleichen; eine per Browser lokal gespeicherte Antwort ist dadurch nicht automatisch geändert.
+
+
 Stand: 12.10.2026. Einstieg: **Team-Fragen → Etappen vorbereiten**, Route `#/workshop/questions/etappen`.
 
 Die Ansicht zeigt die 14 vorhandenen Etappen und 17 Einstiegsfragen zur Abgrenzung des Arbeitsumfangs. Acht Fragen verwenden bereits vorhandene Katalogeinträge. Neun Fragen ergänzen ausdrücklich den Umfang der ersten Version; sie fragen nach dem ersten Start, nicht nach weiteren Detailregeln. Die bisherigen 157 Fragen einschließlich der 95 Originale bleiben erhalten. Der vollständige Bestand umfasst jetzt 166 Fragen.

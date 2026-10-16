@@ -1,5 +1,8 @@
 # ISA / ProRiv – Senior Workshop (Research Navigator)
 
+
+> **Current confirmed ProRiv requirements (16 October 2026):** [Canonical roles and processes](docs/PRORIV_CANON_ROLES_PROCESSES_2026-10-16.md). The user explicitly approved the updated post-second-interview team description. It supersedes conflicting older workshop hypotheses; the older questions, screenshots and RAW interview remain historical references, **not current requirements**. Source RAW is staged privately in the SDD repository. The public repo contains only a distilled summary. Workshop UI seed data and locally stored notes must still be checked against this canon.
+
 **Purpose:** A meeting-ready, bilingual (German/Russian) research and decision surface. **This repository is not the operational ProRiv employee application.**
 
 ## Current UI (October 2026)

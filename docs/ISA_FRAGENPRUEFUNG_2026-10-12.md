@@ -1,5 +1,8 @@
 # Prüfung der Fragen und Abgleich mit der Rollenkarte
 
+> **Stand-Hinweis 16.10.2026:** Diese Prüfung dokumentiert den älteren Fragenstand. Die durch den Nutzer am 16.10.2026 bestätigten Regeln finden sich im [ProRiv-Kanon](PRORIV_CANON_ROLES_PROCESSES_2026-10-16.md). Bereits durch diesen Kanon geklärte Fragen dürfen nicht als weiterhin offene Anforderungen oder gegenteilige Teamhypothesen präsentiert werden. Nicht geklärte technische Details, etwa konkrete Tripletex-API-Objekte, Offline-Verhalten und Berichts-Korrektur nach Versand, bleiben offen. Die Quellfragen und ihre historischen IDs bleiben erhalten.
+
+
 Stand: 12.10.2026. Prüfung des vorhandenen Repository-Stands und seiner Gesprächs-, Rapport-, Preislisten- und Workshop-Grundlagen. Dies ist eine fachliche Teamprüfung, keine Freigabe durch Isa.
 
 ## Ergebnis für das Teamgespräch
